@@ -9,7 +9,7 @@ module.exports = {
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
-            if (profileData.numCards == 0) {
+            if (profileData.cards.length == 0) {
                 await interaction.reply(`You have no cards in your deck. Type **/roll** and react to claim some cards!`);
             }
             else {
@@ -29,7 +29,7 @@ module.exports = {
                 const deckEmbed = new EmbedBuilder()
                     .setTitle(deckName)
                     .setDescription(replyMessage)
-                    .setFooter({ text: `${constants.DEFAULT_CARD_LIMIT + profileData.isaTier - profileData.numCards} card slots remaining.` });
+                    .setFooter({ text: `${constants.DEFAULT_CARD_LIMIT + profileData.isaTier - profileData.cards.length} card slots remaining.` });
                 try {
                     deckEmbed.setColor(deckColor);
                 }

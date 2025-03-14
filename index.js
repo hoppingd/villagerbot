@@ -10,6 +10,8 @@ client.commands = new Collection();
 const commandFoldersPath = path.join(__dirname, 'commands');
 const commandFolders = fs.readdirSync(commandFoldersPath);
 
+client.confirmationState = new Collection(); // tracks if the user is in the middle of an important command
+
 // dynamically load slash commands
 for (const folder of commandFolders) {
 	const commandsPath = path.join(commandFoldersPath, folder);

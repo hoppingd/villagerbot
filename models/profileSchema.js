@@ -7,7 +7,6 @@ const profileSchema = new mongoose.Schema({
     wish: { type: String, default: null },
     deckName: { type: String, default: null},
     deckColor: { type: String, default: "green" },
-    numCards: {type: Number, default: 0},
     cards: {
         type: [{
             name: { type: String, default: null },

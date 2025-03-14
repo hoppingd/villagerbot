@@ -7,4 +7,5 @@ const charSchema = new mongoose.Schema({
 
 const model = mongoose.model('CharModels', charSchema);
 
+charSchema.index({numClaims: -1});
 module.exports = model;

@@ -5,31 +5,36 @@ const { getOrCreateProfile } = require('../../util');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('upgrade')
-        .setDescription("Purchase an upgrade, or view your upgrades.")
+        .setDescription("Purchase an upgrade, or view your upgrades (no argument).")
         .addStringOption(option =>
             option.setName('type')
                 .setDescription('The type of upgrade to be purchased.')
+                .addChoices(
+                    { name: "Celeste", value: "Celeste" },
+                    { name: "Isabelle", value: "Isabelle" },
+                    { name: "Katrina", value: "Katrina" }
+                )
         ),
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
-            let upgradeFlag = interaction.options.getString('type').toLowerCase();
+            let upgradeFlag = interaction.options.getString('type');
             if (upgradeFlag) {
-                // TODO: confirmation
                 let currentLevel;
+                upgradeFlag = upgradeFlag.toLowerCase();
                 switch (upgradeFlag) {
                     // CELESTE UPGRADES
                     case "celeste":
                     case "cel":
                     case "c":
                         currentLevel = profileData.celTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:celeste:1349263647121346662>: *"You've already purchased all of my upgrades!"*`);
-                        else if (profileData.bells < constants.UPGRADE_COSTS[profileData.celTier]) await interaction.reply(`<:celeste:1349263647121346662>: *"Sorry, you don't have enough Bells for that upgrade."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.celTier]}** <:bells:1349182767958855853>)`);
+                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:celeste:1349263647121346662>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        else if (profileData.bells < constants.UPGRADE_COSTS[profileData.celTier]) await interaction.reply(`<:celeste:1349263647121346662>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.celTier]}** <:bells:1349182767958855853>)`);
                         else {
                             profileData.bells -= constants.UPGRADE_COSTS[profileData.celTier];
                             profileData.celTier += 1;
                             await profileData.save();
-                            await interaction.reply(`<:celeste:1349263647121346662>: *"Upgrade purchased! Your wishes are now more powerful!"*`);
+                            await interaction.reply(`<:celeste:1349263647121346662>: *"Upgrade purchased! Your wishes are now more powerful, ${interaction.user}!"*`);
                         }
                         break;
                     // ISABELLE UPGRADES
@@ -37,13 +42,27 @@ module.exports = {
                     case "isa":
                     case "i":
                         currentLevel = profileData.isaTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:isabelle:1349263650191315034>: *"You've already purchased all of my upgrades!"*`);
-                        else if (profileData.bells < constants.UPGRADE_COSTS[profileData.isaTier]) await interaction.reply(`<:isabelle:1349263650191315034>: *"Sorry, you don't have enough Bells for that upgrade."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.isaTier]}** <:bells:1349182767958855853>)`);
+                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:isabelle:1349263650191315034>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        else if (profileData.bells < constants.UPGRADE_COSTS[profileData.isaTier]) await interaction.reply(`<:isabelle:1349263650191315034>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.isaTier]}** <:bells:1349182767958855853>)`);
                         else {
                             profileData.bells -= constants.UPGRADE_COSTS[profileData.isaTier];
                             profileData.isaTier += 1;
                             await profileData.save();
-                            await interaction.reply(`<:isabelle:1349263650191315034>: *"Upgrade purchased! I fixed you up with a new deck slot!"*`);
+                            await interaction.reply(`<:isabelle:1349263650191315034>: *"Upgrade purchased! I fixed you up with a new deck slot, ${interaction.user}!"*`);
+                        }
+                        break;
+                    // ISABELLE UPGRADES
+                    case "katrina":
+                    case "kat":
+                    case "k":
+                        currentLevel = profileData.katTier;
+                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:katrina:1349263648144625694> *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        else if (profileData.bells < constants.UPGRADE_COSTS[profileData.katTier]) await interaction.reply(`<:katrina:1349263648144625694>: *"Hmm... it appears you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.katTier]}** <:bells:1349182767958855853>)`);
+                        else {
+                            profileData.bells -= constants.UPGRADE_COSTS[profileData.katTier];
+                            profileData.katTier += 1;
+                            await profileData.save();
+                            await interaction.reply(`<:katrina:1349263648144625694>: *"Keeeeeeeeeee hamo-ata... Keeee haaaaaamo-atata... There are higher rarity cards in your future, ${interaction.user}..."*`);
                         }
                         break;
                     // INVALID ARG
@@ -56,6 +75,25 @@ module.exports = {
             }
             else {
                 // TODO: show an embed with info about upgrades and the user's current progress
+                let upgradeInfo = "Type **/upgrade** followed by the character you want to purchase an upgrade from. Character names can be shortened to the first three letters, or even just the first letter. Your current upgrade progress is shown below.\n\n";
+                upgradeInfo += `<:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** · `;
+                if (profileData.celTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
+                else {
+                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.celTier]}** <:bells:1349182767958855853> x2 wish chance\n`;
+                }
+                upgradeInfo += `<:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[profileData.isaTier]}** · `;
+                if (profileData.isaTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
+                else {
+                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.isaTier]}** <:bells:1349182767958855853> +1 deck slot\n`;
+                }
+                upgradeInfo += `<:katrina:1349263648144625694> **Katrina ${constants.ROMAN_NUMERALS[profileData.katTier]}** · `;
+                if (profileData.katTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
+                else {
+                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.katTier]}** <:bells:1349182767958855853> +1% foil chance\n`;
+                }
+                const upgradeEmbed = new EmbedBuilder()
+                    .setDescription(upgradeInfo);
+                await interaction.reply({ embeds: [upgradeEmbed] });
             }
         } catch (err) {
             console.log(err);

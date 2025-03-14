@@ -23,26 +23,25 @@ module.exports = {
                     flags: MessageFlags.Ephemeral
                 })
             }
-            const cardIdx = profileData.cards.findIndex(card => card.name && card.name.toLowerCase() === cardName.toLowerCase());
+            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+            const cardIdx = profileData.cards.findIndex(card => card.name && card.name.toLowerCase() === normalizedCardName);
             if (cardIdx === -1) {
                 return await interaction.reply(`No card named **${cardName}** found in your deck. Use **/mydeck** to view your deck.`);
             }
-            // TODO: check the weird ones (Carmen, Lulu, Etoile, Renee, Viche)
             const realName = profileData.cards[cardIdx].name;
             const rarity = profileData.cards[cardIdx].rarity;
 
             // confirm the sale
             await interaction.reply(`Sell your **${realName}**? (y/n)`);
             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 25_000 });
+            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+            interaction.client.confirmationState[interaction.user.id] = true;
 
             collector.on('collect', async (m) => {
                 if (m.content == 'y') {
-                    // calculate bell value
                     let charData = await charModel.findOne({ name: realName });
                     let points = await calculatePoints(charData.numClaims, rarity == constants.RARITIES.FOIL);
                     profileData.cards[cardIdx] = null;
-                    profileData.numCards -= 1;
                     profileData.cards = profileData.cards.filter(card => card !== null);
                     profileData.bells += points;
                     profileData.save();
@@ -50,6 +49,7 @@ module.exports = {
                     // track the sale in the db
                     charData.numClaims -= 1;
                     charData.save();
+                    interaction.client.confirmationState[interaction.user.id] = false;
                 }
                 else {
                     interaction.followUp(`Sale cancelled.`);
@@ -60,6 +60,7 @@ module.exports = {
             collector.on('end', async (collected, reason) => {
                 if (reason === 'time') {
                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The sale was cancelled.`);
+                    interaction.client.confirmationState[interaction.user.id] = false;
                 }
             });
 

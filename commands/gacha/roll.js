@@ -1,6 +1,6 @@
-const { EmbedBuilder, SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
-const villagers = require('../../villagerdata/animal-crossing-villagers.json');
+const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
 const { calculatePoints, getOrCreateProfile, getRank } = require('../../util');
 
@@ -11,22 +11,35 @@ module.exports = {
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id); // still save into profileData, as we may need to know who initially rolled for later features
-            // roll a random character // TODO: implement wishes
-            let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
-            let villager = villagers[randIdx];
+            let villager;
+
+            // see if the wished character is rolled first
+            let wish = profileData.wish;
+            if (wish) {
+                let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
+                if (randIdx < Math.pow(constants.WISH_BASE, profileData.celTier)) villager = villagers.find(v => v.name.toLowerCase() === wish.toLowerCase());
+            }
+            // if not, roll a random character
+            if (!villager) {
+                // roll a random character
+                let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
+                villager = villagers[randIdx];
+            }
             // determine rarity
-            let rarityRoll = Math.floor(Math.random() * 100 + 1);
-            let isFoil = rarityRoll <= constants.DEFAULT_FOIL_CHANCE;
+            const rarityRoll = Math.floor(Math.random() * 100 + 1);
+            const isFoil = rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier;
 
             // get card data
             let charData = await charModel.findOne({ name: villager.name });
             let points = await calculatePoints(charData.numClaims, isFoil);
             let rank = await getRank(villager.name);
+            let personality = villager.personality;
+            if (!personality) personality = "Special";
 
             // make the message look nice
             const rollEmbed = new EmbedBuilder()
                 .setTitle(villager.name)
-                .setDescription(`${villager.species}  :${villager.gender.toLowerCase()}_sign: \n*${villager.personality}*\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
+                .setDescription(`${villager.species}  :${villager.gender.toLowerCase()}_sign: \n*${personality}* · ***${isFoil ? constants.RARITIES.FOIL : constants.RARITIES.COMMON}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
                 .setImage(villager.image_url);
             try {
                 rollEmbed.setColor(villager.title_color);
@@ -51,6 +64,10 @@ module.exports = {
                 time: constants.ROLL_CLAIM_TIME_LIMIT,
             });
             collector.on('collect', async (reaction, reactor) => {
+                if (interaction.client.confirmationState[reactor.id]) {
+                    // send a message to the reactor that they couldn't claim because they are in the middle of a key operation
+                    return interaction.channel.send(`${reactor}, you cannot react to rolls while in the middle of a key operation.`);
+                }
                 let reactorData = await getOrCreateProfile(reactor.id, interaction.guild.id);
                 // if user already has the card (ignore rarity for now)
                 if (reactorData.cards.some(card => card.name === villager.name)) {
@@ -62,10 +79,9 @@ module.exports = {
                     await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>)`);
                 }
                 // if the user has less cards than their max deck size
-                else if (reactorData.numCards < constants.DEFAULT_CARD_LIMIT + reactorData.isaTier) {
+                else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + reactorData.isaTier) {
                     if (isFoil) reactorData.cards.push({ name: villager.name, rarity: constants.RARITIES.FOIL });
                     else reactorData.cards.push({ name: villager.name, rarity: constants.RARITIES.COMMON });
-                    reactorData.numCards += 1;
                     await reactorData.save();
                     collector.stop();
                     rollEmbed.setFooter({ text: `Card claimed by ${reactor.displayName}` });
@@ -76,7 +92,7 @@ module.exports = {
                     charData.save();
                 }
                 else {
-                    // send a message only visible to the reactor that they couldn't claim because their deck is full
+                    // send a message to the reactor that they couldn't claim because their deck is full
                     await interaction.channel.send(`${reactor}, your deck is full, so you could not claim **${villager.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`);
                 }
                 // TODO: factor in storage

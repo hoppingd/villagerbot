@@ -15,7 +15,7 @@ const charSchema = new mongoose.Schema({
 
 const model = mongoose.model('CharModels', charSchema);
 
-fs.readFile('animal-crossing-villagers.json', 'utf8', async(err, data) => {
+fs.readFile('data.json', 'utf8', async(err, data) => {
     if (err) {
         console.error('Error reading the JSON file:', err);
         return;

@@ -1,0 +1,34 @@
+[
+    {
+        "_pageName": "Isabelle",
+        "name": "Isabelle",
+        "number": "",
+        "series": "",
+        "bundle": "Character Parfait",
+        "bundle_wikitext": "''[[wikipedia:en:Dengeki Nintendo#Special editions|Character Parfait]]''",
+        "image_front": "Isabelle Character Parfait amiibo card JP.jpg",
+        "image_front_url": "https:\/\/dodo.ac\/np\/images\/8\/85\/Isabelle_Character_Parfait_amiibo_card_JP.jpg",
+        "type": "Special",
+        "dice": 1,
+        "hand": "Scissors",
+        "birthday": "December 20",
+        "sign": "Sagittarius",
+        "items": ""
+    },
+    {
+        "_pageName": "K.K. Slider",
+        "name": "K.K.",
+        "number": "",
+        "series": "",
+        "bundle": "Pikopuri",
+        "bundle_wikitext": "''Pikopuri''",
+        "image_front": "K.K. Pikopuri amiibo card JP.png",
+        "image_front_url": "https:\/\/dodo.ac\/np\/images\/7\/74\/K.K._Pikopuri_amiibo_card_JP.png",
+        "type": "Special",
+        "dice": 2,
+        "hand": "Rock",
+        "birthday": "August 23",
+        "sign": "Virgo",
+        "items": ""
+    }
+]

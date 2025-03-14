@@ -2,7 +2,7 @@
 const mongoose = require('mongoose');
 const { mongodbSRV } = require('../config.json');
 const charModel = require('../models/charSchema'); 
-const villagers = require('./animal-crossing-villagers.json');
+const villagers = require('./data.json');
 
 mongoose.connect(mongodbSRV).then(() => {
     console.log('Connected to the database!');
