@@ -23,6 +23,19 @@ module.exports = {
                 let currentLevel;
                 upgradeFlag = upgradeFlag.toLowerCase();
                 switch (upgradeFlag) {
+                    // BREWSTER UPGRADES
+                    case "brewster":
+                    case "brew":
+                        currentLevel = profileData.brewTier;
+                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:brewster:1349263645380710431>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        else if (profileData.bells < constants.UPGRADE_COSTS[profileData.brewTier]) await interaction.reply(`<:brewster:1349263645380710431>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.celTier]}** <:bells:1349182767958855853>)`);
+                        else {
+                            profileData.bells -= constants.UPGRADE_COSTS[profileData.brewTier];
+                            profileData.brewTier += 1;
+                            await profileData.save();
+                            await interaction.reply(`<:brewster:1349263645380710431>: *"This upgrade may seem a tad expensive at... ${constants.UPGRADE_COSTS[profileData.brewTier - 1]} Bells, but it's well worth it. Here you go, ${interaction.user}."* (You now have +1 energy)`);
+                        }
+                        break;
                     // CELESTE UPGRADES
                     case "celeste":
                     case "cel":
@@ -76,16 +89,25 @@ module.exports = {
             else {
                 // TODO: show an embed with info about upgrades and the user's current progress
                 let upgradeInfo = "Type **/upgrade** followed by the character you want to purchase an upgrade from. Character names can be shortened to the first three letters, or even just the first letter. Your current upgrade progress is shown below.\n\n";
+                // BREWSTER
+                upgradeInfo += `<:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** · `;
+                if (profileData.brewTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
+                else {
+                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.brewTier]}** <:bells:1349182767958855853> +1 max energy\n`;
+                }
+                // CELESTE
                 upgradeInfo += `<:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** · `;
                 if (profileData.celTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
                 else {
                     upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.celTier]}** <:bells:1349182767958855853> x2 wish chance\n`;
                 }
+                // ISABELLE
                 upgradeInfo += `<:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[profileData.isaTier]}** · `;
                 if (profileData.isaTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
                 else {
                     upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.isaTier]}** <:bells:1349182767958855853> +1 deck slot\n`;
                 }
+                // KATRINA
                 upgradeInfo += `<:katrina:1349263648144625694> **Katrina ${constants.ROMAN_NUMERALS[profileData.katTier]}** · `;
                 if (profileData.katTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
                 else {

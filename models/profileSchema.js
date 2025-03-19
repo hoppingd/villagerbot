@@ -1,3 +1,4 @@
+const { time } = require('discord.js');
 const mongoose = require('mongoose');
 
 const profileSchema = new mongoose.Schema({
@@ -10,13 +11,15 @@ const profileSchema = new mongoose.Schema({
     cards: {
         type: [{
             name: { type: String, default: null },
-            rarity: { type: String, default: null }
+            rarity: { type: String, default: null },
+            level: { type: Number, default: 1 }
         }],
     },
     storage: {
         type: [{
             name: { type: String, default: null },
-            rarity: { type: String, default: null }
+            rarity: { type: String, default: null },
+            level: { type: Number, default: 1}
         }],
     },
     nookTier: { type: Number, default: 0 },
@@ -24,7 +27,10 @@ const profileSchema = new mongoose.Schema({
     katTier: { type: Number, default: 0 },
     isaTier: { type: Number, default: 0 },
     celTier: { type: Number, default: 0 },
-    blaTier: { type: Number, default: 0 }
+    blaTier: { type: Number, default: 0 },
+    energy: { type: Number, default: 5},
+    rechargeTimestamp: { type: Date, default: Date.now()}, 
+    claimTimestamp: { type: Date, default: Date.now() - 4*60*60*1000}
 });
 
 profileSchema.index({ userID: 1, serverID: 1 }, { unique: true });

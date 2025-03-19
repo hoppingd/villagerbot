@@ -20,7 +20,7 @@ module.exports = {
                 let deckColor = profileData.deckColor;
                 // get the deck
                 let replyMessage = "";
-                for (let i = 0; i < profileData.numCards; i++) {
+                for (let i = 0; i < profileData.cards.length; i++) {
                     replyMessage += `**${profileData.cards[i].name}**`;
                     if (profileData.cards[i].rarity == constants.RARITIES.FOIL) replyMessage += " :sparkles:";
                     replyMessage += "\n";

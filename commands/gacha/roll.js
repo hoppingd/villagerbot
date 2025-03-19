@@ -11,8 +11,32 @@ module.exports = {
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id); // still save into profileData, as we may need to know who initially rolled for later features
-            let villager;
+            // check if the user can roll
+            let timeSinceReset = Date.now() - profileData.rechargeTimestamp;
+            let shouldReset = timeSinceReset >= constants.DEFAULT_ROLL_TIMER;
+            if (profileData.energy > 0 || shouldReset) {
+                // replenish the rolls if the roll timer has passed
+                if (shouldReset == true) {
+                    profileData.rechargeTimestamp = Date.now();
+                    profileData.energy = constants.DEFAULT_ENERGY + profileData.brewTier;
+                }
+                profileData.energy -= 1;
+                await profileData.save();
+            }
+            else {
+                let timeRemaining = constants.DEFAULT_ROLL_TIMER - timeSinceReset;
+                let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
+                let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
+                let timeString = "";
+                if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
+                timeString += `**${minutesRemaining} minutes**`;
+                return await interaction.reply({
+                    content: `<:brewster:1349263645380710431>: *"Say... you're out of energy, and that means no rolls. You can get more in ${timeString}, or buy a fresh brew with **/recharge**. You can also get some permanent buffs with **/upgrade**."*`,
+                    flags: MessageFlags.Ephemeral,
+                })
+            }
 
+            let villager;
             // see if the wished character is rolled first
             let wish = profileData.wish;
             if (wish) {
@@ -35,11 +59,14 @@ module.exports = {
             let rank = await getRank(villager.name);
             let personality = villager.personality;
             if (!personality) personality = "Special";
+            let gender = villager.gender;
+            if (!gender) gender = `:transgender_symbol:`;
+            else gender = `:${gender.toLowerCase()}_sign:`;
 
             // make the message look nice
             const rollEmbed = new EmbedBuilder()
                 .setTitle(villager.name)
-                .setDescription(`${villager.species}  :${villager.gender.toLowerCase()}_sign: \n*${personality}* · ***${isFoil ? constants.RARITIES.FOIL : constants.RARITIES.COMMON}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
+                .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${isFoil ? constants.RARITIES.FOIL : constants.RARITIES.COMMON}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
                 .setImage(villager.image_url);
             try {
                 rollEmbed.setColor(villager.title_color);
@@ -69,8 +96,19 @@ module.exports = {
                     return interaction.channel.send(`${reactor}, you cannot react to rolls while in the middle of a key operation.`);
                 }
                 let reactorData = await getOrCreateProfile(reactor.id, interaction.guild.id);
+                let timeSinceClaim = Date.now() - reactorData.claimTimestamp;
+                // if user's claim isn't available
+                if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
+                    let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
+                    let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
+                    let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
+                    let timeString = "";
+                    if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
+                    timeString += `**${minutesRemaining} minutes**`;
+                    return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${timeString} before claiming again.`);
+                }
                 // if user already has the card (ignore rarity for now)
-                if (reactorData.cards.some(card => card.name === villager.name)) {
+                else if (reactorData.cards.some(card => card.name === villager.name)) {
                     reactorData.bells += 50;
                     await reactorData.save();
                     collector.stop();
@@ -82,6 +120,7 @@ module.exports = {
                 else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + reactorData.isaTier) {
                     if (isFoil) reactorData.cards.push({ name: villager.name, rarity: constants.RARITIES.FOIL });
                     else reactorData.cards.push({ name: villager.name, rarity: constants.RARITIES.COMMON });
+                    reactorData.claimTimestamp = Date.now();
                     await reactorData.save();
                     collector.stop();
                     rollEmbed.setFooter({ text: `Card claimed by ${reactor.displayName}` });
