@@ -18,7 +18,7 @@ const profileSchema = new mongoose.Schema({
     storage: {
         type: [{
             name: { type: String, default: null },
-            rarity: { type: String, default: null },
+            rarity: { type: Number, default: 0 },
             level: { type: Number, default: 1}
         }],
     },
@@ -29,8 +29,8 @@ const profileSchema = new mongoose.Schema({
     celTier: { type: Number, default: 0 },
     blaTier: { type: Number, default: 0 },
     energy: { type: Number, default: 5},
-    rechargeTimestamp: { type: Date, default: Date.now()}, 
-    claimTimestamp: { type: Date, default: Date.now() - 4*60*60*1000}
+    rechargeTimestamp: { type: Date, default: new Date(0)}, 
+    claimTimestamp: { type: Date, default: new Date(0)}
 });
 
 profileSchema.index({ userID: 1, serverID: 1 }, { unique: true });

@@ -2,7 +2,7 @@ const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require('discord.js'
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getOrCreateProfile, getRank } = require('../../util');
+const { calculatePoints, getOrCreateProfile, getRank, getCurrentTime } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,7 +17,12 @@ module.exports = {
             if (profileData.energy > 0 || shouldReset) {
                 // replenish the rolls if the roll timer has passed
                 if (shouldReset == true) {
-                    profileData.rechargeTimestamp = Date.now();
+                    let rechargeDate;
+                    try { rechargeDate = await getCurrentTime(); } catch (error) { console.log(error); }
+                    rechargeDate.setMinutes(0);
+                    rechargeDate.setSeconds(0);
+                    rechargeDate.setMilliseconds(0);
+                    profileData.rechargeTimestamp = rechargeDate;
                     profileData.energy = constants.DEFAULT_ENERGY + profileData.brewTier;
                 }
                 profileData.energy -= 1;
@@ -26,12 +31,16 @@ module.exports = {
             else {
                 let timeRemaining = constants.DEFAULT_ROLL_TIMER - timeSinceReset;
                 let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
-                let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
+                let minutesRemaining = Math.ceil((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
+                if (minutesRemaining == 60) {
+                    hoursRemaining += 1;
+                    minutesRemaining = 0;
+                }
                 let timeString = "";
                 if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
                 timeString += `**${minutesRemaining} minutes**`;
                 return await interaction.reply({
-                    content: `<:brewster:1349263645380710431>: *"Say... you're out of energy, and that means no rolls. You can get more in ${timeString}, or buy a fresh brew with **/recharge**. You can also get some permanent buffs with **/upgrade**."*`,
+                    content: `You are out of energy and cannot roll. Your energy will replenish in ${timeString}. You can also purchase max energy from **Brewster** <:brewster:1349263645380710431> by using **/upgrade**.`,
                     flags: MessageFlags.Ephemeral,
                 })
             }
@@ -50,8 +59,9 @@ module.exports = {
                 villager = villagers[randIdx];
             }
             // determine rarity
+            let rarity = 0;
             const rarityRoll = Math.floor(Math.random() * 100 + 1);
-            const isFoil = rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier;
+            if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier) rarity = 1;
 
             // get card data
             let charData = await charModel.findOne({ name: villager.name });
@@ -66,7 +76,7 @@ module.exports = {
             // make the message look nice
             const rollEmbed = new EmbedBuilder()
                 .setTitle(villager.name)
-                .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${isFoil ? constants.RARITIES.FOIL : constants.RARITIES.COMMON}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
+                .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
                 .setImage(villager.image_url);
             try {
                 rollEmbed.setColor(villager.title_color);
@@ -74,7 +84,7 @@ module.exports = {
             catch (err) {
                 rollEmbed.setColor("White");
             }
-            if (isFoil) {
+            if (constants.RARITY_NUMS.FOIL) {
                 rollEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
             }
             const response = await interaction.reply({
@@ -96,7 +106,9 @@ module.exports = {
                     return interaction.channel.send(`${reactor}, you cannot react to rolls while in the middle of a key operation.`);
                 }
                 let reactorData = await getOrCreateProfile(reactor.id, interaction.guild.id);
-                let timeSinceClaim = Date.now() - reactorData.claimTimestamp;
+                let claimDate;
+                try { claimDate = await getCurrentTime(); } catch (error) { console.log(error); }
+                let timeSinceClaim = claimDate - reactorData.claimTimestamp;
                 // if user's claim isn't available
                 if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
                     let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
@@ -107,20 +119,28 @@ module.exports = {
                     timeString += `**${minutesRemaining} minutes**`;
                     return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${timeString} before claiming again.`);
                 }
-                // if user already has the card (ignore rarity for now)
+                // if user already has the card
                 else if (reactorData.cards.some(card => card.name === villager.name)) {
-                    reactorData.bells += 50;
+                    // if the rarity is lower or equal
+                    reactorData.bells += points;
                     await reactorData.save();
                     collector.stop();
                     rollEmbed.setFooter({ text: `Rent collected by ${reactor.displayName}` });
                     await interaction.editReply({ embeds: [rollEmbed] });
                     await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>)`);
+                    // TODO: if the rarity is higher
                 }
                 // if the user has less cards than their max deck size
                 else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + reactorData.isaTier) {
-                    if (isFoil) reactorData.cards.push({ name: villager.name, rarity: constants.RARITIES.FOIL });
-                    else reactorData.cards.push({ name: villager.name, rarity: constants.RARITIES.COMMON });
-                    reactorData.claimTimestamp = Date.now();
+                    reactorData.cards.push({ name: villager.name, rarity: rarity });
+                    // set the claim timestamp
+                    let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
+                    claimDate.setHours(claimHour);
+                    claimDate.setMinutes(0);
+                    claimDate.setSeconds(0);
+                    claimDate.setMilliseconds(0);
+                    reactorData.claimTimestamp = claimDate;
+                    // wrap up
                     await reactorData.save();
                     collector.stop();
                     rollEmbed.setFooter({ text: `Card claimed by ${reactor.displayName}` });

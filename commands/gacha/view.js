@@ -12,12 +12,12 @@ module.exports = {
             option.setName('card')
                 .setDescription('The name of the card to be viewed.')
         )
-        .addStringOption(option =>
+        .addNumberOption(option =>
             option.setName('rarity')
                 .setDescription('The rarity of the card to be viewed.')
                 .addChoices(
-                    { name: "Common", value: "Common" },
-                    { name: "Foil", value: "Foil" }
+                    { name: "Common", value: 0 },
+                    { name: "Foil", value: 1 }
                 )
         ),
     async execute(interaction) {
@@ -32,12 +32,8 @@ module.exports = {
             }
             const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "");
             const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
-
-            // set isFoil based on rarity arg
-            let rarity = interaction.options.getString('rarity');
-            let isFoil = false;
-            if (rarity) isFoil = rarity.toLowerCase() == constants.RARITIES.FOIL.toLowerCase();
-            
+            let rarity = interaction.options.getNumber('rarity');
+            if (rarity == null) rarity = 0;
             if (villager) {
                 let charData = await charModel.findOne({ name: villager.name });
                 let points = await calculatePoints(charData.numClaims, isFoil);
@@ -50,7 +46,7 @@ module.exports = {
                 // make the message look nice
                 const viewEmbed = new EmbedBuilder()
                     .setTitle(villager.name)
-                    .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${isFoil ? constants.RARITIES.FOIL : constants.RARITIES.COMMON}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
+                    .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
                     .setImage(villager.image_url);
                 try {
                     viewEmbed.setColor(villager.title_color);
@@ -58,7 +54,7 @@ module.exports = {
                 catch (err) {
                     viewEmbed.setColor("White");
                 }
-                if (isFoil) {
+                if (rarity == constants.RARITY_NUMS.FOIL) {
                     viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
                 }
                 await interaction.reply({ embeds: [viewEmbed] });

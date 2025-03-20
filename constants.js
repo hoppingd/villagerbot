@@ -6,7 +6,8 @@ const BASE = 20; // This will control the general scale of points
 const SCALING_FACTOR = 275; // Adjust this to control the spread of points
 const MAX_POINTS = 2000; // Cap the maximum points a character can have
 const MIN_POINTS = 20; // Minimum points for least popular characters
-const RARITIES = {COMMON: "Common", FOIL: "Foil"};
+const RARITY_NAMES = ["Common", "Foil"];
+const RARITY_NUMS = { COMMON: 0, FOIL: 1};
 const DECK_NAME_CHAR_LIMIT = 16;
 const FOIL_VALUE_MULTIPLIER = 2;
 const UPGRADE_COSTS = [1000, 2000, 4000, 8000];
@@ -25,7 +26,8 @@ module.exports = {
     SCALING_FACTOR,
     MAX_POINTS,
     MIN_POINTS,
-    RARITIES,
+    RARITY_NAMES,
+    RARITY_NUMS,
     DECK_NAME_CHAR_LIMIT,
     FOIL_VALUE_MULTIPLIER,
     UPGRADE_COSTS,

@@ -33,7 +33,7 @@ module.exports = {
                             profileData.bells -= constants.UPGRADE_COSTS[profileData.brewTier];
                             profileData.brewTier += 1;
                             await profileData.save();
-                            await interaction.reply(`<:brewster:1349263645380710431>: *"This upgrade may seem a tad expensive at... ${constants.UPGRADE_COSTS[profileData.brewTier - 1]} Bells, but it's well worth it. Here you go, ${interaction.user}."* (You now have +1 energy)`);
+                            await interaction.reply(`<:brewster:1349263645380710431>: *"This upgrade may seem a tad expensive at... ${constants.UPGRADE_COSTS[profileData.brewTier - 1]} Bells, but it's well worth it. Here you go, ${interaction.user}. You now have more energy for your rolls."*`);
                         }
                         break;
                     // CELESTE UPGRADES
@@ -87,8 +87,7 @@ module.exports = {
                 }
             }
             else {
-                // TODO: show an embed with info about upgrades and the user's current progress
-                let upgradeInfo = "Type **/upgrade** followed by the character you want to purchase an upgrade from. Character names can be shortened to the first three letters, or even just the first letter. Your current upgrade progress is shown below.\n\n";
+                let upgradeInfo = "Type **/upgrade** followed by the character you want to purchase an upgrade from. In some cases, character names can be shortened to the first few letters, or even just the first letter. Your current upgrade progress is shown below.\n\n";
                 // BREWSTER
                 upgradeInfo += `<:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** · `;
                 if (profileData.brewTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;

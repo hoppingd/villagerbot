@@ -1,6 +1,7 @@
 const profileModel = require('./models/profileSchema');
 const charModel = require('./models/charSchema');
 const constants = require('./constants');
+const ntp = require('ntp-client');
 
 // function to calculate bell value of a card
 async function calculatePoints(charClaims, isFoil) {
@@ -58,8 +59,21 @@ async function getRank(cardName) {
     return rank;
 }
 
+async function getCurrentTime() {
+    return new Promise((resolve, reject) => {
+        ntp.getNetworkTime('pool.ntp.org', 123, (err, time) => {
+            if (err) {
+                reject('Error getting time from NTP server: ' + err);
+            } else {
+                resolve(time);
+            }
+        });
+    });
+}
+
 module.exports = {
     calculatePoints,
     getOrCreateProfile,
-    getRank
+    getRank,
+    getCurrentTime
 };

@@ -16,8 +16,11 @@ module.exports = {
             const cardName = interaction.options.getString('card');
             // if there was no argument supplied, display the user's currently wished card
             if (!cardName) {
-                if (!profileData.wish) await interaction.reply(`<:celeste:1349263647121346662>: *"You're not wishing for anything right now, ${interaction.user}! Try wishing for a card with* ***/wish [card]**!"*`);
-                else await interaction.reply(`<:celeste:1349263647121346662>: *"You are currently wishing for* ***${profileData.wish}**!"*`);
+                let wishName = profileData.wish;
+                if (!wishName) await interaction.reply(`<:celeste:1349263647121346662>: *"You don't appear to be wishing for anything right now, ${interaction.user}! Try wishing for a card with* ***/wish [card]**!"*`);
+                else if (wishName == "Blathers") await interaction.reply(`<:celeste:1349263647121346662>: *"Ah, it appears your wishing for my brother, **Blathers** <:blathers:1349263646206857236> !"*`);
+                else if (wishName == "Celeste") await interaction.reply(`<:celeste:1349263647121346662>: *"Wh-what's this? You're wishing for me, **Celeste**?! I'm flattered..."*`);
+                else await interaction.reply(`<:celeste:1349263647121346662>: *"You are currently wishing for* ***${wishName}**!"*`);
             }
             else {
                 const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, ""); //TODO simplify
@@ -25,11 +28,13 @@ module.exports = {
                 if (villager) {
                     profileData.wish = villager.name;
                     await profileData.save();
-                    await interaction.reply(`<:celeste:1349263647121346662>: *"You are now wishing for* ***${villager.name}**!"*`);
+                    if (villager.name == "Blathers") await interaction.reply(`<:celeste:1349263647121346662>: *"You are now wishing for my dear brother, **Blathers** <:blathers:1349263646206857236> !"*`);
+                    else if (villager.name == "Celeste") await interaction.reply(`<:celeste:1349263647121346662>: *"Hootie—TOOT! You're teasing me, aren't you? Very well, you are now wishing for **Celeste**..."*`);
+                    else await interaction.reply(`<:celeste:1349263647121346662>: *"You are now wishing for* ***${villager.name}**!"*`);
                 }
                 else {
                     await interaction.reply({
-                        content: `<:celeste:1349263647121346662>: *"I couldn't find a card named* ***${cardName}**. Are you sure you spelled it correctly?"*`,
+                        content: `<:celeste:1349263647121346662>: *"I couldn't find a card named* ***${cardName}**. Are you certain you spelled it correctly?"*`,
                         flags: MessageFlags.Ephemeral,
                     });
                 }
