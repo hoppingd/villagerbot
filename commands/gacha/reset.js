@@ -1,11 +1,12 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
 const { getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('reset')
-        .setDescription("Reset's the user's deck."),
+        .setDescription("Reset's the user's deck.")
+        .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);

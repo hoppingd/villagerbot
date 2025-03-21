@@ -1,10 +1,11 @@
-const { SlashCommandBuilder } = require('discord.js');
+const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const { getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('balance')
-        .setDescription("Shows the user's Bell balance."),
+        .setDescription("Shows the user's Bell balance.")
+        .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);

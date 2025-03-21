@@ -1,4 +1,4 @@
-const { MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
 const { getOrCreateProfile } = require('../../util');
 
@@ -9,7 +9,8 @@ module.exports = {
         .addStringOption(option =>
             option.setName('name')
                 .setDescription('The new name for the deck.')
-        ),
+        )
+        .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);

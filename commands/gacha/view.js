@@ -1,4 +1,4 @@
-const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
@@ -15,12 +15,16 @@ module.exports = {
         )
         .addNumberOption(option =>
             option.setName('rarity')
-                .setDescription('The rarity of the card to be viewed.')
+                .setDescription('The rarity of the card to be viewed (default is Common).')
                 .addChoices(
                     { name: "Common", value: 0 },
                     { name: "Foil", value: 1 }
                 )
-        ),
+        )
+        .addUserOption(option =>
+            option.setName('owner')
+                .setDescription('The owner of the card to be viewed (optional).'))
+        .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
             // check that a valid card was supplied
@@ -36,13 +40,7 @@ module.exports = {
 
             if (villager) {
                 // get rarity data
-                /*
-                let rarityArg = interaction.options.getString('rarity');
-                let rarity = 0;
-                if (rarityArg == "COMMON") rarity = constants.RARITY_NUMS.COMMON;
-                else if (rarityArg == "FOIL") rarity = constants.RARITY_NUMS.FOIL;
-                */
-                let rarity = interaction.options.getNumber('rarity');
+                let rarity = interaction.options.getNumber('rarity') ?? constants.RARITY_NUMS.COMMON;
                 // get villager data
                 let charData = await charModel.findOne({ name: villager.name });
                 let points = await calculatePoints(charData.numClaims, rarity);
@@ -50,7 +48,7 @@ module.exports = {
                 let personality = villager.personality;
                 if (!personality) personality = "Special";
                 let gender = villager.gender;
-                if (!gender) gender = `:transgender_symbol:`;
+                if (!gender) gender = `:transgender_symbol:`; // edge case for Somebody
                 else gender = `:${gender.toLowerCase()}_sign:`;
                 // make the message look nice
                 const viewEmbed = new EmbedBuilder()

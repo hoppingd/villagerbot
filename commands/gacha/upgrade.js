@@ -1,20 +1,21 @@
-const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
 const { getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('upgrade')
-        .setDescription("Purchase an upgrade, or view your upgrades (no argument).")
+        .setDescription("Purchase an upgrade, or view your upgrades.")
         .addStringOption(option =>
             option.setName('type')
-                .setDescription('The type of upgrade to be purchased.')
+                .setDescription('The type of upgrade to be purchased (optional).')
                 .addChoices(
                     { name: "Celeste", value: "Celeste" },
                     { name: "Isabelle", value: "Isabelle" },
                     { name: "Katrina", value: "Katrina" }
-                )
-        ),
+                ))
+        .setContexts(InteractionContextType.Guild),
+
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);

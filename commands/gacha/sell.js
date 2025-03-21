@@ -1,4 +1,4 @@
-const { MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
 const constants = require('../../constants');
 const { calculatePoints, getOrCreateProfile } = require('../../util');
@@ -10,7 +10,8 @@ module.exports = {
         .addStringOption(option =>
             option.setName('card')
                 .setDescription('The name of the card to be sold.')
-        ),
+        )
+        .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);

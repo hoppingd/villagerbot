@@ -1,4 +1,4 @@
-const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
@@ -8,7 +8,8 @@ const { calculatePoints, getCurrentTime, getOrCreateProfile, getOwnershipFooter,
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('roll')
-        .setDescription("Rolls a random villager card."),
+        .setDescription("Rolls a random villager card.")
+        .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id); // still save into profileData, as we may need to know who initially rolled for later features
@@ -143,8 +144,13 @@ module.exports = {
                     return interaction.channel.send(`${reactor}, you cannot react to rolls while in the middle of a key operation.`);
                 }
                 let reactorData = await getOrCreateProfile(reactor.id, interaction.guild.id);
+                // get the current time
                 let claimDate;
-                try { claimDate = await getCurrentTime(); } catch (error) { console.log(error); }
+                try { claimDate = await getCurrentTime(); }
+                catch (error) {
+                    console.log(error);
+                    return await interaction.channel.send(`${reactor}, the network request for UTC time took too long. Unfortunately, this is required to check whether you can claim.`);
+                }
                 let timeSinceClaim = claimDate - reactorData.claimTimestamp;
                 const reactorCardIdx = reactorData.cards.findIndex(card => card.name === villager.name);
                 // if user's claim isn't available
@@ -191,11 +197,11 @@ module.exports = {
                     // wrap up
                     await reactorData.save();
                     collector.stop();
-                    cardOwners.unshift(reactorData.displayName);
+                    cardOwners.unshift(reactor.displayName);
                     rollEmbed.setFooter({
                         text: getOwnershipFooter(cardOwners),
                     })
-                    await interaction.editReply({ embeds: [rollEmbed] });
+                    await interaction.editReply({ content: wishMessage, embeds: [rollEmbed] });
                     await interaction.followUp(`${reactor.displayName} claimed **${villager.name}**!`);
                     // track the claim in the db
                     charData.numClaims += 1;
