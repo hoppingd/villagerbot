@@ -8,6 +8,7 @@ const MAX_POINTS = 2000; // Cap the maximum points a character can have
 const MIN_POINTS = 20; // Minimum points for least popular characters
 const RARITY_NAMES = ["Common", "Foil"];
 const RARITY_NUMS = { COMMON: 0, FOIL: 1};
+const RARITY_LVL = [1, 10]; // how much lvl you gain for each rarity
 const DECK_NAME_CHAR_LIMIT = 16;
 const FOIL_VALUE_MULTIPLIER = 2;
 const UPGRADE_COSTS = [1000, 2000, 4000, 8000];
@@ -28,6 +29,7 @@ module.exports = {
     MIN_POINTS,
     RARITY_NAMES,
     RARITY_NUMS,
+    RARITY_LVL,
     DECK_NAME_CHAR_LIMIT,
     FOIL_VALUE_MULTIPLIER,
     UPGRADE_COSTS,

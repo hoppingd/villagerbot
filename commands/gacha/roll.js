@@ -1,8 +1,9 @@
 const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getOrCreateProfile, getRank, getCurrentTime } = require('../../util');
+const { calculatePoints, getCurrentTime, getOrCreateProfile, getOwnershipFooter, getRank } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -16,7 +17,7 @@ module.exports = {
             let shouldReset = timeSinceReset >= constants.DEFAULT_ROLL_TIMER;
             if (profileData.energy > 0 || shouldReset) {
                 // replenish the rolls if the roll timer has passed
-                if (shouldReset == true) {
+                if (shouldReset) {
                     let rechargeDate;
                     try { rechargeDate = await getCurrentTime(); } catch (error) { console.log(error); }
                     rechargeDate.setMinutes(0);
@@ -58,6 +59,9 @@ module.exports = {
                 let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
                 villager = villagers[randIdx];
             }
+
+            // villager = villagers.find(v => v.name.toLowerCase() == "skye"); // FOR TESTING TO ROLL CERTAIN CHARACTERS
+
             // determine rarity
             let rarity = 0;
             const rarityRoll = Math.floor(Math.random() * 100 + 1);
@@ -65,12 +69,12 @@ module.exports = {
 
             // get card data
             let charData = await charModel.findOne({ name: villager.name });
-            let points = await calculatePoints(charData.numClaims, isFoil);
+            let points = await calculatePoints(charData.numClaims, rarity);
             let rank = await getRank(villager.name);
             let personality = villager.personality;
             if (!personality) personality = "Special";
             let gender = villager.gender;
-            if (!gender) gender = `:transgender_symbol:`;
+            if (!gender) gender = `:transgender_symbol:`; // edge case for Somebody
             else gender = `:${gender.toLowerCase()}_sign:`;
 
             // make the message look nice
@@ -84,10 +88,43 @@ module.exports = {
             catch (err) {
                 rollEmbed.setColor("White");
             }
-            if (constants.RARITY_NUMS.FOIL) {
+            if (rarity == constants.RARITY_NUMS.FOIL) {
                 rollEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
             }
+            // get card owners and wishers // TODO: sort by lvl so the top levels are displayed
+            let cardOwners = [];
+            let cardWishers = [];
+            const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
+            for (const profile of guildProfiles) {
+                for (const card of profile.cards) {
+                    if (card.name == villager.name && card.rarity == rarity) {
+                        const user = await interaction.client.users.fetch(profile.userID);
+                        if (profile.userID == interaction.user.id) cardOwners.unshift(user.displayName);
+                        else cardOwners.push(user.displayName);
+                    }
+                }
+                if (profile.wish == villager.name) {
+                    const user = await interaction.client.users.fetch(profile.userID);
+                    if (profile.userID == interaction.user.id) cardWishers.unshift(user);
+                    else cardWishers.push(user);
+                }
+            }
+            // add the ownership footer
+            const ownershipFooter = getOwnershipFooter(cardOwners);
+            if (ownershipFooter != "") {
+                rollEmbed.setFooter({
+                    text: ownershipFooter,
+                })
+            }
+            // add the wish ping
+            let wishMessage = "";
+            const numWishers = cardWishers.length;
+            if (numWishers == 1) wishMessage = `Wished by ${cardWishers[0]}`;
+            else if (numWishers == 2) wishMessage = `Wished by ${cardWishers[0]} and ${cardWishers[1]}`;
+            else if (numWishers) wishMessage = `Wished by ${cardWishers.slice(0, numWishers - 1).join(", ")}, and ${cardWishers[numWishers - 1]}`;
+            // send the embed
             const response = await interaction.reply({
+                content: wishMessage,
                 embeds: [rollEmbed],
                 withResponse: true,
             });
@@ -109,6 +146,7 @@ module.exports = {
                 let claimDate;
                 try { claimDate = await getCurrentTime(); } catch (error) { console.log(error); }
                 let timeSinceClaim = claimDate - reactorData.claimTimestamp;
+                const reactorCardIdx = reactorData.cards.findIndex(card => card.name === villager.name);
                 // if user's claim isn't available
                 if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
                     let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
@@ -120,15 +158,25 @@ module.exports = {
                     return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${timeString} before claiming again.`);
                 }
                 // if user already has the card
-                else if (reactorData.cards.some(card => card.name === villager.name)) {
+                else if (reactorCardIdx != -1) {
                     // if the rarity is lower or equal
-                    reactorData.bells += points;
-                    await reactorData.save();
-                    collector.stop();
-                    rollEmbed.setFooter({ text: `Rent collected by ${reactor.displayName}` });
-                    await interaction.editReply({ embeds: [rollEmbed] });
-                    await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>)`);
-                    // TODO: if the rarity is higher
+                    if (rarity <= reactorData.cards[reactorCardIdx].rarity) {
+                        reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[rarity];
+                        reactorData.bells += points;
+                        await reactorData.save();
+                        collector.stop();
+                        await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732> )`);
+                    }
+                    // if the rarity is higher
+                    else {
+                        const oldRarity = reactorData.cards[reactorCardIdx].rarity;
+                        reactorData.cards[reactorCardIdx].rarity = rarity;
+                        reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[oldRarity];
+                        reactorData.bells += Math.floor(points / constants.FOIL_VALUE_MULTIPLIER); // for now the common points will always be the foil points / foil modifier
+                        await reactorData.save();
+                        collector.stop();
+                        await interaction.followUp(`**${reactor.displayName}** upgraded their **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732> )`);
+                    }
                 }
                 // if the user has less cards than their max deck size
                 else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + reactorData.isaTier) {
@@ -143,7 +191,10 @@ module.exports = {
                     // wrap up
                     await reactorData.save();
                     collector.stop();
-                    rollEmbed.setFooter({ text: `Card claimed by ${reactor.displayName}` });
+                    cardOwners.unshift(reactorData.displayName);
+                    rollEmbed.setFooter({
+                        text: getOwnershipFooter(cardOwners),
+                    })
                     await interaction.editReply({ embeds: [rollEmbed] });
                     await interaction.followUp(`${reactor.displayName} claimed **${villager.name}**!`);
                     // track the claim in the db

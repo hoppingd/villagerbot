@@ -1,8 +1,9 @@
 const { EmbedBuilder, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getRank } = require('../../util');
+const { calculatePoints, getOwnershipFooter, getRank } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -32,11 +33,19 @@ module.exports = {
             }
             const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "");
             const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
-            let rarity = interaction.options.getNumber('rarity');
-            if (rarity == null) rarity = 0;
+
             if (villager) {
+                // get rarity data
+                /*
+                let rarityArg = interaction.options.getString('rarity');
+                let rarity = 0;
+                if (rarityArg == "COMMON") rarity = constants.RARITY_NUMS.COMMON;
+                else if (rarityArg == "FOIL") rarity = constants.RARITY_NUMS.FOIL;
+                */
+                let rarity = interaction.options.getNumber('rarity');
+                // get villager data
                 let charData = await charModel.findOne({ name: villager.name });
-                let points = await calculatePoints(charData.numClaims, isFoil);
+                let points = await calculatePoints(charData.numClaims, rarity);
                 let rank = await getRank(villager.name);
                 let personality = villager.personality;
                 if (!personality) personality = "Special";
@@ -57,6 +66,24 @@ module.exports = {
                 if (rarity == constants.RARITY_NUMS.FOIL) {
                     viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
                 }
+                // add the card ownership footer // TODO: sort by lvl so the top levels are displayed
+                let cardOwners = [];
+                const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
+                for (const profile of guildProfiles) {
+                    for (const card of profile.cards) {
+                        if (card.name == villager.name && card.rarity == rarity) {
+                            const user = await interaction.client.users.fetch(profile.userID);
+                            if (profile.userID == interaction.user.id) cardOwners.unshift(user.displayName);
+                            else cardOwners.push(user.displayName);
+                        }
+                    }
+                }
+                const ownershipFooter = getOwnershipFooter(cardOwners);
+                if (ownershipFooter != "") {
+                    viewEmbed.setFooter({
+                        text: ownershipFooter,
+                    })
+                }
                 await interaction.reply({ embeds: [viewEmbed] });
             }
             else {
@@ -64,7 +91,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with the sale.`);
+            await interaction.reply(`There was an error trying to view the card.`);
         }
     },
 };

@@ -4,7 +4,7 @@ const constants = require('./constants');
 const ntp = require('ntp-client');
 
 // function to calculate bell value of a card
-async function calculatePoints(charClaims, isFoil) {
+async function calculatePoints(charClaims, rarity) {
     let points = constants.MIN_POINTS;
     if (charClaims != 0) {
         let totalClaims;
@@ -23,10 +23,22 @@ async function calculatePoints(charClaims, isFoil) {
         points = Math.floor(constants.BASE * Math.exp(constants.SCALING_FACTOR * claimPercentage));
         points = Math.max(points, constants.MIN_POINTS);
         points = Math.min(points, constants.MAX_POINTS);
-        if (isFoil) points *= constants.FOIL_VALUE_MULTIPLIER;
+        if (rarity == constants.RARITY_NUMS.FOIL) points *= constants.FOIL_VALUE_MULTIPLIER;
     }
 
     return points;
+}
+
+async function getCurrentTime() {
+    return new Promise((resolve, reject) => {
+        ntp.getNetworkTime('pool.ntp.org', 123, (err, time) => {
+            if (err) {
+                reject('Error getting time from NTP server: ' + err);
+            } else {
+                resolve(time);
+            }
+        });
+    });
 }
 
 // Utility function to fetch or create profile data
@@ -40,6 +52,15 @@ async function getOrCreateProfile(userID, serverID) {
         await profileData.save();
     }
     return profileData;
+}
+
+function getOwnershipFooter(usernames) {
+    const numUsers = usernames.length;
+    if (numUsers == 0) return "";
+    else if (numUsers == 1) return `Owned by ${usernames[0]}`;
+    else if (numUsers == 2) return `Owned by ${usernames[0]} and ${usernames[1]}`;
+    else if (numUsers == 3) return `Owned by ${usernames[0]}, ${usernames[1]}, and ${usernames[2]}`;
+    else return `Owned by ${usernames.slice(0, 3).join(", ")}, and **${remainingCount = numUsers - 3}** more...`;
 }
 
 // function to get the rank of a card
@@ -59,21 +80,10 @@ async function getRank(cardName) {
     return rank;
 }
 
-async function getCurrentTime() {
-    return new Promise((resolve, reject) => {
-        ntp.getNetworkTime('pool.ntp.org', 123, (err, time) => {
-            if (err) {
-                reject('Error getting time from NTP server: ' + err);
-            } else {
-                resolve(time);
-            }
-        });
-    });
-}
-
 module.exports = {
     calculatePoints,
+    getCurrentTime,
     getOrCreateProfile,
+    getOwnershipFooter,
     getRank,
-    getCurrentTime
 };

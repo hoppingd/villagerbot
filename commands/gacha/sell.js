@@ -40,7 +40,7 @@ module.exports = {
             collector.on('collect', async (m) => {
                 if (m.content == 'y') {
                     let charData = await charModel.findOne({ name: realName });
-                    let points = await calculatePoints(charData.numClaims, rarity == constants.RARITIES.FOIL);
+                    let points = await calculatePoints(charData.numClaims, rarity);
                     profileData.cards[cardIdx] = null;
                     profileData.cards = profileData.cards.filter(card => card !== null);
                     profileData.bells += points;
