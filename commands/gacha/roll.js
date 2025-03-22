@@ -41,10 +41,7 @@ module.exports = {
                 let timeString = "";
                 if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
                 timeString += `**${minutesRemaining} minutes**`;
-                return await interaction.reply({
-                    content: `You are out of energy and cannot roll. Your energy will replenish in ${timeString}. You can also purchase max energy from **Brewster** <:brewster:1349263645380710431> by using **/upgrade**.`,
-                    flags: MessageFlags.Ephemeral,
-                })
+                return await interaction.reply(`You are out of energy and cannot roll. Your energy will replenish in ${timeString}. You can also purchase max energy from **Brewster** <:brewster:1349263645380710431> by using **/upgrade**.`)
             }
 
             let villager;
@@ -178,7 +175,7 @@ module.exports = {
                         const oldRarity = reactorData.cards[reactorCardIdx].rarity;
                         reactorData.cards[reactorCardIdx].rarity = rarity;
                         reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[oldRarity];
-                        reactorData.bells += Math.floor(points / constants.FOIL_VALUE_MULTIPLIER); // for now the common points will always be the foil points / foil modifier
+                        reactorData.bells += Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
                         await reactorData.save();
                         collector.stop();
                         await interaction.followUp(`**${reactor.displayName}** upgraded their **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732> )`);

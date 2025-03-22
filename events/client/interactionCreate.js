@@ -1,6 +1,7 @@
 const { Events, MessageFlags } = require('discord.js');
 const READ_ONLY_COMMANDS = ["balance", "mydeck", "view"];
 const OPTIONAL_READ_ONLY_COMMANDS = ["upgrade", "wish"];
+const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -13,7 +14,16 @@ module.exports = {
 			console.error(`No command matching ${interaction.commandName} was found.`);
 			return;
 		}
-
+		// check if the user is using commands too quickly
+		const now = Date.now();
+		if (interaction.client.cooldowns[interaction.user.id]) {
+			const expirationTime = interaction.client.cooldowns[interaction.user.id] + GLOBAL_COMMAND_COOLDOWN;
+			if (now < expirationTime) {
+				return interaction.reply({ content: `You are using commands too quickly. Please slow down.`, flags: MessageFlags.Ephemeral });
+			}
+		}
+		interaction.client.cooldowns[interaction.user.id] = now;
+		setTimeout(() => interaction.client.cooldowns.delete(interaction.user.id), GLOBAL_COMMAND_COOLDOWN);
 		// check if a command is currently being confirmed
 		if (interaction.client.confirmationState[interaction.user.id]) {
 			const hasArguments = interaction.options.data && interaction.options.data.length > 0;

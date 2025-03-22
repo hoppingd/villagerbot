@@ -12,7 +12,19 @@ combinedData = combinedData.reduce((acc, current) => {
     const exists = acc.some(item => item.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "") === current.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, ""));
     if (!exists) {
         current.is_special = special_character.some(special => special.name === current.name);
-        acc.push(current);
+        // handle edge case
+        if (current.name == "Timmy and Tommy") {
+            current.name = "Timmy";
+            current.name_sort = "Timmy";
+            acc.push(current);
+            const copy = Object.assign({}, current);
+            copy.name = "Tommy";
+            copy.name_sort = "Tommy";
+            acc.push(copy);
+        }
+        else {
+            acc.push(current);
+        }
     }
     else {
         console.log("there's a dupe");
@@ -44,3 +56,5 @@ combinedData.sort((a, b) => a.name.localeCompare(b.name));
 fs.writeFileSync('data.json', JSON.stringify(combinedData, null, 2), 'utf8');
 
 console.log('Final JSON created successfully!');
+
+process.exit();

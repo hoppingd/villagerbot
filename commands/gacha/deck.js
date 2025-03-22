@@ -1,4 +1,4 @@
-const { EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, InteractionContextType, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const constants = require('../../constants');
 const charModel = require('../../models/charSchema');
 const { getOrCreateProfile, calculatePoints } = require('../../util');
@@ -26,7 +26,8 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let target = interaction.options.getUser('owner') ?? interaction.user;
+            const target = interaction.options.getUser('owner') ?? interaction.user;
+            if (target.bot) return await interaction.reply({ content: "You supplied a bot for the owner argument. Please specify a real user or leave the field blank.", flags: MessageFlags.Ephemeral });
             let profileData = await getOrCreateProfile(target.id, interaction.guild.id);
             if (profileData.cards.length == 0) {
                 if (target.id == interaction.user.id) await interaction.reply(`You have no cards in your deck. Type **/roll** and react to claim some cards!`);

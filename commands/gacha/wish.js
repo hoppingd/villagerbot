@@ -33,10 +33,7 @@ module.exports = {
                     else await interaction.reply(`<:celeste:1349263647121346662>: *"You are now wishing for* ***${villager.name}**!"*`);
                 }
                 else {
-                    await interaction.reply({
-                        content: `<:celeste:1349263647121346662>: *"I couldn't find a card named* ***${cardName}**. Are you certain you spelled it correctly?"*`,
-                        flags: MessageFlags.Ephemeral,
-                    });
+                    await interaction.reply(`<:celeste:1349263647121346662>: *"I couldn't find a card named* ***${cardName}**. Are you certain you spelled it correctly?"*`);
                 }
             }
         } catch (err) {

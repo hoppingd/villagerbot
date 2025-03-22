@@ -19,11 +19,11 @@ async function calculatePoints(charClaims, rarity) {
             return points;
         }
         // formula to calculate points
-        let claimPercentage = charClaims / totalClaims;
+        let claimPercentage = charClaims / totalClaims; // alternatively, could divide by the number of unique decks
         points = Math.floor(constants.BASE * Math.exp(constants.SCALING_FACTOR * claimPercentage));
         points = Math.max(points, constants.MIN_POINTS);
         points = Math.min(points, constants.MAX_POINTS);
-        if (rarity == constants.RARITY_NUMS.FOIL) points *= constants.FOIL_VALUE_MULTIPLIER;
+        points *= constants.RARITY_VALUE_MULTIPLIER[rarity];
     }
 
     return points;

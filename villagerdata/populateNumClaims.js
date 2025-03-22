@@ -54,3 +54,5 @@ async function populateClaims() {
 
 // Call the function to populate the claims
 populateClaims().catch(err => console.error('Error populating claims:', err));
+
+process.exit();

@@ -48,3 +48,4 @@ fs.readFile('data.json', 'utf8', async(err, data) => {
         console.error('Error parsing the JSON data:', error);
       }
 })
+process.exit();
