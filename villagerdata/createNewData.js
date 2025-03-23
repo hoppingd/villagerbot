@@ -1,4 +1,6 @@
+const axios = require('axios');
 const fs = require('fs');
+const path = require('path');
 
 // Read JSON files
 const villager = JSON.parse(fs.readFileSync('villager.json', 'utf8'));
@@ -33,7 +35,7 @@ combinedData = combinedData.reduce((acc, current) => {
 }, []);
 
 
-combinedData.forEach(item => {
+combinedData.forEach(async item => {
     const amiiboMatch = amiibo.find(amiiboInfo => (amiiboInfo.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "") === item.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "") || (amiiboInfo._pageName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "") === item.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, ""))));
     if (amiiboMatch) {
         //console.log(`Updated ${item.name} with amiibo image url.`)
@@ -44,8 +46,25 @@ combinedData.forEach(item => {
         if (ereaderMatch) {
             //console.log(`Updated ${item.name} with ereader image url.`)
             item.image_url = ereaderMatch.image_front;  // Update the image_url with image_front
-        } else console.log(`${item.name} is missing a card image.`);
-        
+        }
+        else {
+            console.log(`${item.name} is missing a card image.`);
+            /* DOWNLOAD WIKI IMAGES FOR CARDS WITHOUT ART
+            const url = item.image_url;
+            const fileName = path.basename(url); // Extract the file name from the URL
+            const filePath = path.join(__dirname, 'downloads', fileName); // Save it in a 'downloads' directory
+
+            console.log(`Starting download for ${fileName}...`);
+
+            try {
+                await downloadImage(url, filePath);
+                console.log(`Downloaded: ${fileName}`);
+            } catch (error) {
+                console.log(error);
+                console.error(`Failed to download ${fileName}`);
+            }
+                */
+        }
     }
 });
 
@@ -58,3 +77,29 @@ fs.writeFileSync('data.json', JSON.stringify(combinedData, null, 2), 'utf8');
 console.log('Final JSON created successfully!');
 
 process.exit();
+
+// function to download images from wiki
+async function downloadImage(url, filename) {
+    try {
+        const response = await axios({
+            method: 'get',
+            url,
+            responseType: 'stream' // Make sure we're getting the response as a stream
+        });
+
+        // Ensure the directory exists, if not, create it
+        const dir = path.dirname(filename);
+
+        // Pipe the image data into a file
+        const writer = fs.createWriteStream(filename);
+        response.data.pipe(writer);
+
+        // Return a promise to ensure we handle completion of the stream
+        return new Promise((resolve, reject) => {
+            writer.on('finish', resolve); // Resolves once the file is fully written
+            writer.on('error', reject);   // Rejects if there’s any error during the writing process
+        });
+    } catch (error) {
+        console.error(`Error downloading image from ${url}:`, error.message);
+    }
+}

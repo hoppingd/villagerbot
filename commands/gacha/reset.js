@@ -14,7 +14,7 @@ module.exports = {
             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content.toLowerCase() == 'confirm' || m.content.toLowerCase() == 'cancel'));
             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
             interaction.client.confirmationState[interaction.user.id] = true;
-            setTimeout(() => interaction.client.confirmationState.delete(interaction.user.id), 30_000);
+            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
 
             collector.on('collect', async(m) => {
                 if (m.content.toLowerCase() == 'confirm') {
@@ -31,11 +31,12 @@ module.exports = {
                 else {
                     await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, the reset's been cancelled! That was a close one!"*`);
                 }
+                interaction.client.confirmationState[interaction.user.id] = false;
                 collector.stop();
             });
 
             collector.on('end', async (collected, reason) => {
-                interaction.client.confirmationState.delete(interaction.user.id);
+                interaction.client.confirmationState[interaction.user.id] = false;
                 if (reason === 'time') {
                     await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, ye didn't confirm in time! What were ye thinkin'?! The reset's been cancelled!"*`);
                 }

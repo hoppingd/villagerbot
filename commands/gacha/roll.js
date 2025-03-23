@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getCurrentTime, getOrCreateProfile, getOwnershipFooter, getRank } = require('../../util');
+const { calculatePoints, getOrCreateProfile, getOwnershipFooter, getRank } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,8 +19,7 @@ module.exports = {
             if (profileData.energy > 0 || shouldReset) {
                 // replenish the rolls if the roll timer has passed
                 if (shouldReset) {
-                    let rechargeDate;
-                    try { rechargeDate = await getCurrentTime(); } catch (error) { console.log(error); }
+                    let rechargeDate = new Date(Date.now());
                     rechargeDate.setMinutes(0);
                     rechargeDate.setSeconds(0);
                     rechargeDate.setMilliseconds(0);
@@ -126,6 +125,7 @@ module.exports = {
                 embeds: [rollEmbed],
                 withResponse: true,
             });
+            if (profileData.energy == 1) await interaction.channel.send(`${interaction.user}, you have 1 roll remaining!`);
 
             const { message } = response.resource;
 
@@ -141,14 +141,7 @@ module.exports = {
                     return interaction.channel.send(`${reactor}, you cannot react to rolls while in the middle of a key operation.`);
                 }
                 let reactorData = await getOrCreateProfile(reactor.id, interaction.guild.id);
-                // get the current time
-                let claimDate;
-                try { claimDate = await getCurrentTime(); }
-                catch (error) {
-                    console.log(error);
-                    return await interaction.channel.send(`${reactor}, the network request for UTC time took too long. Unfortunately, this is required to check whether you can claim.`);
-                }
-                let timeSinceClaim = claimDate - reactorData.claimTimestamp;
+                let timeSinceClaim = Date.now() - reactorData.claimTimestamp;
                 const reactorCardIdx = reactorData.cards.findIndex(card => card.name === villager.name);
                 // if user's claim isn't available
                 if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
@@ -176,6 +169,15 @@ module.exports = {
                         reactorData.cards[reactorCardIdx].rarity = rarity;
                         reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[oldRarity];
                         reactorData.bells += Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
+                        // set the claim timestamp
+                        let claimDate = new Date(Date.now());
+                        let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
+                        claimDate.setHours(claimHour);
+                        claimDate.setMinutes(0);
+                        claimDate.setSeconds(0);
+                        claimDate.setMilliseconds(0);
+                        reactorData.claimTimestamp = claimDate;
+                        // wrap up
                         await reactorData.save();
                         collector.stop();
                         await interaction.followUp(`**${reactor.displayName}** upgraded their **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732> )`);
@@ -185,6 +187,7 @@ module.exports = {
                 else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + reactorData.isaTier) {
                     reactorData.cards.push({ name: villager.name, rarity: rarity });
                     // set the claim timestamp
+                    let claimDate = new Date(Date.now());
                     let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
                     claimDate.setHours(claimHour);
                     claimDate.setMinutes(0);

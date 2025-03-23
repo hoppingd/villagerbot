@@ -29,18 +29,6 @@ async function calculatePoints(charClaims, rarity) {
     return points;
 }
 
-async function getCurrentTime() {
-    return new Promise((resolve, reject) => {
-        ntp.getNetworkTime('pool.ntp.org', 123, (err, time) => {
-            if (err) {
-                reject('Error getting time from NTP server: ' + err);
-            } else {
-                resolve(time);
-            }
-        });
-    });
-}
-
 // Utility function to fetch or create profile data
 async function getOrCreateProfile(userID, serverID) {
     let profileData = await profileModel.findOne({ userID, serverID });
@@ -82,7 +70,6 @@ async function getRank(cardName) {
 
 module.exports = {
     calculatePoints,
-    getCurrentTime,
     getOrCreateProfile,
     getOwnershipFooter,
     getRank,

@@ -41,7 +41,7 @@ module.exports = {
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState.delete(interaction.user.id), 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -57,7 +57,7 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
-                                interaction.client.confirmationState.delete(interaction.user.id);
+                                interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
@@ -75,7 +75,7 @@ module.exports = {
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState.delete(interaction.user.id), 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -91,7 +91,7 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
-                                interaction.client.confirmationState.delete(interaction.user.id);
+                                interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
@@ -109,7 +109,7 @@ module.exports = {
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState.delete(interaction.user.id), 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -125,7 +125,7 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
-                                interaction.client.confirmationState.delete(interaction.user.id);
+                                interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
@@ -143,7 +143,7 @@ module.exports = {
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState.delete(interaction.user.id), 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -153,13 +153,13 @@ module.exports = {
                                     await interaction.followUp(`<:katrina:1349263648144625694>: *"Keeeeeeeeeee hamo-ata... Keeee haaaaaamo-atata... There are higher rarity cards in your future, ${interaction.user}..."*`);
                                 }
                                 else {
-                                    interaction.followUp(`${interaction.user}, the upgrade purchase has been cancelled.`);
+                                    await interaction.followUp(`${interaction.user}, the upgrade purchase has been cancelled.`);
                                 }
                                 collector.stop();
                             });
 
                             collector.on('end', async (collected, reason) => {
-                                interaction.client.confirmationState.delete(interaction.user.id);
+                                interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
