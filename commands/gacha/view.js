@@ -51,9 +51,6 @@ module.exports = {
                     .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
                     .setImage(villager.image_url);
                 try { viewEmbed.setColor(villager.title_color); } catch (err) { viewEmbed.setColor("White"); } // set color
-                if (rarity == constants.RARITY_NUMS.FOIL) {
-                    viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
-                }
                 // add the card ownership footer // TODO: sort by lvl so the top levels are displayed
                 const owner = interaction.options.getUser('owner');
                 if (owner) {
@@ -63,13 +60,18 @@ module.exports = {
                     // the owner does not have the card
                     if (cardIdx == -1) { return await interaction.reply(`No card named **${cardName}** found in the specified deck.`); }
                     const card = ownerData.cards[cardIdx];
-                    const cardRarity = constants.RARITY_NAMES[rarity];
                     // the rarity was specified, and the owner has a different rarity
-                    if (interaction.options.getNumber('rarity') && card.rarity != cardRarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
-                    viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${cardRarity}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                    if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
+                    viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                    if (card.rarity == constants.RARITY_NUMS.FOIL) {
+                        viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                    }
                     viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
                 }
                 else {
+                    if (rarity == constants.RARITY_NUMS.FOIL) {
+                        viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                    }
                     let cardOwners = [];
                     const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
                     for (const profile of guildProfiles) {
