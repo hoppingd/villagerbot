@@ -30,10 +30,10 @@ module.exports = {
                     await profileData.save();
                     if (villager.name == "Blathers") await interaction.reply(`<:celeste:1349263647121346662>: *"You are now wishing for my dear brother, **Blathers** <:blathers:1349263646206857236> !"*`);
                     else if (villager.name == "Celeste") await interaction.reply(`<:celeste:1349263647121346662>: *"Hootie—TOOT! You're teasing me, aren't you? Very well, you are now wishing for **Celeste**..."*`);
-                    else await interaction.reply(`<:celeste:1349263647121346662>: *"You are now wishing for* ***${villager.name}**!"*`);
+                    else await interaction.reply(`<:celeste:1349263647121346662>: *"${interaction.user}, you are now wishing for* ***${villager.name}**!"*`);
                 }
                 else {
-                    await interaction.reply(`<:celeste:1349263647121346662>: *"I couldn't find a card named* ***${cardName}**. Are you certain you spelled it correctly?"*`);
+                    await interaction.reply(`<:celeste:1349263647121346662>: *"${interaction.user}, I couldn't find a card named* ***${cardName}**. Are you certain you spelled it correctly?"*`);
                 }
             }
         } catch (err) {

@@ -11,7 +11,7 @@ const profileSchema = new mongoose.Schema({
     cards: {
         type: [{
             name: { type: String, default: null },
-            rarity: { type: String, default: null },
+            rarity: { type: Number, default: 0 },
             level: { type: Number, default: 1 }
         }],
     },
@@ -32,7 +32,8 @@ const profileSchema = new mongoose.Schema({
     rechargeTimestamp: { type: Date, default: new Date(0) },
     claimTimestamp: { type: Date, default: new Date(0) },
     dailyBellsTimestamp: { type: Date, default: new Date(0) },
-    resetClaimTimestamp: { type: Date, default: new Date(0) }
+    resetClaimTimestamp: { type: Date, default: new Date(0) },
+    rechargeCommandTimestamp: { type: Date, default: new Date(0) },
 });
 
 profileSchema.index({ userID: 1, serverID: 1 }, { unique: true });

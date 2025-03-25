@@ -48,7 +48,7 @@ function getOwnershipFooter(usernames) {
     else if (numUsers == 1) return `Owned by ${usernames[0]}`;
     else if (numUsers == 2) return `Owned by ${usernames[0]} and ${usernames[1]}`;
     else if (numUsers == 3) return `Owned by ${usernames[0]}, ${usernames[1]}, and ${usernames[2]}`;
-    else return `Owned by ${usernames.slice(0, 3).join(", ")}, and **${remainingCount = numUsers - 3}** more...`;
+    else return `Owned by ${usernames[0]}, ${usernames[1]}, and ${remainingCount = numUsers - 2} more...`;
 }
 
 // function to get the rank of a card

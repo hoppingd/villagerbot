@@ -49,6 +49,7 @@ module.exports = {
                                     profileData.brewTier += 1;
                                     await profileData.save();
                                     await interaction.followUp(`<:brewster:1349263645380710431>: *"This upgrade may seem a tad expensive at... ${constants.UPGRADE_COSTS[profileData.brewTier - 1]} Bells, but it's well worth it. Here you go, ${interaction.user}. You now have more energy for your rolls."*`);
+                                    if (profileData.brewTier == constants.UPGRADE_COSTS.length) await interaction.channel.send(`<:brewster:1349263645380710431>: *"Thanks for buying all of my upgrades, ${interaction.user}. Feel free to stop by the Roost with* ***/recharge***. I'll serve you a fresh brew that resets your rolls once per day."*`);
                                 }
                                 else {
                                     interaction.followUp(`${interaction.user}, the upgrade purchase has been cancelled.`);
@@ -116,7 +117,8 @@ module.exports = {
                                     profileData.bells -= constants.UPGRADE_COSTS[profileData.isaTier];
                                     profileData.isaTier += 1;
                                     await profileData.save();
-                                    await interaction.followUp(`<:isabelle:1349263650191315034>: *"Upgrade purchased! I fixed you up with a new deck slot, ${interaction.user}!"*`);
+                                    if (profileData.isaTier < constants.UPGRADE_COSTS.length) await interaction.followUp(`<:isabelle:1349263650191315034>: *"Upgrade purchased! I fixed you up with a new deck slot, ${interaction.user}!"*`);
+                                    else await interaction.followUp(`<:isabelle:1349263650191315034>: *"Upgrade purchased! ${interaction.user}, you can now use* ***/resetclaimtimer**! I can refresh your ability to claim cards, but only once per day."*`);
                                 }
                                 else {
                                     interaction.followUp(`${interaction.user}, the upgrade purchase has been cancelled.`);
@@ -189,26 +191,28 @@ module.exports = {
                 // BREWSTER
                 upgradeInfo += `<:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** · `;
                 if (profileData.brewTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
+                else if (profileData.brewTier == constants.UPGRADE_COSTS.length - 1) upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.brewTier]}** <:bells:1349182767958855853> · Reward: +1 max energy, /recharge\n`;
                 else {
-                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.brewTier]}** <:bells:1349182767958855853> +1 max energy\n`;
+                    upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.brewTier]}** <:bells:1349182767958855853> · Reward: +1 max energy\n`;
                 }
                 // CELESTE
                 upgradeInfo += `<:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** · `;
                 if (profileData.celTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
                 else {
-                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.celTier]}** <:bells:1349182767958855853> x2 wish chance\n`;
+                    upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.celTier]}** <:bells:1349182767958855853> · Reward: x2 wish chance\n`;
                 }
                 // ISABELLE
                 upgradeInfo += `<:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[profileData.isaTier]}** · `;
                 if (profileData.isaTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
+                else if (profileData.isaTier == constants.UPGRADE_COSTS.length - 1) upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.isaTier]}** <:bells:1349182767958855853> · Reward: /resetclaimtimer\n`;
                 else {
-                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.isaTier]}** <:bells:1349182767958855853> +1 deck slot\n`;
+                    upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.isaTier]}** <:bells:1349182767958855853> · Reward: +1 deck slot\n`;
                 }
                 // KATRINA
                 upgradeInfo += `<:katrina:1349263648144625694> **Katrina ${constants.ROMAN_NUMERALS[profileData.katTier]}** · `;
                 if (profileData.katTier == constants.UPGRADE_COSTS.length) upgradeInfo += `Max level reached!\n`;
                 else {
-                    upgradeInfo += `Next level: **${constants.UPGRADE_COSTS[profileData.katTier]}** <:bells:1349182767958855853> +1% foil chance\n`;
+                    upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.katTier]}** <:bells:1349182767958855853> · Reward: +1% foil chance\n`;
                 }
                 // NOOK
                 upgradeInfo += `<:tom_nook:1349263649356779562> **Tom Nook ${constants.ROMAN_NUMERALS[profileData.nookTier]}** · `;

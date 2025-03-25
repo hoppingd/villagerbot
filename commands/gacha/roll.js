@@ -107,7 +107,9 @@ module.exports = {
                 }
             }
             // add the ownership footer
-            const ownershipFooter = getOwnershipFooter(cardOwners);
+            let ownershipFooter = getOwnershipFooter(cardOwners);
+            // warn the user if they have just one roll remaining
+            if (profileData.energy == 1) ownershipFooter += `\n⚠️ 1 ROLL REMAINING! ⚠️`;
             if (ownershipFooter != "") {
                 rollEmbed.setFooter({
                     text: ownershipFooter,
@@ -125,7 +127,6 @@ module.exports = {
                 embeds: [rollEmbed],
                 withResponse: true,
             });
-            if (profileData.energy == 1) await interaction.channel.send(`${interaction.user}, you have 1 roll remaining!`);
 
             const { message } = response.resource;
 
@@ -148,6 +149,10 @@ module.exports = {
                     let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
                     let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
                     let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
+                    if (minutesRemaining == 60) {
+                        hoursRemaining += 1;
+                        minutesRemaining = 0;
+                    }
                     let timeString = "";
                     if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
                     timeString += `**${minutesRemaining} minutes**`;
@@ -184,7 +189,7 @@ module.exports = {
                     }
                 }
                 // if the user has less cards than their max deck size
-                else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + reactorData.isaTier) {
+                else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(reactorData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
                     reactorData.cards.push({ name: villager.name, rarity: rarity });
                     // set the claim timestamp
                     let claimDate = new Date(Date.now());

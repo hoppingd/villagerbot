@@ -1,5 +1,6 @@
 const { EmbedBuilder, InteractionContextType, SlashCommandBuilder, MessageFlags } = require('discord.js');
 const constants = require('../../constants');
+const villagers = require('../../villagerdata/data.json');
 const charModel = require('../../models/charSchema');
 const { getOrCreateProfile, calculatePoints } = require('../../util');
 
@@ -41,8 +42,11 @@ module.exports = {
                 if (deckName == null) deckName = `${target.displayName}'s Deck`;
                 // get the deck color
                 let deckColor = profileData.deckColor;
-                // get the deck and sort it
+                // get the deck
                 let deck = profileData.cards;
+                // get the top card
+                const topVillager = villagers.find(v => v.name == deck[0].name);
+                // sort the deck
                 const sort = interaction.options.getBoolean('sort');
                 if (sort) {
                     deck.sort((a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : 0));
@@ -60,13 +64,16 @@ module.exports = {
                 // display the deck
                 let replyMessage = "";
                 for (let i = 0; i < deck.length; i++) {
-                    replyMessage += `${deck[i].name}`;
+                    const cardName = deck[i].name;
+                    if (cardName == topVillager.name) replyMessage += `***${cardName}***`; // bold the top card
+                    else replyMessage += `${cardName}`;
+                    
                     if (deck[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " :sparkles:";
                     if (flag) {
                         replyMessage += " - ";
                         if (flag == "b") {
                             if (!sort) {
-                                const charData = await charModel.findOne({ name: deck[i].name });
+                                const charData = await charModel.findOne({ name: cardName });
                                 const points = await calculatePoints(charData.numClaims, deck[i].rarity);
                                 replyMessage += `**${points}** <:bells:1349182767958855853>`;
                             }
@@ -80,9 +87,13 @@ module.exports = {
                 }
                 // make the message look nice
                 const deckEmbed = new EmbedBuilder()
-                    .setTitle(deckName)
+                    .setAuthor({
+                        name: deckName,
+                        iconURL: target.displayAvatarURL(),
+                    })
+                    .setThumbnail(topVillager.image_url)
                     .setDescription(replyMessage)
-                    .setFooter({ text: `${constants.DEFAULT_CARD_LIMIT + profileData.isaTier - deck.length} card slots remaining.` });
+                    .setFooter({ text: `${constants.DEFAULT_CARD_LIMIT + Math.min(profileData.isaTier, constants.ADDITIONAL_CARD_SLOTS) - deck.length} card slots remaining.` });
                 try {
                     deckEmbed.setColor(deckColor);
                 }

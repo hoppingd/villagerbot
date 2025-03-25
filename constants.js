@@ -11,12 +11,13 @@ const RARITY_NUMS = { COMMON: 0, FOIL: 1 };
 const RARITY_LVL = [1, 10]; // how much lvl you gain for each rarity
 const DECK_NAME_CHAR_LIMIT = 16;
 const RARITY_VALUE_MULTIPLIER = [1, 2];
-const UPGRADE_COSTS = [1000, 2000, 4000, 8000];
+const UPGRADE_COSTS = [1000, 2000, 4000, 8000, 16000];
 const WISH_BASE = 2;
-const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V"];
+const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "V"];
 const DEFAULT_ROLL_TIMER = 60 * 60 * 1000;
 const DEFAULT_CLAIM_TIMER = 4 * 60 * 60 * 1000;
 const DEFAULT_ENERGY = 5;
+const ADDITIONAL_CARD_SLOTS = 4;
 
 module.exports = {
     NUM_VILLAGERS,
@@ -38,4 +39,5 @@ module.exports = {
     DEFAULT_ROLL_TIMER,
     DEFAULT_CLAIM_TIMER,
     DEFAULT_ENERGY,
+    ADDITIONAL_CARD_SLOTS,
 };

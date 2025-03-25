@@ -26,9 +26,11 @@ module.exports = {
             }
             const realName = profileData.cards[cardIdx].name;
             const rarity = profileData.cards[cardIdx].rarity;
-
+            // get the points
+            let charData = await charModel.findOne({ name: realName });
+            let points = await calculatePoints(charData.numClaims, rarity);
             // confirm the sale
-            await interaction.reply(`Sell your **${realName}**? (y/n)`);
+            await interaction.reply(`Sell your **${realName}** for **${points} <:bells:1349182767958855853>**? (y/n)`);
             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
             interaction.client.confirmationState[interaction.user.id] = true;
@@ -36,8 +38,7 @@ module.exports = {
 
             collector.on('collect', async (m) => {
                 if (m.content == 'y') {
-                    let charData = await charModel.findOne({ name: realName });
-                    let points = await calculatePoints(charData.numClaims, rarity);
+                    
                     profileData.cards[cardIdx] = null;
                     profileData.cards = profileData.cards.filter(card => card !== null);
                     profileData.bells += points;

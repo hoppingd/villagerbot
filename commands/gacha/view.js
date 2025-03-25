@@ -67,7 +67,7 @@ module.exports = {
                     // the rarity was specified, and the owner has a different rarity
                     if (interaction.options.getNumber('rarity') && card.rarity != cardRarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
                     viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${cardRarity}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
-                    viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}` });
+                    viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
                 }
                 else {
                     let cardOwners = [];
