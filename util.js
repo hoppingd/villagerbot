@@ -68,9 +68,27 @@ async function getRank(cardName) {
     return rank;
 }
 
+function getTimeString(timeRemaining) {
+    let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
+    let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
+    let timeString = "";
+    if (minutesRemaining == 60) {
+        hoursRemaining += 1;
+        minutesRemaining = 0;
+    }
+    if (hoursRemaining > 0) {
+        if (hoursRemaining == 1) timeString += `**${hoursRemaining} hour** and `;
+        else timeString += `**${hoursRemaining} hours** and `;
+    }
+    if (minutesRemaining == 1)`**${minutesRemaining} minute**`;
+    else timeString += `**${minutesRemaining} minutes**`;
+    return timeString;
+}
+
 module.exports = {
     calculatePoints,
     getOrCreateProfile,
     getOwnershipFooter,
     getRank,
+    getTimeString,
 };

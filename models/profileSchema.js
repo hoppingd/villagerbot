@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const profileSchema = new mongoose.Schema({
     userID: { type: String, require: true, unique: false },
     serverID: { type: String, require: true, unique: false },
-    bells: { type: Number, default: 0, min: [0, 'Negative bells are not allowed.'] },
+    bells: { type: Number, default: 0, min: [0, 'Negative bells are not allowed.'], max: [Number.MAX_VALUE, 'Max level reached.']},
     wish: { type: String, default: null },
     deckName: { type: String, default: null },
     deckColor: { type: String, default: "green" },
@@ -12,14 +12,14 @@ const profileSchema = new mongoose.Schema({
         type: [{
             name: { type: String, default: null },
             rarity: { type: Number, default: 0 },
-            level: { type: Number, default: 1 }
+            level: { type: Number, default: 1, max: [Number.MAX_VALUE, 'Max level reached.']  }
         }],
     },
     storage: {
         type: [{
             name: { type: String, default: null },
             rarity: { type: Number, default: 0 },
-            level: { type: Number, default: 1 }
+            level: { type: Number, default: 1, max: [Number.MAX_VALUE, 'Max level reached.']}
         }],
     },
     nookTier: { type: Number, default: 0 },

@@ -1,7 +1,6 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile } = require('../../util');
-const DAY = 24 * 60 * 60 * 1000;
+const { getOrCreateProfile, getTimeString } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -15,18 +14,9 @@ module.exports = {
             // check the timer
             const currDate = Date.now();
             const timeSinceRecharge = currDate - profileData.rechargeCommandTimestamp;
-            if (timeSinceRecharge < DAY) {
-                const timeRemaining = DAY - timeSinceRecharge;
-                let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
-                let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
-                if (minutesRemaining == 60) {
-                    hoursRemaining += 1;
-                    minutesRemaining = 0;
-                }
-                let timeString = "";
-                if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
-                timeString += `**${minutesRemaining} minutes**`;
-                return await interaction.reply(`<:brewster:1349263645380710431>: *"Sorry, ${interaction.user}. I'm all out of coffee. Come back in ${timeString}."*`);
+            if (timeSinceRecharge < constants.DAY) {
+                const timeRemaining = constants.DAY - timeSinceRecharge;
+                return await interaction.reply(`<:brewster:1349263645380710431>: *"Sorry, ${interaction.user}. I'm all out of coffee. Come back in ${getTimeString(timeRemaining)}."*`);
             }
             // check if the user can roll
             let timeSinceReset = Date.now() - profileData.rechargeTimestamp;

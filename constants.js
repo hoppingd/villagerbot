@@ -18,6 +18,8 @@ const DEFAULT_ROLL_TIMER = 60 * 60 * 1000;
 const DEFAULT_CLAIM_TIMER = 4 * 60 * 60 * 1000;
 const DEFAULT_ENERGY = 5;
 const ADDITIONAL_CARD_SLOTS = 4;
+const DAY = 24 * 60 * 60 * 1000;
+const WISH_CLAIM_BONUS = 100;
 
 module.exports = {
     NUM_VILLAGERS,
@@ -40,4 +42,6 @@ module.exports = {
     DEFAULT_CLAIM_TIMER,
     DEFAULT_ENERGY,
     ADDITIONAL_CARD_SLOTS,
+    DAY,
+    WISH_CLAIM_BONUS
 };

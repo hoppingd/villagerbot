@@ -42,8 +42,15 @@ module.exports = {
                     profileData.cards[cardIdx] = null;
                     profileData.cards = profileData.cards.filter(card => card !== null);
                     profileData.bells += points;
+                    let followUpMsg = `**${realName}** sold! (+**${points}** <:bells:1349182767958855853>)`;
+                    // NOOK IV BONUS
+                    if (profileData.nookTier > 3) {
+                        const nookBonus = Math.ceil(points / 2);
+                        profileData.bells += nookBonus;
+                        followUpMsg += ` (+**${nookBonus}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook IV**)`
+                    }
                     profileData.save();
-                    interaction.followUp(`**${realName}** sold! (+**${points}** <:bells:1349182767958855853>)`);
+                    interaction.followUp(followUpMsg);
                     // track the sale in the db
                     charData.numClaims -= 1;
                     charData.save();

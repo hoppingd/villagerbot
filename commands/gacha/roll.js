@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getOrCreateProfile, getOwnershipFooter, getRank } = require('../../util');
+const { calculatePoints, getOrCreateProfile, getOwnershipFooter, getRank, getTimeString } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -31,16 +31,7 @@ module.exports = {
             }
             else {
                 let timeRemaining = constants.DEFAULT_ROLL_TIMER - timeSinceReset;
-                let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
-                let minutesRemaining = Math.ceil((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
-                if (minutesRemaining == 60) {
-                    hoursRemaining += 1;
-                    minutesRemaining = 0;
-                }
-                let timeString = "";
-                if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
-                timeString += `**${minutesRemaining} minutes**`;
-                return await interaction.reply(`You are out of energy and cannot roll. Your energy will replenish in ${timeString}. You can also purchase max energy from **Brewster** <:brewster:1349263645380710431> by using **/upgrade**.`)
+                return await interaction.reply(`You are out of energy and cannot roll. Your energy will replenish in ${getTimeString(timeRemaining)}. You can also purchase max energy from **Brewster** <:brewster:1349263645380710431> by using **/upgrade**.`)
             }
 
             let villager;
@@ -147,16 +138,7 @@ module.exports = {
                 // if user's claim isn't available
                 if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
                     let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
-                    let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
-                    let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
-                    if (minutesRemaining == 60) {
-                        hoursRemaining += 1;
-                        minutesRemaining = 0;
-                    }
-                    let timeString = "";
-                    if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
-                    timeString += `**${minutesRemaining} minutes**`;
-                    return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${timeString} before claiming again.`);
+                    return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${getTimeString(timeRemaining)} before claiming again.`);
                 }
                 // if user already has the card
                 else if (reactorCardIdx != -1) {
@@ -173,7 +155,8 @@ module.exports = {
                         const oldRarity = reactorData.cards[reactorCardIdx].rarity;
                         reactorData.cards[reactorCardIdx].rarity = rarity;
                         reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[oldRarity];
-                        reactorData.bells += Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
+                        const oldPoints = Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
+                        reactorData.bells += oldPoints;
                         // set the claim timestamp
                         let claimDate = new Date(Date.now());
                         let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
@@ -182,10 +165,19 @@ module.exports = {
                         claimDate.setSeconds(0);
                         claimDate.setMilliseconds(0);
                         reactorData.claimTimestamp = claimDate;
+                        let followUpMsg = `**${reactor.displayName}** upgraded their **${villager.name}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732> )`;
+                        if (profileData.nookTier > 1 && reactorData.wish == villager.name) {
+                            reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
+                            followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
+                        }
+                        if (profileData.nookTier > 2) {
+                            reactorData.bells += points;  // NOOK III BONUS
+                            followUpMsg += ` (+**${points}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook III**)`
+                        }
                         // wrap up
                         await reactorData.save();
                         collector.stop();
-                        await interaction.followUp(`**${reactor.displayName}** upgraded their **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732> )`);
+                        await interaction.followUp(followUpMsg);
                     }
                 }
                 // if the user has less cards than their max deck size
@@ -199,6 +191,15 @@ module.exports = {
                     claimDate.setSeconds(0);
                     claimDate.setMilliseconds(0);
                     reactorData.claimTimestamp = claimDate;
+                    let followUpMsg = `${reactor.displayName} claimed **${villager.name}**!`;
+                    if (profileData.nookTier > 1 && reactorData.wish == villager.name) {
+                        reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
+                        followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
+                    }
+                    if (profileData.nookTier > 2) {
+                        reactorData.bells += points;  // NOOK III BONUS
+                        followUpMsg += ` (+**${points}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook III**)`
+                    }
                     // wrap up
                     await reactorData.save();
                     collector.stop();

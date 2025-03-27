@@ -1,7 +1,6 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile } = require('../../util');
-const DAY = 24 * 60 * 60 * 1000;
+const { getOrCreateProfile, getTimeString } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -15,18 +14,9 @@ module.exports = {
             // check the timer
             const currDate = Date.now();
             const timeSinceResetClaim = currDate - profileData.resetClaimTimestamp;
-            if (timeSinceResetClaim < DAY) {
-                const timeRemaining = DAY - timeSinceResetClaim;
-                let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
-                let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
-                if (minutesRemaining == 60) {
-                    hoursRemaining += 1;
-                    minutesRemaining = 0;
-                }
-                let timeString = "";
-                if (hoursRemaining > 0) timeString += `**${hoursRemaining} hours** and `;
-                timeString += `**${minutesRemaining} minutes**`;
-                return await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just... Wait a sec, you already came in today! Come back in ${timeString}.*`);
+            if (timeSinceResetClaim < constants.DAY) {
+                const timeRemaining = constants.DAY - timeSinceResetClaim;
+                return await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just... Wait a sec, you already came in today! Come back in ${getTimeString(timeRemaining)}.*`);
             }
             let timeSinceClaim = Date.now() - profileData.claimTimestamp;
             // if user's claim is available
@@ -40,7 +30,7 @@ module.exports = {
             newDate.setMilliseconds(0);
             profileData.resetClaimTimestamp = newDate;
             await profileData.save();
-            await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just make a quick call to out mutual friend <:resetti:1349263941179674645> and... yup, looks like you're all set. You should be able to claim another card now!"*`);
+            await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just make a quick call to our mutual friend <:resetti:1349263941179674645> and... yup, looks like you're all set. You should be able to claim another card now!"*`);
         } catch (err) {
             console.log(err);
             await interaction.reply(`There was an error setting the deck name.`);
