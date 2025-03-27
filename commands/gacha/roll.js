@@ -192,7 +192,7 @@ module.exports = {
                     claimDate.setMilliseconds(0);
                     reactorData.claimTimestamp = claimDate;
                     let followUpMsg = `${reactor.displayName} claimed **${villager.name}**!`;
-                    if (profileData.nookTier > 1 && reactorData.wish == villager.name) {
+                    if (profileData.nookTier > 1 && cardWishers.contains(reactor.displayName)) {
                         reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
                         followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                     }

@@ -28,8 +28,6 @@ module.exports = {
 		// check if a command is currently being confirmed
 		if (interaction.client.confirmationState[interaction.user.id]) {
 			const subCommand = interaction.options.getSubcommand();
-			console.log(interaction.commandName);
-
 			// check if the new command is not read only
 			if (!READ_ONLY_COMMANDS.includes(interaction.commandName) && (!OPTIONAL_READ_ONLY_COMMANDS.includes(interaction.commandName) || !OPTIONAL_READ_ONLY_SUBCOMMANDS.includes(subCommand))) {
 				return interaction.reply({

@@ -4,7 +4,7 @@ const { getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
-        .setName('deckname')
+        .setName('name')
         .setDescription("Deck name commands.")
         .addSubcommand(subcommand =>
             subcommand

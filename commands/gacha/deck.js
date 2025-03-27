@@ -17,7 +17,10 @@ module.exports = {
                 .setDescription('Show additional information (optional).')
                 .addChoices(
                     { name: "Bells", value: "b" },
-                    { name: "Level", value: "l" }
+                    { name: "Gender", value: "g" },
+                    { name: "Level", value: "l" },
+                    { name: "Personality", value: "p" },
+                    { name: "Species", value: "s" }
                 )
         )
         .addBooleanOption(option =>
@@ -65,9 +68,9 @@ module.exports = {
                 let replyMessage = "";
                 for (let i = 0; i < deck.length; i++) {
                     const cardName = deck[i].name;
-                    if (cardName == topVillager.name) replyMessage += `***${cardName}***`; // bold the top card
+                    if (cardName == topVillager.name) replyMessage += `**${cardName}**`; // bold the top card
                     else replyMessage += `${cardName}`;
-                    
+
                     if (deck[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " :sparkles:";
                     if (flag) {
                         replyMessage += " - ";
@@ -79,8 +82,24 @@ module.exports = {
                             }
                             else replyMessage += `**${deck[i].points}** <:bells:1349182767958855853>`;
                         }
-                        else {
+                        else if (flag == "g") {
+                            const villager = villagers.find(v => v.name == cardName);
+                            let gender = villager.gender;
+                            if (!gender) replyMessage += `:transgender_symbol:`; // edge case for Somebody
+                            else replyMessage += `:${gender.toLowerCase()}_sign:`;
+                        }
+                        else if (flag == "l") {
                             replyMessage += `**${deck[i].level}** <:love:1352200821072199732>`;
+                        }
+                        else if (flag == "p") {
+                            const villager = villagers.find(v => v.name == cardName);
+                            let personality = villager.personality;
+                            if (!personality) replyMessage += `*Special*`;
+                            else replyMessage += `*${personality}*`;
+                        }
+                        else if (flag == "s") {
+                            const villager = villagers.find(v => v.name == cardName);
+                            replyMessage += `*${villager.species}*`;
                         }
                     }
                     replyMessage += "\n";
