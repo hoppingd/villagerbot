@@ -16,16 +16,27 @@ module.exports = {
     async execute(interaction) {
         try {
             let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
-            
+
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');
-            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
+            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
             const cardIdx = profileData.cards.findIndex(card => card.name.toLowerCase() === normalizedCardName);
-            if (cardIdx === -1) {
-                return await interaction.reply(`No card named **${cardName}** found in your deck. Use **/deck** to view your deck.`);
+            const storageIdx = -1;
+            let realName = null;
+            let rarity = null;
+            if (cardIdx == -1) {
+                const storageIdx = profileData.storage.findIndex(card => card.name.toLowerCase() === normalizedCardName);
+                // the card is in storage
+                if (storageIdx != -1) {
+                    realName = profileData.storage[storageIdx].name;
+                    rarity = profileData.storage[storageIdx].rarity;
+                }
+                else return await interaction.reply(`No card named **${cardName}** found in your deck or storage. Use **/deck** to view your deck, and **/storage view** to view your storage.`);
             }
-            const realName = profileData.cards[cardIdx].name;
-            const rarity = profileData.cards[cardIdx].rarity;
+            else {
+                realName = profileData.cards[cardIdx].name;
+                rarity = profileData.cards[cardIdx].rarity;
+            }
             // get the points
             let charData = await charModel.findOne({ name: realName });
             let points = await calculatePoints(charData.numClaims, rarity);
@@ -38,16 +49,28 @@ module.exports = {
 
             collector.on('collect', async (m) => {
                 if (m.content == 'y') {
-                    
-                    profileData.cards[cardIdx] = null;
-                    profileData.cards = profileData.cards.filter(card => card !== null);
-                    profileData.bells += points;
+                    if (storageIdx != -1) {
+                        profileData.storage[storageIdx] = null;
+                        profileData.storage = profileData.storage.filter(card => card !== null);
+                        profileData.bells += points;
+                    }
+                    else {
+                        profileData.cards[cardIdx] = null;
+                        profileData.cards = profileData.cards.filter(card => card !== null);
+                        profileData.bells += points;
+                    }
                     let followUpMsg = `**${realName}** sold! (+**${points}** <:bells:1349182767958855853>)`;
                     // NOOK IV BONUS
                     if (profileData.nookTier > 3) {
                         const nookBonus = Math.ceil(points / 2);
                         profileData.bells += nookBonus;
                         followUpMsg += ` (+**${nookBonus}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook IV**)`
+                    }
+                    // BLATHERS II BONUS
+                    if (profileData.blaTier > 2 && storageIdx != -1) {
+                        const blaBonus = Math.ceil(points / 2);
+                        profileData.bells += blaBonus;
+                        followUpMsg += ` (+**${blaBonus}** <:bells:1349182767958855853> from <:blathers:1349263646206857236> **Blathers II**)`
                     }
                     profileData.save();
                     interaction.followUp(followUpMsg);

@@ -135,6 +135,7 @@ module.exports = {
                 let reactorData = await getOrCreateProfile(reactor.id, interaction.guild.id);
                 let timeSinceClaim = Date.now() - reactorData.claimTimestamp;
                 const reactorCardIdx = reactorData.cards.findIndex(card => card.name === villager.name);
+                const reactorStorageIdx = reactorData.storage.findIndex(card => card.name === villager.name)
                 // if user's claim isn't available
                 if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
                     let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
@@ -180,6 +181,10 @@ module.exports = {
                         await interaction.followUp(followUpMsg);
                     }
                 }
+                // the user has the card in storage
+                else if (reactorStorageIdx != -1) {
+                    await interaction.channel.send(`${reactor}, you cannot claim cards you already have in storage. You must first sell the card with **/sell** or move it to your deck with **/storage move**.`);
+                }
                 // if the user has less cards than their max deck size
                 else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(reactorData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
                     reactorData.cards.push({ name: villager.name, rarity: rarity });
@@ -208,7 +213,51 @@ module.exports = {
                         text: getOwnershipFooter(cardOwners),
                     })
                     await interaction.editReply({ content: wishMessage, embeds: [rollEmbed] });
-                    await interaction.followUp(`${reactor.displayName} claimed **${villager.name}**!`);
+                    await interaction.followUp(followUpMsg);
+                    // track the claim in the db
+                    charData.numClaims += 1;
+                    charData.save();
+                }
+                // if user has room in storage
+                else if (reactorData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[reactorData.blaTier]) {
+                    // BLATHERS V BONUS
+                    let randIdx = Math.floor(Math.random() * 101);
+                    if (randIdx < constants.BLATHERS_BONUS_CHANCE && rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
+                        rarity += 1;
+                        interaction.channel.send(`${villager.name} rarity upgraded to ${constants.RARITY_NAMES[rarity]} by <:blathers:1349263646206857236> **Blathers V**.`);
+                    }
+                    // BLATHERS III BONUS
+                    if (reactorData.blaTier < 3) reactorData.storage.push({ name: villager.name, rarity: rarity });
+                    else {
+                        reactorData.storage.push({ name: villager.name, rarity: rarity, level: 1 + constants.BLATHERS_BONUS_LVLS });
+                    }
+                    // set the claim timestamp
+                    let claimDate = new Date(Date.now());
+                    let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
+                    claimDate.setHours(claimHour);
+                    claimDate.setMinutes(0);
+                    claimDate.setSeconds(0);
+                    claimDate.setMilliseconds(0);
+                    reactorData.claimTimestamp = claimDate;
+                    let followUpMsg = `${reactor.displayName} claimed **${villager.name}**! The card was sent to their storage.`;
+                    // NOOK II BONUS
+                    if (profileData.nookTier > 1 && cardWishers.contains(reactor.displayName)) {
+                        reactorData.bells += WISH_CLAIM_BONUS;
+                        followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
+                    }
+                    // NOOK III BONUS
+                    if (profileData.nookTier > 2) {
+                        reactorData.bells += points; 
+                        followUpMsg += ` (+**${points}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook III**)`
+                    }
+                    // BLATHERS III BONUS
+                    if (reactorData.blaTier >= 3) {
+                        followUpMsg += ` (+**${constants.BLATHERS_BONUS_LVLS}** <:love:1352200821072199732> from <:blathers:1349263646206857236> **Blathers III**)`
+                    }
+                    // wrap up
+                    await reactorData.save();
+                    collector.stop();
+                    await interaction.followUp(followUpMsg);
                     // track the claim in the db
                     charData.numClaims += 1;
                     charData.save();
@@ -217,7 +266,6 @@ module.exports = {
                     // send a message to the reactor that they couldn't claim because their deck is full
                     await interaction.channel.send(`${reactor}, your deck is full, so you could not claim **${villager.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`);
                 }
-                // TODO: factor in storage
             });
         } catch (err) {
             console.log(err);

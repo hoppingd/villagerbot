@@ -38,21 +38,18 @@ module.exports = {
                 else await interaction.reply(`There are no cards in the specified deck.`);
             }
             else {
-                // get flags
+                // get preliminary info
                 const flag = interaction.options.getString('info');
-                // get the deck name
                 let deckName = profileData.deckName;
                 if (deckName == null) deckName = `${target.displayName}'s Deck`;
-                // get the deck color
                 let deckColor = profileData.deckColor;
-                // get the deck
                 let deck = profileData.cards;
-                // get the top card
                 const topVillager = villagers.find(v => v.name == deck[0].name);
                 // sort the deck
                 const sort = interaction.options.getBoolean('sort');
                 if (sort) {
                     deck.sort((a, b) => a.name.toLowerCase() < b.name.toLowerCase() ? -1 : (a.name.toLowerCase() > b.name.toLowerCase() ? 1 : 0));
+                    // BELLS
                     if (flag == "b") {
                         for (let i = 0; i < deck.length; i++) {
                             const charData = await charModel.findOne({ name: deck[i].name });
@@ -60,8 +57,29 @@ module.exports = {
                         }
                         deck.sort((a, b) => b.points - a.points);
                     }
+                    // GENDER
+                    else if (flag == "g") {
+                        deck.sort((a, b) => {
+                            const genderA = a.gender ?? "Unknown";
+                            const genderB = b.gender ?? "Unknown";
+                            return genderA < genderB ? -1 : (genderA > genderB ? 1 : 0);
+                        });
+                    }
+                    // LEVEL
                     else if (flag == "l") {
                         deck.sort((a, b) => b.level - a.level);
+                    }
+                    // PERSONALITY
+                    else if (flag == "p") {
+                        deck.sort((a, b) => {
+                            const personalityA = a.personality ?? "Special";
+                            const personalityB = b.personality ?? "Special";
+                            return personalityA < personalityB ? -1 : (personalityA > personalityB ? 1 : 0);
+                        });
+                    }
+                    // SPECIES
+                    else if (flag == "s") {
+                        deck.sort((a, b) => a.species < b.species ? -1 : (a.species > b.species ? 1 : 0));
                     }
                 }
                 // display the deck
@@ -74,6 +92,7 @@ module.exports = {
                     if (deck[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " :sparkles:";
                     if (flag) {
                         replyMessage += " - ";
+                        // BELLS
                         if (flag == "b") {
                             if (!sort) {
                                 const charData = await charModel.findOne({ name: cardName });
@@ -82,21 +101,25 @@ module.exports = {
                             }
                             else replyMessage += `**${deck[i].points}** <:bells:1349182767958855853>`;
                         }
+                        // GENDER
                         else if (flag == "g") {
                             const villager = villagers.find(v => v.name == cardName);
                             let gender = villager.gender;
                             if (!gender) replyMessage += `:transgender_symbol:`; // edge case for Somebody
                             else replyMessage += `:${gender.toLowerCase()}_sign:`;
                         }
+                        // LEVEL
                         else if (flag == "l") {
                             replyMessage += `**${deck[i].level}** <:love:1352200821072199732>`;
                         }
+                        // PERSONALITY
                         else if (flag == "p") {
                             const villager = villagers.find(v => v.name == cardName);
                             let personality = villager.personality;
                             if (!personality) replyMessage += `*Special*`;
                             else replyMessage += `*${personality}*`;
                         }
+                        // SPECIES
                         else if (flag == "s") {
                             const villager = villagers.find(v => v.name == cardName);
                             replyMessage += `*${villager.species}*`;

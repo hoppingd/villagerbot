@@ -1,6 +1,6 @@
 const { Events, MessageFlags } = require('discord.js');
 const READ_ONLY_COMMANDS = ["balance", "claim", "leaderboard", "deck", "view"];
-const OPTIONAL_READ_ONLY_COMMANDS = ["upgrade", "wish"];
+const OPTIONAL_READ_ONLY_COMMANDS = ["storage", "upgrade", "wish"];
 const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["view"];
 const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
 

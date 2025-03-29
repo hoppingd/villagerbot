@@ -57,16 +57,33 @@ module.exports = {
                     if (owner.bot) return await interaction.reply({ content: "You supplied a bot for the owner argument. Please specify a real user or leave the field blank.", flags: MessageFlags.Ephemeral });
                     const ownerData = await getOrCreateProfile(owner.id, interaction.guild.id);
                     const cardIdx = ownerData.cards.findIndex(card => card.name == villager.name);
-                    // the owner does not have the card
-                    if (cardIdx == -1) { return await interaction.reply(`No card named **${cardName}** found in the specified deck.`); }
-                    const card = ownerData.cards[cardIdx];
-                    // the rarity was specified, and the owner has a different rarity
-                    if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
-                    viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
-                    if (card.rarity == constants.RARITY_NUMS.FOIL) {
-                        viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                    // the owner does not have the card in their deck
+                    if (cardIdx == -1) {
+                        const storageIdx = ownerData.storage.findIndex(card => card.name == villager.name);
+                        // the owner has the card in storage
+                        if (storageIdx != -1) {
+                            const card = ownerData.storage[storageIdx];
+                            // the rarity was specified, and the owner has a different rarity
+                            if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
+                            viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                            if (card.rarity == constants.RARITY_NUMS.FOIL) {
+                                viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                            }
+                            viewEmbed.setFooter({ text: `Stored by ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
+                        }
+                        else return await interaction.reply(`No card named **${cardName}** found in the specified deck.`);
                     }
-                    viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
+                    // the owner has the card in their deck
+                    else {
+                        const card = ownerData.cards[cardIdx];
+                        // the rarity was specified, and the owner has a different rarity
+                        if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
+                        viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                        if (card.rarity == constants.RARITY_NUMS.FOIL) {
+                            viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                        }
+                        viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
+                    }
                 }
                 else {
                     if (rarity == constants.RARITY_NUMS.FOIL) {

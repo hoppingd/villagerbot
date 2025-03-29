@@ -43,7 +43,7 @@ module.exports = {
                         else if (profileData.bells < getUpgradeCost(profileData.blaTier, profileData.nookTier)) await interaction.reply(`<:blathers:1349263646206857236>: *"Hm... upon close persual, I see you require more bells for this upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
-                            await interaction.reply(`Purchase <:blathers:1349263646206857236> **Blathers ${constants.ROMAN_NUMERALS[profileData.nookTier]}** for **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
+                            await interaction.reply(`Purchase <:blathers:1349263646206857236> **Blathers ${constants.ROMAN_NUMERALS[profileData.blaTier]}** for **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
                             interaction.client.confirmationState[interaction.user.id] = true;
@@ -54,7 +54,7 @@ module.exports = {
                                     profileData.bells -= getUpgradeCost(profileData.blaTier, profileData.nookTier);
                                     profileData.blaTier += 1;
                                     await profileData.save();
-                                    if (profileData.blaTier == 1) await interaction.followUp(`<:blathers:1349263646206857236>: *"Oh hoo hoo... are those trading cards I see, ${interaction.user}? If your deck is full, I can hold onto new cards for you. Use* ***/storage move*** *to transfer them to your deck."*`);
+                                    if (profileData.blaTier == 1) await interaction.followUp(`<:blathers:1349263646206857236>: *"Oh hoo hoo... are those cards I see, ${interaction.user}? If your deck is full, I can hold onto new cards for you. Use* ***/storage move*** *to transfer them to your deck."*`);
                                     else await interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo... thank you for your donation, ${interaction.user}! Rest assured all upgrades will be in effect immediately!"*`);
                                 }
                                 else {
@@ -262,9 +262,9 @@ module.exports = {
                     upgradeInfo += `Cost: **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853> · Reward: `;
                     if (profileData.blaTier == 0) upgradeInfo += `+1 storage slot\n`;
                     if (profileData.blaTier == 1) upgradeInfo += `cards sold from storage generate 50% more Bells\n`;
-                    if (profileData.blaTier == 2) upgradeInfo += `cards entering your deck from storage gain 8 levels\n`;
+                    if (profileData.blaTier == 2) upgradeInfo += `cards entering storage gain 8 levels\n`;
                     if (profileData.blaTier == 3) upgradeInfo += `+1 storage slot\n`;
-                    if (profileData.blaTier == 4) upgradeInfo += `cards claimed into storage have a chance to upgrade rarity (if possible)\n`;
+                    if (profileData.blaTier == 4) upgradeInfo += `cards entering storage have a chance to upgrade rarity (if possible)\n`;
                 }
                 // BREWSTER
                 upgradeInfo += `<:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** · `;
@@ -315,6 +315,6 @@ module.exports = {
 };
 
 function getUpgradeCost(upgradeTier, nookTier) {
-    if (nookTier == constants.UPGRADE_COSTS.length - 1) return Math.round(constants.UPGRADE_COSTS[upgradeTier] * .75)
+    if (nookTier == constants.UPGRADE_COSTS.length) return Math.round(constants.UPGRADE_COSTS[upgradeTier] * .75)
     return constants.UPGRADE_COSTS[upgradeTier];
 }

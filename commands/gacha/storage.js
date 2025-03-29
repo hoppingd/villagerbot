@@ -1,0 +1,154 @@
+const { EmbedBuilder, InteractionContextType, SlashCommandBuilder, MessageFlags } = require('discord.js');
+const constants = require('../../constants');
+const villagers = require('../../villagerdata/data.json');
+const charModel = require('../../models/charSchema');
+const { getOrCreateProfile, calculatePoints } = require('../../util');
+
+module.exports = {
+    data: new SlashCommandBuilder()
+        .setName('storage')
+        .setDescription("Storage commands.")
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('view')
+                .setDescription('View your storage.')
+                .addStringOption(option =>
+                    option.setName('info')
+                        .setDescription('Show additional information (optional).')
+                        .addChoices(
+                            { name: "Bells", value: "b" },
+                            { name: "Gender", value: "g" },
+                            { name: "Level", value: "l" },
+                            { name: "Personality", value: "p" },
+                            { name: "Species", value: "s" }
+                        )
+                ))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('move')
+                .setDescription('Move a card from storage to your deck.')
+                .addStringOption(option =>
+                    option.setName('card')
+                        .setDescription('The card to be moved.')
+                        .setRequired(true)
+                ))
+        .setContexts(InteractionContextType.Guild),
+    async execute(interaction) {
+        try {
+            const subCommand = interaction.options.getSubcommand();
+            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            if (profileData.storage.length == 0) {
+                await interaction.reply(`You have no cards in your storage. Purchase storage slots from Blathers <:blathers:1349263646206857236> using **/upgrade**.`);
+            }
+            else {
+                // VIEW SUBCOMMAND (copied from deck)
+                if (subCommand == "view") {
+                    // get preliminary info
+                    const flag = interaction.options.getString('info');
+                    let storage = profileData.storage;
+                    // display the deck
+                    let replyMessage = "";
+                    for (let i = 0; i < storage.length; i++) {
+                        const cardName = storage[i].name;
+                        replyMessage += `${cardName}`;
+
+                        if (storage[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " :sparkles:";
+                        if (flag) {
+                            replyMessage += " - ";
+                            // BELLS
+                            if (flag == "b") {
+                                const charData = await charModel.findOne({ name: cardName });
+                                const points = await calculatePoints(charData.numClaims, storage[i].rarity);
+                                replyMessage += `**${points}** <:bells:1349182767958855853>`;
+                            }
+                            // GENDER
+                            else if (flag == "g") {
+                                const villager = villagers.find(v => v.name == cardName);
+                                let gender = villager.gender;
+                                if (!gender) replyMessage += `:transgender_symbol:`; // edge case for Somebody
+                                else replyMessage += `:${gender.toLowerCase()}_sign:`;
+                            }
+                            // LEVEL
+                            else if (flag == "l") {
+                                replyMessage += `**${storage[i].level}** <:love:1352200821072199732>`;
+                            }
+                            // PERSONALITY
+                            else if (flag == "p") {
+                                const villager = villagers.find(v => v.name == cardName);
+                                let personality = villager.personality;
+                                if (!personality) replyMessage += `*Special*`;
+                                else replyMessage += `*${personality}*`;
+                            }
+                            // SPECIES
+                            else if (flag == "s") {
+                                const villager = villagers.find(v => v.name == cardName);
+                                replyMessage += `*${villager.species}*`;
+                            }
+                        }
+                        replyMessage += "\n";
+                    }
+                    // make the message look nice
+                    const storageEmbed = new EmbedBuilder()
+                        .setAuthor({
+                            name: `${interaction.user.displayName}'s Storage`,
+                            iconURL: interaction.user.displayAvatarURL(),
+                        })
+                        .setDescription(replyMessage)
+                        .setFooter({ text: `${constants.BLATIER_TO_STORAGE_LIMIT[profileData.blaTier] - storage.length} storage slots remaining.` });
+                    await interaction.reply({
+                        embeds: [storageEmbed]
+                    });
+                }
+                // MOVE SUBCOMMAND
+                else {
+                    // check that there is space in the deck
+                    if (profileData.cards.length >= constants.DEFAULT_CARD_LIMIT + Math.min(profileData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
+                        return await interaction.reply(`<:blathers:1349263646206857236>: *"Hoo... hoo? Your deck is full, ${interaction.user}! Consider freeing up some space with* ***/sell*** *to free up some space."*`);
+                    }
+                    // check that a valid card was supplied
+                    const cardName = interaction.options.getString('card');
+                    const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
+                    const cardIdx = profileData.storage.findIndex(card => card.name.toLowerCase() === normalizedCardName);
+                    // the card exists
+                    if (cardIdx != -1) {
+                        const realName = profileData.storage[cardIdx].name;
+                        // confirm the move
+                        await interaction.reply(`<:blathers:1349263646206857236>: *"Would you like your* ***${realName}*** *back?" (y/n)*`);
+                        const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                        interaction.client.confirmationState[interaction.user.id] = true;
+                        setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+
+                        collector.on('collect', async (m) => {
+                            if (m.content == 'y') {
+                                const card = profileData.storage[cardIdx];
+                                profileData.cards.push({ name: card.name, rarity: card.rarity, level: card.level});
+                                profileData.storage[cardIdx] = null;
+                                profileData.storage = profileData.storage.filter(card => card !== null);
+                                profileData.save();
+                                interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo!* ***${realName}*** *is now in your deck!"*`);
+                            }
+                            else {
+                                interaction.followUp(`<:blathers:1349263646206857236>: *"Very well... I shall hold onto your* ***${realName}*** *for a little while longer..."*`);
+                            }
+                            collector.stop();
+                        });
+
+                        collector.on('end', async (collected, reason) => {
+                            interaction.client.confirmationState[interaction.user.id] = false;
+                            if (reason === 'time') {
+                                await interaction.followUp(`<:blathers:1349263646206857236>: *"Hooooo... WHO?! ${interaction.user}, you didn't respond in time!"*`);
+                            }
+                        });
+                    }
+                    else return await interaction.reply(`<:blathers:1349263646206857236>: *"Hoo... hoo? I don't see that card anywhere, ${interaction.user}... Are you quite certain you gave it to me?"*`);
+
+                }
+            }
+
+        } catch (err) {
+            console.log(err);
+            await interaction.reply(`There was an error with /storage.`);
+        }
+    },
+};
