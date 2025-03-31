@@ -9,7 +9,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             let timeSinceClaim = Date.now() - profileData.claimTimestamp;
             // if user's claim isn't available
             if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {

@@ -38,8 +38,8 @@ module.exports = {
                 let rarity = interaction.options.getNumber('rarity') ?? constants.RARITY_NUMS.COMMON;
                 // get villager data
                 let charData = await charModel.findOne({ name: villager.name });
-                let points = await calculatePoints(charData.numClaims, rarity);
-                let rank = await getRank(villager.name);
+                const points = await calculatePoints(charData.numClaims, rarity);
+                const rank = await getRank(villager.name);
                 let personality = villager.personality;
                 if (!personality) personality = "Special";
                 let gender = villager.gender;

@@ -24,22 +24,22 @@ module.exports = {
                             { name: "Isabelle", value: "isa" },
                             { name: "Katrina", value: "kat" },
                             { name: "Nook", value: "nook" },
+                            { name: "Tortimer", value: "tort" },
                         )
                         .setRequired(true)))
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             const subCommand = interaction.options.getSubcommand();
+            const wasMaxed = isMaxed(profileData);
             // BUY SUBCOMMAND
             if (subCommand == 'buy') {
                 const upgradeFlag = interaction.options.getString('type');
-                let currentLevel;
                 switch (upgradeFlag) {
                     // BLATHERS UPGRADES
                     case "bla":
-                        currentLevel = profileData.blaTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:blathers:1349263646206857236>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.blaTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:blathers:1349263646206857236>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.blaTier, profileData.nookTier)) await interaction.reply(`<:blathers:1349263646206857236>: *"Hm... upon close persual, I see you require more bells for this upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -68,13 +68,13 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
                             });
                         }
                         break;
                     // BREWSTER UPGRADES
                     case "brew":
-                        currentLevel = profileData.brewTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:brewster:1349263645380710431>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.brewTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:brewster:1349263645380710431>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.brewTier, profileData.nookTier)) await interaction.reply(`<:brewster:1349263645380710431>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.brewTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -103,13 +103,13 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
                             });
                         }
                         break;
                     // CELESTE UPGRADES
                     case "cel":
-                        currentLevel = profileData.celTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:celeste:1349263647121346662>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.celTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:celeste:1349263647121346662>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.celTier, profileData.nookTier)) await interaction.reply(`<:celeste:1349263647121346662>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -137,13 +137,13 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
                             });
                         }
                         break;
                     // ISABELLE UPGRADES
                     case "isa":
-                        currentLevel = profileData.isaTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:isabelle:1349263650191315034>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.isaTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:isabelle:1349263650191315034>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.isaTier, profileData.nookTier)) await interaction.reply(`<:isabelle:1349263650191315034>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.isaTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -172,13 +172,13 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
                             });
                         }
                         break;
                     // KATRINA UPGRADES
                     case "kat":
-                        currentLevel = profileData.katTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:katrina:1349263648144625694> *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.katTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:katrina:1349263648144625694> *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.katTier, profileData.nookTier)) await interaction.reply(`<:katrina:1349263648144625694>: *"Hmm... it appears you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.katTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -206,13 +206,13 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
                             });
                         }
                         break;
                     // NOOK UPGRADES
                     case "nook":
-                        currentLevel = profileData.nookTier;
-                        if (currentLevel == constants.UPGRADE_COSTS.length) await interaction.reply(`<:tom_nook:1349263649356779562>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.nookTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:tom_nook:1349263649356779562>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < constants.UPGRADE_COSTS[profileData.nookTier]) await interaction.reply(`<:tom_nook:1349263649356779562>: *"You need more Bells, yes? Come back when you have more, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -241,9 +241,43 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
                             });
                         }
                         break;
+                    // TORTIMER UPGRADES
+                    case "tort":
+                        if (!isMaxed(profileData)) await interaction.reply(`<:tortimer:1354073717776453733>: *"..."*`);
+                        else if (profileData.tortTier == constants.MAX_TORT_LVL) await interaction.reply(`<:tortimer:1354073717776453733>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        else if (profileData.bells < getTortCost(profileData.tortTier)) await interaction.reply(`<:tortimer:1354073717776453733>: *"Fool! You need more Bells for that upgrade!"*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853>)`);
+                        else {
+                            // confirm the purchase
+                            await interaction.reply(`Purchase <:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** for **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> ? (y/n)`);
+                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            interaction.client.confirmationState[interaction.user.id] = true;
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+
+                            collector.on('collect', async (m) => {
+                                if (m.content == 'y') {
+                                    profileData.bells -= getTortCost(profileData.tortTier);
+                                    profileData.tortTier += 1;
+                                    await profileData.save();
+                                    await interaction.followUp(`<:tortimer:1354073717776453733>: *"Thanks for the Bells, ${interaction.user}! Heh heh HORF!"*`);
+                                }
+                                else {
+                                    await interaction.followUp(`${interaction.user}, the upgrade purchase has been cancelled.`);
+                                }
+                                collector.stop();
+                            });
+
+                            collector.on('end', async (collected, reason) => {
+                                interaction.client.confirmationState[interaction.user.id] = false;
+                                if (reason === 'time') {
+                                    await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
+                                }
+                            });
+                        }
                     // INVALID ARG
                     default:
                         await interaction.reply({
@@ -303,6 +337,14 @@ module.exports = {
                     if (profileData.nookTier == 3) upgradeInfo += `cards sell for 50% more\n`;
                     if (profileData.nookTier == 4) upgradeInfo += `reduce all upgrade costs by 25%\n`;
                 }
+                // TORTIMER
+                if (isMaxed(profileData)) {
+                    upgradeInfo += `<:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** · `;
+                    upgradeInfo += `Cost: **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> · Reward: empower /daily, `;
+                    if (profileData.tortTier == constants.MAX_TORT_LVL) upgradeInfo += `Max level reached!\n`;
+                    else if (profileData.tortTier + 1 % 5 == 0) upgradeInfo += `+1% ink chance\n`;
+                    else upgradeInfo += `+1% foil chance\n`;
+                }
                 const upgradeEmbed = new EmbedBuilder()
                     .setDescription(upgradeInfo);
                 await interaction.reply({ embeds: [upgradeEmbed] });
@@ -317,4 +359,14 @@ module.exports = {
 function getUpgradeCost(upgradeTier, nookTier) {
     if (nookTier == constants.UPGRADE_COSTS.length) return Math.round(constants.UPGRADE_COSTS[upgradeTier] * .75)
     return constants.UPGRADE_COSTS[upgradeTier];
+}
+
+function isMaxed(profileData) {
+    return profileData.blaTier == constants.UPGRADE_COSTS.length && profileData.brewTier == constants.UPGRADE_COSTS.length && 
+            profileData.celTier == constants.UPGRADE_COSTS.length && profileData.isaTier == constants.UPGRADE_COSTS.length &&
+            profileData.katTier == constants.UPGRADE_COSTS.length && profileData.nookTier == constants.UPGRADE_COSTS.length;
+}
+
+function getTortCost(tortTier) {
+    return 20000 + 2000 * tortTier;
 }

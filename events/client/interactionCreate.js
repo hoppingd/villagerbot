@@ -1,6 +1,6 @@
 const { Events, MessageFlags } = require('discord.js');
 const READ_ONLY_COMMANDS = ["balance", "claim", "leaderboard", "deck", "view"];
-const OPTIONAL_READ_ONLY_COMMANDS = ["storage", "upgrade", "wish"];
+const OPTIONAL_READ_ONLY_COMMANDS = ["shop", "storage", "upgrade", "wish"];
 const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["view"];
 const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
 
@@ -27,9 +27,8 @@ module.exports = {
 		setTimeout(() => interaction.client.cooldowns.delete(interaction.user.id), GLOBAL_COMMAND_COOLDOWN);
 		// check if a command is currently being confirmed
 		if (interaction.client.confirmationState[interaction.user.id]) {
-			const subCommand = interaction.options.getSubcommand();
 			// check if the new command is not read only
-			if (!READ_ONLY_COMMANDS.includes(interaction.commandName) && (!OPTIONAL_READ_ONLY_COMMANDS.includes(interaction.commandName) || !OPTIONAL_READ_ONLY_SUBCOMMANDS.includes(subCommand))) {
+			if (!READ_ONLY_COMMANDS.includes(interaction.commandName) && (!OPTIONAL_READ_ONLY_COMMANDS.includes(interaction.commandName) || !OPTIONAL_READ_ONLY_SUBCOMMANDS.includes(interaction.options.getSubcommand()))) {
 				return interaction.reply({
 					content: 'You cannot use this command while awaiting confirmation on another key operation.',
 					flags: MessageFlags.Ephemeral,

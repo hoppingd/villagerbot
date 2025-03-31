@@ -8,7 +8,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             await interaction.reply(`You have **${profileData.bells}** <:bells:1349182767958855853>.`)
         } catch (err) {
             console.log(err);

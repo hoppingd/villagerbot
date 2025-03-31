@@ -9,7 +9,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             await interaction.reply(`<:resetti:1349263941179674645>: *"${interaction.user}, are ye sure ye wanna reset? All yer cards'll be deleted! If yer sure, type* ***'confirm'*** *below! If yer not, type* ***'cancel'**!"*`);
             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content.toLowerCase() == 'confirm' || m.content.toLowerCase() == 'cancel'));
             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
@@ -31,7 +31,6 @@ module.exports = {
                 else {
                     await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, the reset's been cancelled! That was a close one!"*`);
                 }
-                interaction.client.confirmationState[interaction.user.id] = false;
                 collector.stop();
             });
 

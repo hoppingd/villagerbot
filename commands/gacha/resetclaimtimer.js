@@ -1,4 +1,4 @@
-const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
 const { getOrCreateProfile, getTimeString } = require('../../util');
 
@@ -9,14 +9,14 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             if (profileData.isaTier != constants.UPGRADE_COSTS.length) return await interaction.reply(`You must purchase the upgrade **Isabelle ${constants.ROMAN_NUMERALS[constants.UPGRADE_COSTS.length]}** to use this command.`);
             // check the timer
             const currDate = Date.now();
             const timeSinceResetClaim = currDate - profileData.resetClaimTimestamp;
             if (timeSinceResetClaim < constants.DAY) {
                 const timeRemaining = constants.DAY - timeSinceResetClaim;
-                return await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just... Wait a sec, you already came in today! Come back in ${getTimeString(timeRemaining)}.*`);
+                return await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just... Wait a sec, you already came in today! Come back in ${getTimeString(timeRemaining)}!*`);
             }
             let timeSinceClaim = Date.now() - profileData.claimTimestamp;
             // if user's claim is available

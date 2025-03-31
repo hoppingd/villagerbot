@@ -25,7 +25,7 @@ module.exports = {
             const subCommand = interaction.options.getSubcommand();
             // SET SUBCOMMAND
             if (subCommand == 'set') {
-                let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+                const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
                 // update the deckname based on user input
                 let newName = interaction.options.getString('name');
                 if (newName.length > constants.DECK_NAME_CHAR_LIMIT) {
@@ -42,7 +42,7 @@ module.exports = {
             }
             // CLEAR SUBCOMMAND
             else {
-                let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+                const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
                 // if necessary, set deckName to null
                 if (profileData.deckName != null) {
                     profileData.deckName = null;

@@ -32,7 +32,7 @@ module.exports = {
         try {
             const target = interaction.options.getUser('owner') ?? interaction.user;
             if (target.bot) return await interaction.reply({ content: "You supplied a bot for the owner argument. Please specify a real user or leave the field blank.", flags: MessageFlags.Ephemeral });
-            let profileData = await getOrCreateProfile(target.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(target.id, interaction.guild.id);
             if (profileData.cards.length == 0) {
                 if (target.id == interaction.user.id) await interaction.reply(`You have no cards in your deck. Type **/roll** and react to claim some cards!`);
                 else await interaction.reply(`There are no cards in the specified deck.`);

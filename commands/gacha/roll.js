@@ -12,7 +12,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id); // still save into profileData, as we may need to know who initially rolled for later features
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             // check if the user can roll
             let timeSinceReset = Date.now() - profileData.rechargeTimestamp;
             let shouldReset = timeSinceReset >= constants.DEFAULT_ROLL_TIMER;
@@ -47,13 +47,13 @@ module.exports = {
                 let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
                 villager = villagers[randIdx];
             }
-
             // villager = villagers.find(v => v.name.toLowerCase() == "skye"); // FOR TESTING TO ROLL CERTAIN CHARACTERS
 
             // determine rarity
             let rarity = 0;
             const rarityRoll = Math.floor(Math.random() * 100 + 1);
-            if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier) rarity = 1;
+            // TODO: check higher rarities here and change below to else if 
+            if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier + profileData.tortTier - Math.floor(profileData.tortTier / 5)) rarity = 1;
 
             // get card data
             let charData = await charModel.findOne({ name: villager.name });
@@ -197,7 +197,7 @@ module.exports = {
                     claimDate.setMilliseconds(0);
                     reactorData.claimTimestamp = claimDate;
                     let followUpMsg = `${reactor.displayName} claimed **${villager.name}**!`;
-                    if (profileData.nookTier > 1 && cardWishers.contains(reactor.displayName)) {
+                    if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {
                         reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
                         followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                     }
@@ -221,10 +221,12 @@ module.exports = {
                 // if user has room in storage
                 else if (reactorData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[reactorData.blaTier]) {
                     // BLATHERS V BONUS
-                    let randIdx = Math.floor(Math.random() * 101);
-                    if (randIdx < constants.BLATHERS_BONUS_CHANCE && rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
-                        rarity += 1;
-                        interaction.channel.send(`${villager.name} rarity upgraded to ${constants.RARITY_NAMES[rarity]} by <:blathers:1349263646206857236> **Blathers V**.`);
+                    if (reactorData.blaTier == constants.UPGRADE_COSTS.length) {
+                        let randIdx = Math.floor(Math.random() * 101);
+                        if (randIdx < constants.BLATHERS_BONUS_CHANCE && rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
+                            rarity += 1;
+                            interaction.channel.send(`${villager.name} rarity upgraded to ${constants.RARITY_NAMES[rarity]} by <:blathers:1349263646206857236> **Blathers V**.`);
+                        }
                     }
                     // BLATHERS III BONUS
                     if (reactorData.blaTier < 3) reactorData.storage.push({ name: villager.name, rarity: rarity });
@@ -241,13 +243,13 @@ module.exports = {
                     reactorData.claimTimestamp = claimDate;
                     let followUpMsg = `${reactor.displayName} claimed **${villager.name}**! The card was sent to their storage.`;
                     // NOOK II BONUS
-                    if (profileData.nookTier > 1 && cardWishers.contains(reactor.displayName)) {
+                    if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {
                         reactorData.bells += WISH_CLAIM_BONUS;
                         followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                     }
                     // NOOK III BONUS
                     if (profileData.nookTier > 2) {
-                        reactorData.bells += points; 
+                        reactorData.bells += points;
                         followUpMsg += ` (+**${points}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook III**)`
                     }
                     // BLATHERS III BONUS

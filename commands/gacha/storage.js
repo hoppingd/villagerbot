@@ -1,4 +1,4 @@
-const { EmbedBuilder, InteractionContextType, SlashCommandBuilder, MessageFlags } = require('discord.js');
+const { EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 const charModel = require('../../models/charSchema');
@@ -36,7 +36,7 @@ module.exports = {
     async execute(interaction) {
         try {
             const subCommand = interaction.options.getSubcommand();
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             if (profileData.storage.length == 0) {
                 await interaction.reply(`You have no cards in your storage. Purchase storage slots from Blathers <:blathers:1349263646206857236> using **/upgrade**.`);
             }
@@ -113,7 +113,7 @@ module.exports = {
                     if (cardIdx != -1) {
                         const realName = profileData.storage[cardIdx].name;
                         // confirm the move
-                        await interaction.reply(`<:blathers:1349263646206857236>: *"Would you like your* ***${realName}*** *back?" (y/n)*`);
+                        await interaction.reply(`<:blathers:1349263646206857236>: *"Would you like to retrieve your* ***${realName}*** *from storage?" (y/n)*`);
                         const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
                         const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
                         interaction.client.confirmationState[interaction.user.id] = true;
@@ -126,10 +126,10 @@ module.exports = {
                                 profileData.storage[cardIdx] = null;
                                 profileData.storage = profileData.storage.filter(card => card !== null);
                                 profileData.save();
-                                interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo!* ***${realName}*** *is now in your deck!"*`);
+                                interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo!* ***${realName}*** *has been transferred to your deck!"*`);
                             }
                             else {
-                                interaction.followUp(`<:blathers:1349263646206857236>: *"Very well... I shall hold onto your* ***${realName}*** *for a little while longer..."*`);
+                                interaction.followUp(`<:blathers:1349263646206857236>: *"Very well... I shall hold onto your* ***${realName}*** *for the time being."*`);
                             }
                             collector.stop();
                         });
@@ -141,7 +141,7 @@ module.exports = {
                             }
                         });
                     }
-                    else return await interaction.reply(`<:blathers:1349263646206857236>: *"Hoo... hoo? I don't see that card anywhere, ${interaction.user}... Are you quite certain you gave it to me?"*`);
+                    else return await interaction.reply(`<:blathers:1349263646206857236>: *"Hoo... hoo? I don't see that card anywhere, ${interaction.user}... Are you quite certain you gave it to me? Try using* ***/storage view**."*`);
 
                 }
             }

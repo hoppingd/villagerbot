@@ -9,7 +9,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             if (profileData.brewTier != constants.UPGRADE_COSTS.length) return await interaction.reply(`You must purchase the upgrade **Brewster ${constants.ROMAN_NUMERALS[constants.UPGRADE_COSTS.length]}** to use this command.`);
             // check the timer
             const currDate = Date.now();

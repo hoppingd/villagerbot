@@ -11,7 +11,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             const nookTier = profileData.nookTier;
             // check the nook level
             if (nookTier == 0) return await interaction.reply(`You must purchase the upgrade **NOOK I** to use this command.`);

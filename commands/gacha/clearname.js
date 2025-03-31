@@ -8,7 +8,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             // if necessary, set deckName to null
             if (profileData.deckName != null) {
                 profileData.deckName = null;

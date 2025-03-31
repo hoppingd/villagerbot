@@ -1,6 +1,5 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
-const constants = require('../../constants');
 const { calculatePoints, getOrCreateProfile } = require('../../util');
 
 module.exports = {
@@ -15,17 +14,16 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            let profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
 
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');
             const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
             const cardIdx = profileData.cards.findIndex(card => card.name.toLowerCase() === normalizedCardName);
-            const storageIdx = -1;
+            const storageIdx = profileData.storage.findIndex(card => card.name.toLowerCase() === normalizedCardName);
             let realName = null;
             let rarity = null;
             if (cardIdx == -1) {
-                const storageIdx = profileData.storage.findIndex(card => card.name.toLowerCase() === normalizedCardName);
                 // the card is in storage
                 if (storageIdx != -1) {
                     realName = profileData.storage[storageIdx].name;
@@ -39,7 +37,7 @@ module.exports = {
             }
             // get the points
             let charData = await charModel.findOne({ name: realName });
-            let points = await calculatePoints(charData.numClaims, rarity);
+            const points = await calculatePoints(charData.numClaims, rarity);
             // confirm the sale
             await interaction.reply(`Sell your **${realName}** for **${points} <:bells:1349182767958855853>**? (y/n)`);
             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));

@@ -23,6 +23,14 @@ const WISH_CLAIM_BONUS = 100;
 const BLATIER_TO_STORAGE_LIMIT = [0, 1, 1, 1, 2, 2];
 const BLATHERS_BONUS_LVLS = 8;
 const BLATHERS_BONUS_CHANCE = 25;
+const MAX_TORT_LVL = 60;
+const TORT_NUMERALS = [
+    "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX",
+    "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX",
+    "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI", "XXXVII", "XXXVIII", "XXXIX", "XL",
+    "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII", "XLIX", "L",
+    "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX", "LX"];
 
 module.exports = {
     NUM_VILLAGERS,
@@ -49,5 +57,7 @@ module.exports = {
     WISH_CLAIM_BONUS,
     BLATIER_TO_STORAGE_LIMIT,
     BLATHERS_BONUS_LVLS,
-    BLATHERS_BONUS_CHANCE
+    BLATHERS_BONUS_CHANCE,
+    MAX_TORT_LVL,
+    TORT_NUMERALS
 };
