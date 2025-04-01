@@ -5,6 +5,7 @@ module.exports = {
 		.setName('ping')
 		.setDescription('pong'),
 	async execute(interaction) {
+		// get the ping between the bot and Discord API
 		const ping = interaction.client.ws.ping;
 		if (ping < 1) {
 			await interaction.reply(`<:orville:1352918494051831860>: *"Our systems aren't online yet. Try again later."*`)
