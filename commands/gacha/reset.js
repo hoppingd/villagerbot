@@ -18,13 +18,20 @@ module.exports = {
 
             collector.on('collect', async(m) => {
                 if (m.content.toLowerCase() == 'confirm') {
-                    for (let card of profileData.cards) {
+                    for (const card of profileData.cards) {
+                        // track the loss of the card in the db
+                        let charData = await charModel.findOne({ name: card.name });
+                        charData.numClaims -= 1;
+                        await charData.save();
+                    }
+                    for (const card of profileData.storage) {
                         // track the loss of the card in the db
                         let charData = await charModel.findOne({ name: card.name });
                         charData.numClaims -= 1;
                         await charData.save();
                     }
                     profileData.cards = [];
+                    profileData.storage = [];
                     profileData.save();
                     interaction.channel.send(`<:resetti:1349263941179674645>: *"${interaction.user}, yer deck's been reset! Best of luck to ya!"*`);
                 }

@@ -1,6 +1,7 @@
 const { EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const villagers = require('../../villagerdata/data.json');
 const shopModel = require('../../models/shopSchema');
+const charModel = require('../../models/charSchema');
 const constants = require('../../constants');
 const { calculatePoints, getOrCreateProfile, getTimeString } = require('../../util');
 const NUM_ITEMS = 4;
@@ -26,11 +27,11 @@ module.exports = {
                 .setName('buy')
                 .setDescription('Buy a card from Redd.')
                 .addIntegerOption(option =>
-                    option.setName('item #')
+                    option.setName('number')
                         .setDescription('The number of the item you want to purchase.')
-                        .setRequired(true))
-                .setMinValue(1)
-                .setMaxValue(NUM_ITEMS))
+                        .setRequired(true)
+                        .setMinValue(1)
+                        .setMaxValue(NUM_ITEMS)))
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
@@ -53,7 +54,7 @@ module.exports = {
                     let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
                     const villager = villagers[randIdx];
                     // for now, all cards will simply be foil
-                    shopData.merchandise.push({ name: villager.name, rarity: constants.RARITY_NUMS.FOIL, isPurchased: false });
+                    shopData.merchandise.push({ name: villager.name, rarity: constants.RARITY_NUMS.FOIL, purchasedBy: null });
                 }
                 let newDate = new Date(now);
                 newDate.setHours(0);
@@ -64,48 +65,32 @@ module.exports = {
                 await shopData.save();
             }
             // VIEW SUBCOMMAND
-            if (subCommand == view) {
-                const timeRemaining = shopData.lastRefreshed + constants.DAY - now;
-                const timeString = getTimeString(timeRemaining);
-                let shopMsg = `Welcome to **Crazy Redd's shop**. Available merchandise will refresh in **${timeString}**. Use **/shop buy [number]** to buy something.\n\n`;
-                for (let i = 0; i < NUM_ITEMS; i++) {
-                    const item = shopData.merchandise[i];
-                    shopMsg += `**${i + 1}**: `;
-                    if (item.isPurchased) {
-                        shopMsg += `*Purchased*\n`
-                    }
-                    else {
-                        shopMsg += `**${item.name}** `;
-                        if (item.rarity == constants.RARITY_NUMS.FOIL) shopMsg += ":sparkles: ";
-                        // get the points
-                        const charData = await charModel.findOne({ name: item.name });
-                        const points = await calculatePoints(charData.numClaims, rarity);
-                        shopMsg += `- **${points * REDD_PRICE_MULTIPLIER}** <:bells:1349182767958855853>\n`;
-                    }
-                }
-                const randIdx = Math.floor(Math.random(REDD_QUOTES.length))
-                shopMsg += `\n<:redd:1354073677318062153>: *"${REDD_QUOTES[randIdx]}"*`;
-                // make the message look nice
-                const deckEmbed = new EmbedBuilder()
-                    .setDescription(shopMsg);
+            if (subCommand == 'view') {
+                const shopEmbed = await getShopEmbed(shopData, now);
                 await interaction.reply({
-                    embeds: [deckEmbed]
+                    embeds: [shopEmbed]
                 });
             }
             // BUY SUBCOMMAND
             else {
-                const idx = interaction.options.getInteger('item #');
+                const idx = interaction.options.getInteger('number') - 1;
                 const item = shopData.merchandise[idx];
                 // card already purchased
-                if (item.isPurchased) return await interaction.reply(`<:redd:1354073677318062153>: *"Sorry cousin, someone bought that already. You gotta be quick if you wanna take advantage of these deals!"*`);
+                if (item.purchasedBy != null) return await interaction.reply(`<:redd:1354073677318062153>: *"Sorry cousin, someone bought that already. You gotta be quick if you wanna take advantage of these deals!"*`);
                 const charData = await charModel.findOne({ name: item.name });
-                const points = await calculatePoints(charData.numClaims, rarity);
+                const points = await calculatePoints(charData.numClaims, item.rarity);
                 const price = points * REDD_PRICE_MULTIPLIER;
                 const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
                 // not enough bells
                 if (profileData.bells < price) return await interaction.reply(`<:redd:1354073677318062153>: *"Er... come back when you've got more Bells, cousin."* (Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${price}** <:bells:1349182767958855853>)`);
+                // set the shop to active and check if it is already active
+                if (interaction.client.activeShops[interaction.guild.id]) return await interaction.reply(`Someone else is currently using the shop. Please try again later.`);
+                else {
+                    interaction.client.activeShops[interaction.guild.id] = true;
+                    setTimeout(() => interaction.client.activeShops[interaction.guild.id] = false, 30_000);
+                }
                 // send confirmation msg
-                await interaction.reply(`<:redd:1354073677318062153>: "Ahhh... you've got a discerning eye. That **${constants.RARITY_NAMES[item.rarity]} ${item.name}** is one-of-a-kind. Lucky for you, we're running a huge discount on it today. For the meager price of **${price}** <:bells:1349182767958855853>, it can be yours. Will you buy it? (y/n)`);
+                await interaction.reply(`<:redd:1354073677318062153>: *"Ahhh... you've got a discerning eye. That **${constants.RARITY_NAMES[item.rarity]} ${item.name}** is one-of-a-kind. Lucky for you, we're currently running a HUGE discount on it! For the meager price of **${price}** <:bells:1349182767958855853>, it can be yours! How about it?"* (y/n)`);
                 const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
                 const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
                 interaction.client.confirmationState[interaction.user.id] = true;
@@ -113,23 +98,119 @@ module.exports = {
 
                 collector.on('collect', async (m) => {
                     if (m.content == 'y') {
-                        // TODO: use same logic as claiming
-                        profileData.bells -= price;
-                        shopData[idx].isPurchased = true;
-                        await profileData.save();
-                        await shopData.save();
-                        await interaction.followUp(`<:redd:1354073677318062153>: *"Feh heh heh... thank you kindly!"*`);
+                        const cardIdx = profileData.cards.findIndex(card => card.name === item.name);
+                        const storageIdx = profileData.storage.findIndex(card => card.name === item.name)
+                        // if user already has the card
+                        if (cardIdx != -1) {
+                            // if the rarity is lower or equal
+                            if (item.rarity <= profileData.cards[cardIdx].rarity) {
+                                profileData.cards[cardIdx].level += constants.RARITY_LVL[item.rarity];
+                                profileData.bells -= price;
+                                shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
+                                await profileData.save();
+                                await shopData.save();
+                                collector.stop();
+                                await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${interaction.user.displayName}** leveled up their **${item.name}**! (+**${constants.RARITY_LVL[item.rarity]}** <:love:1352200821072199732> )`);
+                                const shopEmbed = await getShopEmbed(shopData, now);
+                                await interaction.editReply({
+                                    embeds: [shopEmbed]
+                                });
+                            }
+                            // if the rarity is higher
+                            else {
+                                const oldRarity = profileData.cards[cardIdx].rarity;
+                                profileData.cards[cardIdx].rarity = item.rarity;
+                                profileData.cards[cardIdx].level += constants.RARITY_LVL[oldRarity];
+                                const oldPoints = Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[item.rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
+                                profileData.bells += oldPoints;
+                                profileData.bells -= price;
+                                shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
+                                // wrap up
+                                await profileData.save();
+                                await shopData.save();
+                                collector.stop();
+                                await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${interaction.user.displayName}** upgraded their **${item.name}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732> )`);
+                                const shopEmbed = await getShopEmbed(shopData, now);
+                                await interaction.editReply({
+                                    embeds: [shopEmbed]
+                                });
+                            }
+                        }
+                        // the user has the card in storage
+                        else if (storageIdx != -1) {
+                            await interaction.channel.send(`${interaction.user}, you cannot buy cards you already have in storage. You must first sell the card with **/sell** or move it to your deck with **/storage move**.`);
+                        }
+                        // if the user has less cards than their max deck size
+                        else if (profileData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(profileData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
+                            profileData.cards.push({ name: item.name, rarity: item.rarity });
+                            profileData.bells -= price;
+                            shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
+                            // wrap up
+                            await profileData.save();
+                            await shopData.save();
+                            collector.stop();
+                            await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n ${interaction.user.displayName} claimed **${item.name}**!`);
+                            // update the shop embed
+                            const shopEmbed = await getShopEmbed(shopData, now);
+                            await interaction.editReply({
+                                embeds: [shopEmbed]
+                            });
+                            // track the claim in the db
+                            charData.numClaims += 1;
+                            charData.save();
+                        }
+                        // if user has room in storage
+                        else if (profileData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[profileData.blaTier]) {
+                            // BLATHERS V BONUS
+                            if (profileData.blaTier == constants.UPGRADE_COSTS.length) {
+                                let randIdx = Math.floor(Math.random() * 101);
+                                if (randIdx < constants.BLATHERS_BONUS_CHANCE && item.rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
+                                    shopData.merchandise[idx].rarity += 1;
+                                    interaction.channel.send(`${item.name} rarity upgraded to ${constants.RARITY_NAMES[shopData.merchandise[idx].rarity]} by <:blathers:1349263646206857236> **Blathers V**.`);
+                                }
+                            }
+                            // BLATHERS III BONUS
+                            if (profileData.blaTier < 3) profileData.storage.push({ name: item.name, rarity: shopData.merchandise[idx].rarity });
+                            else {
+                                profileData.storage.push({ name: item.name, rarity: shopData.merchandise[idx].rarity, level: 1 + constants.BLATHERS_BONUS_LVLS });
+                            }
+                            let followUpMsg = `<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n${interaction.user.displayName} claimed **${item.name}**! The card was sent to their storage.`;
+                            // BLATHERS III BONUS
+                            if (profileData.blaTier >= 3) {
+                                followUpMsg += ` (+**${constants.BLATHERS_BONUS_LVLS}** <:love:1352200821072199732> from <:blathers:1349263646206857236> **Blathers III**)`
+                            }
+                            profileData.bells -= price;
+                            shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
+                            // wrap up
+                            await profileData.save();
+                            await shopData.save();
+                            collector.stop();
+                            await interaction.followUp(followUpMsg);
+                            // update the shop embed
+                            const shopEmbed = await getShopEmbed(shopData, now);
+                            await interaction.editReply({
+                                embeds: [shopEmbed]
+                            });
+                            // track the claim in the db
+                            charData.numClaims += 1;
+                            charData.save();
+                        }
+                        else {
+                            await interaction.channel.send(`${reactor}, your deck is full, so you cannot purchase **${item.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`);
+                        }
+                        collector.stop();
                     }
                     else {
-                        await interaction.followUp(`<:redd:1354073677318062153>: *"Thanks a lot..."* (The purchase was cancelled.)`);
+                        await interaction.followUp(`<:redd:1354073677318062153>: *"Thanks a lot..."*`);
+                        collector.stop();
                     }
-                    collector.stop();
                 });
 
                 collector.on('end', async (collected, reason) => {
                     interaction.client.confirmationState[interaction.user.id] = false;
+                    interaction.client.activeShops[interaction.guild.id] = false;
                     if (reason === 'time') {
-                        await interaction.followUp(`<:redd:1354073677318062153>: *"Thanks a lot..."* (You didn't type 'y' or 'n' in time. The purchase was cancelled.)`);
+                        await interaction.followUp(`<:redd:1354073677318062153>: *"Thanks a lot..."*`);
                     }
                 });
 
@@ -140,3 +221,29 @@ module.exports = {
         }
     },
 };
+
+async function getShopEmbed(shopData, now) {
+    const timeRemaining = shopData.lastRefreshed.getTime() + constants.DAY - now;
+    const timeString = getTimeString(timeRemaining);
+    let shopMsg = `Welcome to **Crazy Redd's**. Merchandise will refresh in ${timeString}. Use **/shop buy [number]** to buy something.\n\n`;
+    for (let i = 0; i < NUM_ITEMS; i++) {
+        const item = shopData.merchandise[i];
+        shopMsg += `**${i + 1}**: **${item.name}** `;
+        if (item.rarity == constants.RARITY_NUMS.FOIL) shopMsg += ":sparkles: ";
+        if (item.purchasedBy != null) {
+            shopMsg += `- *Purchased by ${item.purchasedBy}*\n`
+        }
+        else {
+            // get the points
+            const charData = await charModel.findOne({ name: item.name });
+            const points = await calculatePoints(charData.numClaims, shopData.merchandise[i].rarity);
+            shopMsg += `- **${points * REDD_PRICE_MULTIPLIER}** <:bells:1349182767958855853>\n`;
+        }
+    }
+    const randIdx = Math.floor(Math.random() * REDD_QUOTES.length)
+    shopMsg += `\n<:redd:1354073677318062153>: *"${REDD_QUOTES[randIdx]}"*`;
+    // make the message look nice
+    const shopEmbed = new EmbedBuilder()
+        .setDescription(shopMsg);
+    return shopEmbed;
+}

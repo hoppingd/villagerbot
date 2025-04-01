@@ -278,6 +278,7 @@ module.exports = {
                                 }
                             });
                         }
+                        break;
                     // INVALID ARG
                     default:
                         await interaction.reply({

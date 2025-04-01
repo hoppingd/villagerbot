@@ -31,6 +31,7 @@ const TORT_NUMERALS = [
     "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI", "XXXVII", "XXXVIII", "XXXIX", "XL",
     "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII", "XLIX", "L",
     "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX", "LX"];
+const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
 
 module.exports = {
     NUM_VILLAGERS,
@@ -59,5 +60,6 @@ module.exports = {
     BLATHERS_BONUS_LVLS,
     BLATHERS_BONUS_CHANCE,
     MAX_TORT_LVL,
-    TORT_NUMERALS
+    TORT_NUMERALS,
+    GLOBAL_COMMAND_COOLDOWN
 };

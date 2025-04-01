@@ -6,7 +6,7 @@ const shopSchema = new mongoose.Schema({
         type: [{
             name: { type: String, default: null },
             rarity: { type: Number, default: 0 },
-            isPurchased: {type: Boolean, default: false}
+            purchasedBy: {type: String, default: null}
         }],
     },
     lastRefreshed: {type: Date, default: 0}

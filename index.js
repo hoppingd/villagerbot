@@ -12,6 +12,7 @@ const commandFolders = fs.readdirSync(commandFoldersPath);
 
 client.confirmationState = new Collection(); // tracks if the user is in the middle of an important command
 client.cooldowns = new Collection();
+client.activeShops = new Collection(); // tracks if a shop is being accessed
 
 // dynamically load slash commands
 for (const folder of commandFolders) {

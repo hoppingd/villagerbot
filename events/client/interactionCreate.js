@@ -1,8 +1,8 @@
 const { Events, MessageFlags } = require('discord.js');
-const READ_ONLY_COMMANDS = ["balance", "claim", "leaderboard", "deck", "view"];
+const READ_ONLY_COMMANDS = ["balance", "claim", "help", "leaderboard", "deck", "view"];
 const OPTIONAL_READ_ONLY_COMMANDS = ["shop", "storage", "upgrade", "wish"];
 const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["view"];
-const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
+const constants = require('../../constants');
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -18,13 +18,13 @@ module.exports = {
 		// check if the user is using commands too quickly
 		const now = Date.now();
 		if (interaction.client.cooldowns[interaction.user.id]) {
-			const expirationTime = interaction.client.cooldowns[interaction.user.id] + GLOBAL_COMMAND_COOLDOWN;
+			const expirationTime = interaction.client.cooldowns[interaction.user.id] + constants.GLOBAL_COMMAND_COOLDOWN;
 			if (now < expirationTime) {
 				return interaction.reply({ content: `You are using commands too quickly. Please slow down.`, flags: MessageFlags.Ephemeral });
 			}
 		}
 		interaction.client.cooldowns[interaction.user.id] = now;
-		setTimeout(() => interaction.client.cooldowns.delete(interaction.user.id), GLOBAL_COMMAND_COOLDOWN);
+		setTimeout(() => interaction.client.cooldowns.delete(interaction.user.id), constants.GLOBAL_COMMAND_COOLDOWN);
 		// check if a command is currently being confirmed
 		if (interaction.client.confirmationState[interaction.user.id]) {
 			// check if the new command is not read only

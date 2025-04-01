@@ -15,7 +15,7 @@ module.exports = {
                         .setDescription('The amount of bells to be gifted.')
                         .setRequired(true)
                         .setMinValue(1)
-                        .setMaxValue(Number.MAX_VALUE)
+                        .setMaxValue(Number.MAX_SAFE_INTEGER)
                 )
                 .addUserOption(option =>
                     option.setName('recipient')
@@ -63,9 +63,21 @@ module.exports = {
                             if (interaction.client.confirmationState[recipient.id]) {
                                 return await interaction.channel.send(`${recipient}, you cannot accept a gift while awaiting confirmation on another key operation.`);
                             }
+                            // check if the recipient is using commands too quickly
+                            const now = Date.now();
+                            if (interaction.client.cooldowns[recipient.id]) {
+                                const expirationTime = interaction.client.cooldowns[recipient.id] + constants.GLOBAL_COMMAND_COOLDOWN;
+                                if (now < expirationTime) {
+                                    return interaction.channel.send(`${recipient}, you are using commands too quickly. Please slow down.`);
+                                }
+                            }
+                            interaction.client.cooldowns[interaction.user.id] = now;
+                            setTimeout(() => interaction.client.cooldowns.delete(recipient.id), constants.GLOBAL_COMMAND_COOLDOWN);
                             const recipientData = await getOrCreateProfile(recipient.id, interaction.guild.id);
                             recipientData.bells += amount;
                             profileData.bells -= amount;
+                            await profileData.save();
+                            await recipientData.save();
                             await interaction.followUp(`Gift successful! ${interaction.user} gave **${amount}** <:bells:1349182767958855853> to ${recipient}!`);
                             collector.stop();
                         }
@@ -127,13 +139,13 @@ module.exports = {
                             // check if the recipient is using commands too quickly
                             const now = Date.now();
                             if (interaction.client.cooldowns[recipient.id]) {
-                                const expirationTime = interaction.client.cooldowns[recipient.id] + GLOBAL_COMMAND_COOLDOWN;
+                                const expirationTime = interaction.client.cooldowns[recipient.id] + constants.GLOBAL_COMMAND_COOLDOWN;
                                 if (now < expirationTime) {
                                     return interaction.channel.send(`${recipient}, you are using commands too quickly. Please slow down.`);
                                 }
                             }
                             interaction.client.cooldowns[interaction.user.id] = now;
-                            setTimeout(() => interaction.client.cooldowns.delete(recipient.id), GLOBAL_COMMAND_COOLDOWN);
+                            setTimeout(() => interaction.client.cooldowns.delete(recipient.id), constants.GLOBAL_COMMAND_COOLDOWN);
                             const recipientData = await getOrCreateProfile(recipient.id, interaction.guild.id);
                             // check if the recipient already owns the card
                             if (recipientData.cards.some(card => card.name === realName) || recipientData.storage.some(card => card === realName)) {
