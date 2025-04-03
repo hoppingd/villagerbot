@@ -10,7 +10,7 @@ module.exports = {
     async execute(interaction) {
         try {
             const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
-            if (profileData.brewTier != constants.UPGRADE_COSTS.length) return await interaction.reply(`You must purchase the upgrade **Brewster ${constants.ROMAN_NUMERALS[constants.UPGRADE_COSTS.length]}** to use this command.`);
+            if (profileData.brewTier != constants.UPGRADE_COSTS.length) return await interaction.reply(`You must purchase the upgrade <:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[constants.UPGRADE_COSTS.length]}** to use this command.`);
             // check the timer
             const currDate = Date.now();
             const timeSinceRecharge = currDate - profileData.rechargeCommandTimestamp;

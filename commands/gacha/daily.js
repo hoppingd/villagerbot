@@ -14,7 +14,7 @@ module.exports = {
             const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             const nookTier = profileData.nookTier;
             // check the nook level
-            if (nookTier == 0) return await interaction.reply(`You must purchase the upgrade **NOOK I** to use this command.`);
+            if (nookTier == 0) return await interaction.reply(`You must purchase the upgrade <:tom_nook:1349263649356779562> **Tom Nook I** to use this command.`);
             // check the timer
             const currDate = Date.now();
             const timeSinceDailyBells = currDate - profileData.dailyBellsTimestamp;

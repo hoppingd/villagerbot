@@ -10,7 +10,7 @@ module.exports = {
 		if (ping < 1) {
 			await interaction.reply(`<:orville:1352918494051831860>: *"Our systems aren't online yet. Try again later."*`)
 		}
-		if (ping < 50) {
+		else if (ping < 50) {
 			await interaction.reply(`<:orville:1352918494051831860>: *"Hey, hey, hey! Looks like we got your message in just* ***${ping} ms!*** *Not bad!"*`);
 		}
 		else if (ping < 100) {

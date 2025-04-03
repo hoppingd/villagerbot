@@ -10,7 +10,7 @@ module.exports = {
     async execute(interaction) {
         try {
             const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
-            if (profileData.isaTier != constants.UPGRADE_COSTS.length) return await interaction.reply(`You must purchase the upgrade **Isabelle ${constants.ROMAN_NUMERALS[constants.UPGRADE_COSTS.length]}** to use this command.`);
+            if (profileData.isaTier != constants.UPGRADE_COSTS.length) return await interaction.reply(`You must purchase the upgrade <:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[constants.UPGRADE_COSTS.length]}** to use this command.`);
             // check the timer
             const currDate = Date.now();
             const timeSinceResetClaim = currDate - profileData.resetClaimTimestamp;

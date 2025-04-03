@@ -15,7 +15,7 @@ module.exports = {
 
                 *"Every card is worth a certain amount of **Bells** <:bells:1349182767958855853> based on its popularity and rarity. You can sell a card for its Bell value using **/sell**. Bells can be used to buy upgrades from a variety of characters."*
                 
-                *"Every owned card also has a **Level** <:love:1352200821072199732>. If you claim a card you already own, it will be leveled up. Leveling up a card can result in an automatic rarity upgrade as well as access to an exclusive rarity. If the claimed card is a higher rarity than the one you own, the lower rarity copy will be automatically sold, and its levels will be transferred to the new copy. If the claimed card is a lower rarity, you will "collect rent" on them, gaining the card's bell Value and leveling up your copy."*
+                *"Every owned card also has a **Level** <:love:1352200821072199732>. If you claim a card you already own, it will be leveled up. Leveling up a card can result in an automatic rarity upgrade as well as access to an exclusive rarity. If the claimed card is a higher rarity than the one you own, the lower rarity copy will be automatically sold, and its levels will be transferred to the new copy. If the claimed card is a lower rarity, you will 'collect rent' on them, gaining the card's Bell Value and leveling up your copy."*
                 
                 *"When you have a full deck, claimed cards enter your storage, assuming there is room. You can transfer them to your deck using **/storage move**. Cards can only be moved out of storage, not in. Cards in storage cannot be leveled up. You can also wish for a card using **/wish**. Wishing for a card increases your chances of rolling it."*
                 
