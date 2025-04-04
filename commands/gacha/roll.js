@@ -1,4 +1,4 @@
-const { EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');

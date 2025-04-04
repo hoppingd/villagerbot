@@ -80,7 +80,7 @@ function getTimeString(timeRemaining) {
         if (hoursRemaining == 1) timeString += `**${hoursRemaining} hour** and `;
         else timeString += `**${hoursRemaining} hours** and `;
     }
-    if (minutesRemaining == 1)`**${minutesRemaining} minute**`;
+    if (minutesRemaining == 1) timeString += `**${minutesRemaining} minute**`;
     else timeString += `**${minutesRemaining} minutes**`;
     return timeString;
 }
