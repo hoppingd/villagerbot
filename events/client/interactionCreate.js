@@ -30,7 +30,7 @@ module.exports = {
 			// check if the new command is not read only
 			if (!READ_ONLY_COMMANDS.includes(interaction.commandName) && (!OPTIONAL_READ_ONLY_COMMANDS.includes(interaction.commandName) || !OPTIONAL_READ_ONLY_SUBCOMMANDS.includes(interaction.options.getSubcommand()))) {
 				return interaction.reply({
-					content: 'You cannot use this command while awaiting confirmation on another key operation.',
+					content: 'You cannot use this command while in the middle of a key operation.',
 					flags: MessageFlags.Ephemeral,
 				});
 			}
