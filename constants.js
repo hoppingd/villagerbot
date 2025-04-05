@@ -1,5 +1,6 @@
 const NUM_VILLAGERS = 566;
 const ROLL_CLAIM_TIME_LIMIT = 180 * 1000; // active collector time (sec * ms)
+const CONFIRM_TIME_LIMIT = 180 * 1000; // active collector time (sec * ms)
 const DEFAULT_CARD_LIMIT = 10;
 const DEFAULT_FOIL_CHANCE = 5;
 const BASE = 20; // This will control the general scale of points
@@ -36,6 +37,7 @@ const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
 module.exports = {
     NUM_VILLAGERS,
     ROLL_CLAIM_TIME_LIMIT,
+    CONFIRM_TIME_LIMIT,
     DEFAULT_CARD_LIMIT,
     DEFAULT_FOIL_CHANCE,
     BASE,

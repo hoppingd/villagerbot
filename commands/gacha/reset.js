@@ -1,6 +1,7 @@
 const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
 const { getOrCreateProfile } = require('../../util');
+const constants = require('../../constants');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,9 +13,9 @@ module.exports = {
             const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             await interaction.reply(`<:resetti:1349263941179674645>: *"${interaction.user}, are ye sure ye wanna reset? All yer cards'll be deleted! If yer sure, type* ***'confirm'*** *below! If yer not, type* ***'cancel'**!"*`);
             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content.toLowerCase() == 'confirm' || m.content.toLowerCase() == 'cancel'));
-            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
-            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
             collector.on('collect', async(m) => {
                 if (m.content.toLowerCase() == 'confirm') {

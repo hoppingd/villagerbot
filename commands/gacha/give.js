@@ -52,9 +52,9 @@ module.exports = {
                 await interaction.reply(`${recipient}, ${interaction.user} wants to give you **${amount}** <:bells:1349182767958855853>. Do you accept? (y/n, or the gifter can type 'cancel')`);
                 // listen with a collector
                 const collectorFilter = m => ((m.author.id == recipient.id && (m.content == 'y' || m.content == 'n')) || (m.author.id == interaction.user.id && m.content == 'cancel'));
-                const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
-                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
                 collector.on('collect', async (m) => {
                     // the recipient responded
                     if (m.author.id == recipient.id) {
@@ -124,9 +124,9 @@ module.exports = {
 
                 await interaction.reply(`${recipient}, ${interaction.user} wants to give you their **${realName}**. Do you accept? (y/n, or the gifter can type 'cancel')`);
                 const collectorFilter = m => ((m.author.id == recipient.id && (m.content == 'y' || m.content == 'n')) || (m.author.id == interaction.user.id && m.content == 'cancel'));
-                const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
-                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                 collector.on('collect', async (m) => {
                     // the recipient responded

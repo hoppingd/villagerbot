@@ -45,9 +45,9 @@ module.exports = {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:blathers:1349263646206857236> **Blathers ${constants.ROMAN_NUMERALS[profileData.blaTier]}** for **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -80,9 +80,9 @@ module.exports = {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** for **${getUpgradeCost(profileData.brewTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -115,9 +115,9 @@ module.exports = {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** for **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -149,9 +149,9 @@ module.exports = {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[profileData.isaTier]}** for **${getUpgradeCost(profileData.isaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -184,9 +184,9 @@ module.exports = {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:katrina:1349263648144625694> **Katrina ${constants.ROMAN_NUMERALS[profileData.katTier]}** for **${getUpgradeCost(profileData.katTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -218,9 +218,9 @@ module.exports = {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:tom_nook:1349263649356779562> **Nook ${constants.ROMAN_NUMERALS[profileData.nookTier]}** for **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {
@@ -254,9 +254,9 @@ module.exports = {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** for **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> ? (y/n)`);
                             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
-                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
                                 if (m.content == 'y') {

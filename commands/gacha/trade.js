@@ -132,9 +132,9 @@ module.exports = {
             tradeMsg += `. Do you accept? (y/n, or ${interaction.user} can type 'cancel')`;
             await interaction.reply(tradeMsg);
             const collectorFilter = m => ((m.author.id == target.id && (m.content == 'y' || m.content == 'n')) || (m.author.id == interaction.user.id && m.content == 'cancel'));
-            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
-            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
             collector.on('collect', async (m) => {
                 // the target responded
