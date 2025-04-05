@@ -257,12 +257,12 @@ module.exports = {
             collector.on('end', async (collected, reason) => {
                 interaction.client.confirmationState[interaction.user.id] = false;
                 if (reason === 'time') {
-                    await interaction.followUp(`${target}, you didn't type 'y' or 'n' in time. The sale was cancelled.`);
+                    await interaction.followUp(`${target}, you didn't type 'y' or 'n' in time. The trade was cancelled.`);
                 }
             });
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with the trade.`);
+            await interaction.reply(`There was an error with the trade: ${err.name}.`);
         }
     },
 };

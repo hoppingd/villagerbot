@@ -217,7 +217,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error visiting Redd's shop.`);
+            await interaction.reply(`There was an error visiting Redd's shop: ${err.name}.`);
         }
     },
 };

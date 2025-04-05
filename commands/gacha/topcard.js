@@ -29,7 +29,7 @@ module.exports = {
             await interaction.reply(`**${realName}** was successfully moved to the top of your deck.`);
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error moving a card to the top of your deck.`);
+            await interaction.reply(`There was an error moving a card to the top of your deck: ${err.name}.`);
         }
     },
 };

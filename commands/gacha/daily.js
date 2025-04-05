@@ -14,7 +14,7 @@ module.exports = {
             const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             const nookTier = profileData.nookTier;
             // check the nook level
-            if (nookTier == 0) return await interaction.reply(`You must purchase the upgrade <:tom_nook:1349263649356779562> **Tom Nook I** to use this command.`);
+            if (nookTier == 0) return await interaction.reply(`You must purchase the upgrade <:tom_nook:1349263649356779562> **Nook I** to use this command.`);
             // check the timer
             const currDate = Date.now();
             const timeSinceDailyBells = currDate - profileData.dailyBellsTimestamp;
@@ -35,7 +35,7 @@ module.exports = {
             return await interaction.reply(`<:tom_nook:1349263649356779562>: *"Here is a gift of **${bells}** <:bells:1349182767958855853> from the Bank of Nook, ${interaction.user}. This is acceptable, yes?"*`);
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error recieving daily bells.`);
+            await interaction.reply(`There was an error recieving daily bells: ${err.name}.`);
         }
     },
 };

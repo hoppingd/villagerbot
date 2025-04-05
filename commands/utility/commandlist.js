@@ -39,7 +39,7 @@ module.exports = {
                 });
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with /help.`);
+            await interaction.reply(`There was an error with /help: ${err.name}.`);
         }
     },
 };

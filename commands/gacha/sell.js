@@ -91,7 +91,7 @@ module.exports = {
 
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with the sale.`);
+            await interaction.reply(`There was an error with the sale: ${err.name}.`);
         }
     },
 };

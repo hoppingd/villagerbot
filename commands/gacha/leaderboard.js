@@ -30,7 +30,7 @@ module.exports = {
             });
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error displaying the leaderboard.`);
+            await interaction.reply(`There was an error displaying the leaderboard: ${err.name}.`);
         }
     },
 };

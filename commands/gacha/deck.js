@@ -148,7 +148,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error showing the specified deck.`);
+            await interaction.reply(`There was an error showing the specified deck: ${err.name}.`);
         }
     },
 };

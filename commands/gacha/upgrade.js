@@ -352,7 +352,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with **/upgrade**.`);
+            await interaction.reply(`There was an error with **/upgrade**: ${err.name}.`);
         }
     },
 };

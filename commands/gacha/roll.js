@@ -47,6 +47,7 @@ module.exports = {
                 let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
                 villager = villagers[randIdx];
             }
+            console.log(`${interaction.user.displayName} rolled ${villager.name}`);
             // villager = villagers.find(v => v.name.toLowerCase() == "skye"); // FOR TESTING TO ROLL CERTAIN CHARACTERS
 
             // determine rarity
@@ -271,7 +272,7 @@ module.exports = {
             });
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error.`);
+            await interaction.reply(`There was an error rolling: ${err.name}. `);
         }
     },
 };
