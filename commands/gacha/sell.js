@@ -2,6 +2,7 @@ const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('d
 const charModel = require('../../models/charSchema');
 const { calculatePoints, getOrCreateProfile } = require('../../util');
 const constants = require('../../constants');
+const villagers = require('../../villagerdata/data.json');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,28 +20,27 @@ module.exports = {
 
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');
-            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
-            const cardIdx = profileData.cards.findIndex(card => card.name.toLowerCase() === normalizedCardName);
-            const storageIdx = profileData.storage.findIndex(card => card.name.toLowerCase() === normalizedCardName);
-            let realName = null;
+            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "");
+            const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(".", "") === normalizedCardName);
+            if (!villager) return await interaction.reply(`No card named **${cardName}** found in your deck or storage. Use **/deck** to view your deck, and **/storage view** to view your storage.`);
+            const cardIdx = profileData.cards.findIndex(card => card.name == villager.name);
+            const storageIdx = profileData.storage.findIndex(card => card.name == villager.name);
             let rarity = null;
             if (cardIdx == -1) {
                 // the card is in storage
                 if (storageIdx != -1) {
-                    realName = profileData.storage[storageIdx].name;
                     rarity = profileData.storage[storageIdx].rarity;
                 }
                 else return await interaction.reply(`No card named **${cardName}** found in your deck or storage. Use **/deck** to view your deck, and **/storage view** to view your storage.`);
             }
             else {
-                realName = profileData.cards[cardIdx].name;
                 rarity = profileData.cards[cardIdx].rarity;
             }
             // get the points
-            let charData = await charModel.findOne({ name: realName });
+            let charData = await charModel.findOne({ name: villager.name });
             const points = await calculatePoints(charData.numClaims, rarity);
             // confirm the sale
-            await interaction.reply(`Sell your **${realName}** for **${points} <:bells:1349182767958855853>**? (y/n)`);
+            await interaction.reply(`Sell your **${villager.name}** for **${points} <:bells:1349182767958855853>**? (y/n)`);
             const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
@@ -58,7 +58,7 @@ module.exports = {
                         profileData.cards = profileData.cards.filter(card => card !== null);
                         profileData.bells += points;
                     }
-                    let followUpMsg = `**${realName}** sold! (+**${points}** <:bells:1349182767958855853>)`;
+                    let followUpMsg = `**${villager.name}** sold! (+**${points}** <:bells:1349182767958855853>)`;
                     // NOOK IV BONUS
                     if (profileData.nookTier > 3) {
                         const nookBonus = Math.ceil(points / 2);
