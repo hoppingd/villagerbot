@@ -65,7 +65,8 @@ module.exports = {
                             const card = ownerData.storage[storageIdx];
                             // the rarity was specified, and the owner has a different rarity
                             if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
-                            viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                            const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
+                            viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
                             if (card.rarity == constants.RARITY_NUMS.FOIL) {
                                 viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
                             }
@@ -78,7 +79,8 @@ module.exports = {
                         const card = ownerData.cards[cardIdx];
                         // the rarity was specified, and the owner has a different rarity
                         if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
-                        viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                        const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
+                        viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
                         if (card.rarity == constants.RARITY_NUMS.FOIL) {
                             viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
                         }
