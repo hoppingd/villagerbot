@@ -54,7 +54,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with /name: ${err.name}.`);
+            await interaction.reply(`There was an error with /name: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };

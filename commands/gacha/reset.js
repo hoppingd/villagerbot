@@ -51,7 +51,7 @@ module.exports = {
 
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error resetting: ${err.name}.`);
+            await interaction.reply(`There was an error resetting: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };

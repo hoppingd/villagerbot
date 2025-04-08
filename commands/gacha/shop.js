@@ -87,14 +87,14 @@ module.exports = {
                 if (interaction.client.activeShops[interaction.guild.id]) return await interaction.reply(`Someone else is currently using the shop. Please try again later.`);
                 else {
                     interaction.client.activeShops[interaction.guild.id] = true;
-                    setTimeout(() => interaction.client.activeShops[interaction.guild.id] = false, 30_000);
+                    setTimeout(() => interaction.client.activeShops[interaction.guild.id] = false, constants.CONFIRM_TIME_LIMIT);
                 }
                 // send confirmation msg
                 await interaction.reply(`<:redd:1354073677318062153>: *"Ahhh... you've got a discerning eye. That **${constants.RARITY_NAMES[item.rarity]} ${item.name}** is one-of-a-kind. Lucky for you, we're currently running a HUGE discount on it! For the meager price of **${price}** <:bells:1349182767958855853>, it can be yours! How about it?"* (y/n)`);
                 const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
-                const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: 30_000 });
+                const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
-                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 30_000);
+                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                 collector.on('collect', async (m) => {
                     if (m.content == 'y') {
@@ -107,6 +107,11 @@ module.exports = {
                                 profileData.cards[cardIdx].level += constants.RARITY_LVL[item.rarity];
                                 profileData.bells -= price;
                                 shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
+                                // upgrade the card if a level threshold was reached
+                                if (profileData.cards[cardIdx].rarity == constants.RARITY_NUMS.COMMON && profileData.cards[cardIdx].level >= constants.FOIL_UPGRADE_LVL) {
+                                    profileData.cards[cardIdx].rarity += 1;
+                                    await interaction.channel.send(`${interaction.user}, your **${card.name}** reached level ${constants.FOIL_UPGRADE_LVL} and was automatically upgraded to Foil.`);
+                                }
                                 await profileData.save();
                                 await shopData.save();
                                 collector.stop();
@@ -217,15 +222,15 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error visiting Redd's shop: ${err.name}.`);
+            await interaction.reply(`There was an error visiting Redd's shop: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };
 
 async function getShopEmbed(shopData, now) {
-    const timeRemaining = shopData.lastRefreshed.getTime() + constants.DAY - now;
-    const timeString = getTimeString(timeRemaining);
-    let shopMsg = `Welcome to **Crazy Redd's**. Merchandise will refresh in ${timeString}. Use **/shop buy [number]** to buy something.\n\n`;
+    const timeSinceReset = now - shopData.lastRefreshed;
+    const timeRemaining = constants.DAY - timeSinceReset;
+    let shopMsg = `Welcome to **Crazy Redd's**. Merchandise will refresh in ${getTimeString(timeRemaining)}. Use **/shop buy [number]** to buy something.\n\n`;
     for (let i = 0; i < NUM_ITEMS; i++) {
         const item = shopData.merchandise[i];
         shopMsg += `**${i + 1}**: **${item.name}** `;

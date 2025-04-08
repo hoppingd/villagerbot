@@ -116,7 +116,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error trying to view the card: ${err.name}.`);
+            await interaction.reply(`There was an error trying to view the card: ${err.name}.  Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };

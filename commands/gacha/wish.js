@@ -65,7 +65,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error attempting **/wish**: ${err.name}.`);
+            await interaction.reply(`There was an error attempting **/wish**: ${err.name}.  Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };

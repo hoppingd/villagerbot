@@ -57,7 +57,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error sorting your deck: ${err.name}.`);
+            await interaction.reply(`There was an error sorting your deck: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };

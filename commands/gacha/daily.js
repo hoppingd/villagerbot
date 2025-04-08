@@ -35,7 +35,7 @@ module.exports = {
             return await interaction.reply(`<:tom_nook:1349263649356779562>: *"Here is a gift of **${bells}** <:bells:1349182767958855853> from the Bank of Nook, ${interaction.user}. This is acceptable, yes?"*`);
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error recieving daily bells: ${err.name}.`);
+            await interaction.reply(`There was an error recieving daily bells: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };

@@ -14,8 +14,8 @@ module.exports = {
         try {
             const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
             // check if the user can roll
-            let timeSinceReset = Date.now() - profileData.rechargeTimestamp;
-            let shouldReset = timeSinceReset >= constants.DEFAULT_ROLL_TIMER;
+            const timeSinceReset = Date.now() - profileData.rechargeTimestamp;
+            const shouldReset = timeSinceReset >= constants.DEFAULT_ROLL_TIMER;
             if (profileData.energy > 0 || shouldReset) {
                 // replenish the rolls if the roll timer has passed
                 if (shouldReset) {
@@ -29,7 +29,7 @@ module.exports = {
                 await profileData.save();
             }
             else {
-                let timeRemaining = constants.DEFAULT_ROLL_TIMER - timeSinceReset;
+                const timeRemaining = constants.DEFAULT_ROLL_TIMER - timeSinceReset;
                 return await interaction.reply(`You are out of energy and cannot roll. Your energy will replenish in ${getTimeString(timeRemaining)}. You can also purchase max energy from **Brewster** <:brewster:1349263645380710431> by using **/upgrade**.`);
             }
             if (profileData.energy == 1) { await interaction.reply(`Rolling ${profileData.energy} time for ${interaction.user}.`); }
@@ -152,6 +152,11 @@ module.exports = {
                         if (rarity <= reactorData.cards[reactorCardIdx].rarity) {
                             reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[rarity];
                             reactorData.bells += points;
+                            // upgrade the card if a level threshold was reached
+                            if (reactorData.cards[reactorCardIdx].rarity == constants.RARITY_NUMS.COMMON && reactorData.cards[reactorCardIdx].level >= constants.FOIL_UPGRADE_LVL) {
+                                reactorData.cards[reactorCardIdx].rarity += 1;
+                                await interaction.channel.send(`${reactor}, your **${villager.name}** reached level ${constants.FOIL_UPGRADE_LVL} and was automatically upgraded to Foil.`);
+                            }
                             await reactorData.save();
                             collector.stop();
                             await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732> )`);
@@ -281,7 +286,7 @@ module.exports = {
         } catch (err) {
             interaction.client.confirmationState[interaction.user.id] = false;
             console.log(err);
-            await interaction.channel.send(`${interaction.user}, there was an error rolling: ${err.name}.`);
+            await interaction.channel.send(`${interaction.user}, there was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };

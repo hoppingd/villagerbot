@@ -30,7 +30,7 @@ module.exports = {
             });
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error displaying the leaderboard: ${err.name}.`);
+            await interaction.reply(`There was an error displaying the leaderboard: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },
 };
