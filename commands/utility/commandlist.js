@@ -19,6 +19,7 @@ module.exports = {
                 **/give** - gives a user bells or a card (levels are reset)
                 **/help** - displays info about the card collecting game and how it works
                 **/leaderboard** - displays the top characters
+                **/multiroll** - rolls until the user has 0 energy left
                 **/name** - sets or clears the user's deck name
                 **/ping** - displays the ping between the bot and Discord API
                 **/recharge** - replenishes the user's energy daily (BREWSTER V REQUIRED)

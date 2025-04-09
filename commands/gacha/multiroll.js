@@ -59,9 +59,8 @@ module.exports = {
                 // determine rarity
                 let rarity = 0;
                 const rarityRoll = Math.floor(Math.random() * 100 + 1);
-                // TODO: check higher rarities here and change below to else if 
-                if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier + profileData.tortTier - Math.floor(profileData.tortTier / 5)) rarity = 1;
-
+                if (rarityRoll <= Math.floor(profileData.tortTier / 5)) rarity = 2;
+                else if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier + profileData.tortTier - Math.floor(profileData.tortTier / 5)) rarity = 1;
                 // get card data
                 let charData = await charModel.findOne({ name: villager.name });
                 let points = await calculatePoints(charData.numClaims, rarity);
@@ -83,9 +82,8 @@ module.exports = {
                 catch (err) {
                     rollEmbed.setColor("White");
                 }
-                if (rarity == constants.RARITY_NUMS.FOIL) {
-                    rollEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
-                }
+                if (rarity == constants.RARITY_NUMS.FOIL) rollEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                else if (rarity == constants.RARITY_NUMS.PRISMATIC) rollEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                 // get card owners and wishers // TODO: sort by lvl so the top levels are displayed
                 let cardOwners = [];
                 let cardWishers = [];
@@ -153,9 +151,9 @@ module.exports = {
                             reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[rarity];
                             reactorData.bells += points;
                             // upgrade the card if a level threshold was reached
-                            if (reactorData.cards[reactorCardIdx].rarity == constants.RARITY_NUMS.COMMON && reactorData.cards[reactorCardIdx].level >= constants.FOIL_UPGRADE_LVL) {
+                            if (reactorData.cards[reactorCardIdx].level >= constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity]) {
                                 reactorData.cards[reactorCardIdx].rarity += 1;
-                                await interaction.channel.send(`${reactor}, your **${villager.name}** reached level ${constants.FOIL_UPGRADE_LVL} and was automatically upgraded to Foil.`);
+                                await interaction.channel.send(`${reactor}, your **${villager.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity - 1]} and was automatically upgraded to ${constants.RARITY_NAMES[reactorData.cards[reactorCardIdx].rarity]}!`);
                             }
                             await reactorData.save();
                             collector.stop();

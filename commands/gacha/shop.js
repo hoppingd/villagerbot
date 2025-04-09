@@ -47,15 +47,20 @@ module.exports = {
             // check if the merchandise should be updated
             const now = Date.now();
             if (now - shopData.lastRefreshed > constants.DAY) {
+                // empty the shop
+                while (shopData.merchandise.length) shopData.merchandise.pop();
                 // refresh the shop
-                shopData.merchandise.length = 0;
                 for (let i = 0; i < NUM_ITEMS; i++) {
                     // pick a random character
                     let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
                     const villager = villagers[randIdx];
-                    // for now, all cards will simply be foil
-                    shopData.merchandise.push({ name: villager.name, rarity: constants.RARITY_NUMS.FOIL, purchasedBy: null });
+                    // set all cards to foil
+                    shopData.merchandise[i].name({ name: villager.name, rarity: constants.RARITY_NUMS.FOIL, purchasedBy: null });
                 }
+                // set one card randomly to prismatic
+                const prismaticIdx = Math.floor(Math.random() * NUM_ITEMS);
+                shopData.merchandise[prismaticIdx] = constants.RARITY_NUMS.PRISMATIC;
+                // update lastRefreshed
                 let newDate = new Date(now);
                 newDate.setHours(0);
                 newDate.setMinutes(0);
@@ -108,9 +113,9 @@ module.exports = {
                                 profileData.bells -= price;
                                 shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
                                 // upgrade the card if a level threshold was reached
-                                if (profileData.cards[cardIdx].rarity == constants.RARITY_NUMS.COMMON && profileData.cards[cardIdx].level >= constants.FOIL_UPGRADE_LVL) {
+                                if (profileData.cards[cardIdx].level >= constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity]) {
                                     profileData.cards[cardIdx].rarity += 1;
-                                    await interaction.channel.send(`${interaction.user}, your **${card.name}** reached level ${constants.FOIL_UPGRADE_LVL} and was automatically upgraded to Foil.`);
+                                    await interaction.channel.send(`${reactor}, your **${card.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity - 1]} and was automatically upgraded to ${constants.RARITY_NAMES[profileData.cards[reactorCardIdx].rarity]}!`);
                                 }
                                 await profileData.save();
                                 await shopData.save();
@@ -235,6 +240,7 @@ async function getShopEmbed(shopData, now) {
         const item = shopData.merchandise[i];
         shopMsg += `**${i + 1}**: **${item.name}** `;
         if (item.rarity == constants.RARITY_NUMS.FOIL) shopMsg += ":sparkles: ";
+        else if (item.rarity == constants.RARITY_NUMS.PRISMATIC) shopMsg += `<:prismatic:1359641457702604800> `;
         if (item.purchasedBy != null) {
             shopMsg += `- *Purchased by ${item.purchasedBy}*\n`
         }

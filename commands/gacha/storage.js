@@ -51,8 +51,8 @@ module.exports = {
                     for (let i = 0; i < storage.length; i++) {
                         const cardName = storage[i].name;
                         replyMessage += `${cardName}`;
-
                         if (storage[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " :sparkles:";
+                        else if (storage[i].rarity == constants.RARITY_NUMS.PRISMATIC) replyMessage += `<:prismatic:1359641457702604800> `;
                         if (flag) {
                             replyMessage += " - ";
                             // BELLS
@@ -122,7 +122,7 @@ module.exports = {
                         collector.on('collect', async (m) => {
                             if (m.content == 'y') {
                                 const card = profileData.storage[cardIdx];
-                                profileData.cards.push({ name: card.name, rarity: card.rarity, level: card.level});
+                                profileData.cards.push({ name: card.name, rarity: card.rarity, level: card.level });
                                 profileData.storage[cardIdx] = null;
                                 profileData.storage = profileData.storage.filter(card => card !== null);
                                 profileData.save();

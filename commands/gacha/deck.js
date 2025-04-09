@@ -90,6 +90,7 @@ module.exports = {
                     else replyMessage += `${cardName}`;
 
                     if (deck[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " :sparkles:";
+                    if (deck[i].rarity == constants.RARITY_NUMS.PRISMATIC) replyMessage += " <:prismatic:1359641457702604800>";
                     if (flag) {
                         replyMessage += " - ";
                         // BELLS

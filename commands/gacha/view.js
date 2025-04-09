@@ -19,7 +19,8 @@ module.exports = {
                 .setDescription('The rarity of the card to be viewed (default is Common).')
                 .addChoices(
                     { name: "Common", value: 0 },
-                    { name: "Foil", value: 1 }
+                    { name: "Foil", value: 1 },
+                    { name: "Prismatic", value: 2}
                 )
         )
         .addUserOption(option =>
@@ -67,9 +68,8 @@ module.exports = {
                             if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
                             const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
                             viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
-                            if (card.rarity == constants.RARITY_NUMS.FOIL) {
-                                viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
-                            }
+                            if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                            else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                             viewEmbed.setFooter({ text: `Stored by ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
                         }
                         else return await interaction.reply(`No card named **${cardName}** found in the specified deck.`);
@@ -81,16 +81,14 @@ module.exports = {
                         if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
                         const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
                         viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
-                        if (card.rarity == constants.RARITY_NUMS.FOIL) {
-                            viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
-                        }
+                        if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                        else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                         viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
                     }
                 }
                 else {
-                    if (rarity == constants.RARITY_NUMS.FOIL) {
-                        viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
-                    }
+                    if (rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                    else if (rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                     let cardOwners = [];
                     const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
                     for (const profile of guildProfiles) {

@@ -7,11 +7,11 @@ const BASE = 20; // This will control the general scale of points
 const SCALING_FACTOR = 275; // Adjust this to control the spread of points
 const MAX_POINTS = 2000; // Cap the maximum points a character can have
 const MIN_POINTS = 20; // Minimum points for least popular characters
-const RARITY_NAMES = ["Common", "Foil"];
-const RARITY_NUMS = { COMMON: 0, FOIL: 1 };
-const RARITY_LVL = [1, 10]; // how much lvl you gain for each rarity
+const RARITY_NAMES = ["Common", "Foil", "Prismatic"];
+const RARITY_NUMS = { COMMON: 0, FOIL: 1, PRISMATIC: 2};
+const RARITY_LVL = [1, 10, 100]; // how much lvl you gain for each rarity
 const DECK_NAME_CHAR_LIMIT = 16;
-const RARITY_VALUE_MULTIPLIER = [1, 2];
+const RARITY_VALUE_MULTIPLIER = [1, 2, 5];
 const UPGRADE_COSTS = [1000, 2000, 4000, 8000, 16000];
 const WISH_BASE = 2;
 const ROMAN_NUMERALS = ["I", "II", "III", "IV", "V", "V"];
@@ -33,7 +33,7 @@ const TORT_NUMERALS = [
     "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII", "XLIX", "L",
     "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX", "LX"];
 const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
-const FOIL_UPGRADE_LVL = 10;
+const UPGRADE_THRESHOLDS = [10, 100, Number.MAX_SAFE_INTEGER];
 
 module.exports = {
     NUM_VILLAGERS,
@@ -65,5 +65,5 @@ module.exports = {
     MAX_TORT_LVL,
     TORT_NUMERALS,
     GLOBAL_COMMAND_COOLDOWN,
-    FOIL_UPGRADE_LVL
+    UPGRADE_THRESHOLDS
 };

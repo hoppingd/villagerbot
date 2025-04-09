@@ -71,8 +71,8 @@ module.exports = {
             // remove duplicates in both arrays
             const uniqueOfferedCards = [...new Set(offeredCards)];
             const uniqueRequestedCards = [...new Set(requestedCards)];
-            offeredCards.length = 0;
-            requestedCards.length = 0;
+            while (offeredCards.length) offeredCards.pop();
+            while (requestedCards.length) requestedCards.pop();
             offeredCards.push(...uniqueOfferedCards);
             requestedCards.push(...uniqueRequestedCards);
             // check that no requested cards already exist in the user's deck, or if they do, they are being offered
