@@ -153,7 +153,7 @@ module.exports = {
                         }
                         await reactorData.save();
                         collector.stop();
-                        await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732> )`);
+                        await interaction.followUp(`${reactor.displayName} collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732> )`);
                     }
                     // if the rarity is higher
                     else {

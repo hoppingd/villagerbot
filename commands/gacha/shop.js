@@ -55,11 +55,11 @@ module.exports = {
                     let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
                     const villager = villagers[randIdx];
                     // set all cards to foil
-                    shopData.merchandise[i].name({ name: villager.name, rarity: constants.RARITY_NUMS.FOIL, purchasedBy: null });
+                    shopData.merchandise.push({ name: villager.name, rarity: constants.RARITY_NUMS.FOIL, purchasedBy: null });
                 }
                 // set one card randomly to prismatic
                 const prismaticIdx = Math.floor(Math.random() * NUM_ITEMS);
-                shopData.merchandise[prismaticIdx] = constants.RARITY_NUMS.PRISMATIC;
+                shopData.merchandise[prismaticIdx].rarity = constants.RARITY_NUMS.PRISMATIC;
                 // update lastRefreshed
                 let newDate = new Date(now);
                 newDate.setHours(0);
