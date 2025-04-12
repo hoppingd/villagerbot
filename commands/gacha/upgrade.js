@@ -1,6 +1,6 @@
 const { EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, isYesOrNo } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -44,13 +44,13 @@ module.exports = {
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:blathers:1349263646206857236> **Blathers ${constants.ROMAN_NUMERALS[profileData.blaTier]}** for **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
                             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
-                                if (m.content == 'y') {
+                                if (m.content.toLowerCase() == 'y') {
                                     profileData.bells -= getUpgradeCost(profileData.blaTier, profileData.nookTier);
                                     profileData.blaTier += 1;
                                     await profileData.save();
@@ -79,13 +79,13 @@ module.exports = {
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** for **${getUpgradeCost(profileData.brewTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
                             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
-                                if (m.content == 'y') {
+                                if (m.content.toLowerCase() == 'y') {
                                     profileData.bells -= getUpgradeCost(profileData.brewTier, profileData.nookTier);
                                     profileData.brewTier += 1;
                                     await profileData.save();
@@ -114,13 +114,13 @@ module.exports = {
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** for **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
                             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
-                                if (m.content == 'y') {
+                                if (m.content.toLowerCase() == 'y') {
                                     profileData.bells -= getUpgradeCost(profileData.celTier, profileData.nookTier);
                                     profileData.celTier += 1;
                                     await profileData.save();
@@ -148,13 +148,13 @@ module.exports = {
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[profileData.isaTier]}** for **${getUpgradeCost(profileData.isaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
                             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
-                                if (m.content == 'y') {
+                                if (m.content.toLowerCase() == 'y') {
                                     profileData.bells -= getUpgradeCost(profileData.isaTier, profileData.nookTier);
                                     profileData.isaTier += 1;
                                     await profileData.save();
@@ -183,13 +183,13 @@ module.exports = {
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:katrina:1349263648144625694> **Katrina ${constants.ROMAN_NUMERALS[profileData.katTier]}** for **${getUpgradeCost(profileData.katTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
                             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
-                                if (m.content == 'y') {
+                                if (m.content.toLowerCase() == 'y') {
                                     profileData.bells -= getUpgradeCost(profileData.katTier, profileData.nookTier);
                                     profileData.katTier += 1;
                                     await profileData.save();
@@ -217,13 +217,13 @@ module.exports = {
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:tom_nook:1349263649356779562> **Nook ${constants.ROMAN_NUMERALS[profileData.nookTier]}** for **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
                             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
-                                if (m.content == 'y') {
+                                if (m.content.toLowerCase() == 'y') {
                                     profileData.bells -= constants.UPGRADE_COSTS[profileData.nookTier];
                                     profileData.nookTier += 1;
                                     await profileData.save();
@@ -253,13 +253,13 @@ module.exports = {
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** for **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
                             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                             collector.on('collect', async (m) => {
-                                if (m.content == 'y') {
+                                if (m.content.toLowerCase() == 'y') {
                                     profileData.bells -= getTortCost(profileData.tortTier);
                                     profileData.tortTier += 1;
                                     await profileData.save();
@@ -343,7 +343,7 @@ module.exports = {
                     upgradeInfo += `<:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** · `;
                     upgradeInfo += `Cost: **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> · Reward: empower /daily, `;
                     if (profileData.tortTier == constants.MAX_TORT_LVL) upgradeInfo += `Max level reached!\n`;
-                    else if (profileData.tortTier + 1 % 5 == 0) upgradeInfo += `+1% ink chance\n`;
+                    else if (profileData.tortTier + 1 % 5 == 0) upgradeInfo += `+1% prismatic chance\n`;
                     else upgradeInfo += `+1% foil chance\n`;
                 }
                 const upgradeEmbed = new EmbedBuilder()

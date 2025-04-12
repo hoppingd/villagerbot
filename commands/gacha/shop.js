@@ -3,7 +3,7 @@ const villagers = require('../../villagerdata/data.json');
 const shopModel = require('../../models/shopSchema');
 const charModel = require('../../models/charSchema');
 const constants = require('../../constants');
-const { calculatePoints, getOrCreateProfile, getTimeString } = require('../../util');
+const { calculatePoints, getOrCreateProfile, getTimeString, isYesOrNo } = require('../../util');
 const NUM_ITEMS = 4;
 const REDD_PRICE_MULTIPLIER = 4;
 const REDD_QUOTES = ["Instead of tryin' to decide if it's real or not, it's more important to decide if ya really like it or not.",
@@ -96,13 +96,13 @@ module.exports = {
                 }
                 // send confirmation msg
                 await interaction.reply(`<:redd:1354073677318062153>: *"Ahhh... you've got a discerning eye. That **${constants.RARITY_NAMES[item.rarity]} ${item.name}** is one-of-a-kind. Lucky for you, we're currently running a HUGE discount on it! For the meager price of **${price}** <:bells:1349182767958855853>, it can be yours! How about it?"* (y/n)`);
-                const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+                const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                 const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
                 setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                 collector.on('collect', async (m) => {
-                    if (m.content == 'y') {
+                    if (m.content.toLowerCase() == 'y') {
                         const cardIdx = profileData.cards.findIndex(card => card.name === item.name);
                         const storageIdx = profileData.storage.findIndex(card => card.name === item.name)
                         // if user already has the card

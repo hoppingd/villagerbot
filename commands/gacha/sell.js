@@ -1,6 +1,6 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile } = require('../../util');
+const { calculatePoints, getOrCreateProfile, isYesOrNo } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -41,13 +41,13 @@ module.exports = {
             const points = await calculatePoints(charData.numClaims, rarity);
             // confirm the sale
             await interaction.reply(`Sell your **${villager.name}** for **${points} <:bells:1349182767958855853>**? (y/n)`);
-            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content == 'y' || m.content == 'n'));
+            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
             collector.on('collect', async (m) => {
-                if (m.content == 'y') {
+                if (m.content.toLowerCase() == 'y') {
                     if (storageIdx != -1) {
                         profileData.storage[storageIdx] = null;
                         profileData.storage = profileData.storage.filter(card => card !== null);

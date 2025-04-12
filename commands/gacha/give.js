@@ -1,5 +1,5 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, isYesOrNo } = require('../../util');
 const constants = require('../../constants');
 
 module.exports = {
@@ -51,14 +51,14 @@ module.exports = {
                 if (profileData.bells < amount) return await interaction.reply(`You don't have enough Bells for that, ${interaction.user}. (Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${amount}** <:bells:1349182767958855853>)`);
                 await interaction.reply(`${recipient}, ${interaction.user} wants to give you **${amount}** <:bells:1349182767958855853>. Do you accept? (y/n, or the gifter can type 'cancel')`);
                 // listen with a collector
-                const collectorFilter = m => ((m.author.id == recipient.id && (m.content == 'y' || m.content == 'n')) || (m.author.id == interaction.user.id && m.content == 'cancel'));
+                const collectorFilter = m => ((m.author.id == recipient.id && isYesOrNo(m.content)) || (m.author.id == interaction.user.id && m.content == 'cancel'));
                 const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
                 setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
                 collector.on('collect', async (m) => {
                     // the recipient responded
                     if (m.author.id == recipient.id) {
-                        if (m.content == 'y') {
+                        if (m.content.toLowerCase() == 'y') {
                             // check if the recipient is in the middle of a key operation
                             if (interaction.client.confirmationState[recipient.id]) {
                                 return await interaction.channel.send(`${recipient}, you cannot accept a gift while awaiting confirmation on another key operation.`);
@@ -123,7 +123,7 @@ module.exports = {
                 }
 
                 await interaction.reply(`${recipient}, ${interaction.user} wants to give you their **${realName}**. Do you accept? (y/n, or the gifter can type 'cancel')`);
-                const collectorFilter = m => ((m.author.id == recipient.id && (m.content == 'y' || m.content == 'n')) || (m.author.id == interaction.user.id && m.content == 'cancel'));
+                const collectorFilter = m => ((m.author.id == recipient.id && isYesOrNo(m.content)) || (m.author.id == interaction.user.id && m.content == 'cancel'));
                 const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
                 setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
@@ -131,7 +131,7 @@ module.exports = {
                 collector.on('collect', async (m) => {
                     // the recipient responded
                     if (m.author.id == recipient.id) {
-                        if (m.content == 'y') {
+                        if (m.content.toLowerCase() == 'y') {
                             // check if the recipient is in the middle of a key operation
                             if (interaction.client.confirmationState[recipient.id]) {
                                 return await interaction.channel.send(`${recipient}, you cannot accept a gift while awaiting confirmation on another key operation.`);

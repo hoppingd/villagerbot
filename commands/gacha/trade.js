@@ -1,5 +1,5 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, isYesOrNo } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -131,7 +131,7 @@ module.exports = {
             }
             tradeMsg += `. Do you accept? (y/n, or ${interaction.user} can type 'cancel')`;
             await interaction.reply(tradeMsg);
-            const collectorFilter = m => ((m.author.id == target.id && (m.content == 'y' || m.content == 'n')) || (m.author.id == interaction.user.id && m.content == 'cancel'));
+            const collectorFilter = m => ((m.author.id == target.id && isYesOrNo(m.content)) || (m.author.id == interaction.user.id && m.content == 'cancel'));
             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
             setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
@@ -139,7 +139,7 @@ module.exports = {
             collector.on('collect', async (m) => {
                 // the target responded
                 if (m.author.id == target.id) {
-                    if (m.content == 'y') {
+                    if (m.content.toLowerCase() == 'y') {
                         // check if the target is in the middle of a key operation
                         if (interaction.client.confirmationState[target.id]) {
                             return await interaction.channel.send(`${target}, you cannot accept a trade while awaiting confirmation on another key operation.`);

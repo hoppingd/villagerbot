@@ -85,10 +85,15 @@ function getTimeString(timeRemaining) {
     return timeString;
 }
 
+function isYesOrNo(content) {
+    return m.content == 'y' || m.content == 'n' || m.content == 'Y' || m.content == 'N';
+}
+
 module.exports = {
     calculatePoints,
     getOrCreateProfile,
     getOwnershipFooter,
     getRank,
     getTimeString,
+    isYesOrNo,
 };
