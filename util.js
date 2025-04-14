@@ -86,7 +86,7 @@ function getTimeString(timeRemaining) {
 }
 
 function isYesOrNo(content) {
-    return m.content == 'y' || m.content == 'n' || m.content == 'Y' || m.content == 'N';
+    return content == 'y' || content == 'n' || content == 'Y' || content == 'N';
 }
 
 module.exports = {

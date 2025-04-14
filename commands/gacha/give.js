@@ -96,7 +96,7 @@ module.exports = {
                 collector.on('end', async (collected, reason) => {
                     interaction.client.confirmationState[interaction.user.id] = false;
                     if (reason === 'time') {
-                        await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The sale was cancelled.`);
+                        await interaction.followUp(`${recipient}, you didn't type 'y' or 'n' in time. The gift was cancelled.`);
                     }
                 });
             }
