@@ -54,7 +54,7 @@ function getOwnershipFooter(usernames) {
 // function to get the rank of a card
 async function getRank(cardName) {
     const result = await charModel.aggregate([
-        { $sort: { numClaims: -1 } }, // Sort characters by numClaims in descending order
+        { $sort: { numClaims: -1, name: 1 } }, // Sort characters by numClaims in descending order, then by name
         { $project: { name: 1, numClaims: 1 } },
     ]);
 
