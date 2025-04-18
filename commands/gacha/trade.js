@@ -40,6 +40,7 @@ module.exports = {
             // check for valid target
             if (target.bot) return await interaction.reply({ content: "You supplied a bot for the target argument. Please specify a real user.", flags: MessageFlags.Ephemeral });
             if (target.id == interaction.user.id) return await interaction.reply({ content: "You cannot trade with yourself.", flags: MessageFlags.Ephemeral });
+            if (interaction.client.confirmationState[target.id]) return await interaction.reply({ content: "You cannot trade with someone who is awaiting confirmation on a key command. Please try again later.", flags: MessageFlags.Ephemeral });
             // get options
             const offerString = interaction.options.getString('offeredcards');
             const requestString = interaction.options.getString('requestedcards');

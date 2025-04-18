@@ -44,6 +44,7 @@ module.exports = {
             const recipient = interaction.options.getUser('recipient');
             if (recipient.bot) return await interaction.reply({ content: "You supplied a bot for the recipient argument. Please specify a real user.", flags: MessageFlags.Ephemeral });
             if (recipient.id == interaction.user.id) return await interaction.reply({ content: "You cannot gift to yourself.", flags: MessageFlags.Ephemeral });
+            if (interaction.client.confirmationState[recipient.id]) return await interaction.reply({ content: "You cannot gift someone who is awaiting confirmation on a key command. Please try again later.", flags: MessageFlags.Ephemeral });
             // BELLS SUBCOMMAND
             if (subCommand == "bells") {
                 const amount = interaction.options.getInteger('amount');

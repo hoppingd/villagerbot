@@ -20,7 +20,7 @@ module.exports = {
                 .addChoices(
                     { name: "Common", value: 0 },
                     { name: "Foil", value: 1 },
-                    { name: "Prismatic", value: 2}
+                    { name: "Prismatic", value: 2 }
                 )
         )
         .addUserOption(option =>
@@ -52,7 +52,6 @@ module.exports = {
                     .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
                     .setImage(villager.image_url);
                 try { viewEmbed.setColor(villager.title_color); } catch (err) { viewEmbed.setColor("White"); } // set color
-                // add the card ownership footer // TODO: sort by lvl so the top levels are displayed
                 const owner = interaction.options.getUser('owner');
                 if (owner) {
                     if (owner.bot) return await interaction.reply({ content: "You supplied a bot for the owner argument. Please specify a real user or leave the field blank.", flags: MessageFlags.Ephemeral });
@@ -89,17 +88,23 @@ module.exports = {
                 else {
                     if (rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
                     else if (rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
+                    // get card owners and wishers
                     let cardOwners = [];
                     const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
                     for (const profile of guildProfiles) {
                         for (const card of profile.cards) {
                             if (card.name == villager.name && card.rarity == rarity) {
                                 const user = await interaction.client.users.fetch(profile.userID);
-                                if (profile.userID == interaction.user.id) cardOwners.unshift(user.displayName);
-                                else cardOwners.push(user.displayName);
+                                if (profile.userID == interaction.user.id) cardOwners.unshift({ name: user.displayName, level: card.level });
+                                else insertSorted(cardOwners, { name: user.displayName, level: card.level });
                             }
                         }
                     }
+                    // remove the level field so cardOwners only tracks names
+                    for (let i = 0; i < cardOwners.length; i++) {
+                        cardOwners[i] = cardOwners[i].name;
+                    }
+                    // add the ownership footer
                     const ownershipFooter = getOwnershipFooter(cardOwners);
                     if (ownershipFooter != "") {
                         viewEmbed.setFooter({
@@ -118,3 +123,16 @@ module.exports = {
         }
     },
 };
+
+function insertSorted(arr, item) {
+    let low = 0, high = arr.length;
+    while (low < high) {
+        let mid = Math.floor((low + high) / 2);
+        if (arr[mid].level > item.level) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+    arr.splice(low, 0, item);
+}

@@ -78,7 +78,7 @@ module.exports = {
             }
             if (rarity == constants.RARITY_NUMS.FOIL) rollEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
             else if (rarity == constants.RARITY_NUMS.PRISMATIC) rollEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
-            // get card owners and wishers // TODO: sort by lvl so the top levels are displayed
+            // get card owners and wishers
             let cardOwners = [];
             let cardWishers = [];
             const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
@@ -86,8 +86,8 @@ module.exports = {
                 for (const card of profile.cards) {
                     if (card.name == villager.name && card.rarity == rarity) {
                         const user = await interaction.client.users.fetch(profile.userID);
-                        if (profile.userID == interaction.user.id) cardOwners.unshift(user.displayName);
-                        else cardOwners.push(user.displayName);
+                        if (profile.userID == interaction.user.id) cardOwners.unshift({ name: user.displayName, level: card.level });
+                        else insertSorted(cardOwners, { name: user.displayName, level: card.level });
                     }
                 }
                 if (profile.wish == villager.name) {
@@ -95,6 +95,10 @@ module.exports = {
                     if (profile.userID == interaction.user.id) cardWishers.unshift(user);
                     else cardWishers.push(user);
                 }
+            }
+            // remove the level field so cardOwners only tracks names
+            for (let i = 0; i < cardOwners.length; i++) {
+                cardOwners[i] = cardOwners[i].name;
             }
             // add the ownership footer
             let ownershipFooter = getOwnershipFooter(cardOwners);
@@ -280,3 +284,16 @@ module.exports = {
         }
     },
 };
+
+function insertSorted(arr, item) {
+    let low = 0, high = arr.length;
+    while (low < high) {
+        let mid = Math.floor((low + high) / 2);
+        if (arr[mid].level > item.level) {
+            low = mid + 1;
+        } else {
+            high = mid;
+        }
+    }
+    arr.splice(low, 0, item);
+}
