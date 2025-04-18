@@ -13,7 +13,8 @@ module.exports = {
                     { name: "Alphabetical", value: "a" },
                     { name: "Bells", value: "b" },
                     { name: "Level", value: "l" },
-                    { name: "Random", value: "r" }
+                    { name: "Random", value: "rand" },
+                    { name: "Rarity", value: "rar" },
                 )
                 .setRequired(true)
         )
@@ -42,18 +43,22 @@ module.exports = {
                 else if (category == "l") {
                     deck.sort((a, b) => b.level - a.level);
                 }
-                else if (category == "r") {
+                else if (category == "rand") {
                     // Fisher-Yates Shuffle
                     for (let i = profileData.cards.length - 1; i > 0; i--) {
                         const j = Math.floor(Math.random() * (i + 1));
                         [profileData.cards[i], profileData.cards[j]] = [profileData.cards[j], profileData.cards[i]];
                     }
                 }
+                else if (category == "rar") {
+                    deck.sort((a, b) => b.rarity - a.rarity);
+                }
                 await profileData.save();
                 if (category == "a") await interaction.reply(`Your deck has been sorted alphabetically.`);
                 else if (category == "b") await interaction.reply(`Your deck has been sorted by Bells <:bells:1349182767958855853>.`);
                 else if (category == "l") await interaction.reply(`Your deck has been sorted by Level <:love:1352200821072199732>.`);
-                else if (category == "r") await interaction.reply(`Your deck has been shuffled randomly.`);
+                else if (category == "rand") await interaction.reply(`Your deck has been shuffled randomly.`);
+                else if (category == "rar") await interaction.reply(`Your deck has been sorted by rarity.`);
             }
         } catch (err) {
             console.log(err);
