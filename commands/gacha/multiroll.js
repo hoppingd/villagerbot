@@ -36,7 +36,6 @@ module.exports = {
             else await interaction.reply(`Rolling ${profileData.energy} times for ${interaction.user}.`);
             let energy = profileData.energy;
             interaction.client.confirmationState[interaction.user.id] = true;
-            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, 10_000);
 
             while (energy > 0) {
                 energy -= 1;

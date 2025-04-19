@@ -92,14 +92,12 @@ module.exports = {
                 if (interaction.client.activeShops[interaction.guild.id]) return await interaction.reply(`Someone else is currently using the shop. Please try again later.`);
                 else {
                     interaction.client.activeShops[interaction.guild.id] = true;
-                    setTimeout(() => interaction.client.activeShops[interaction.guild.id] = false, constants.CONFIRM_TIME_LIMIT);
                 }
                 // send confirmation msg
                 await interaction.reply(`<:redd:1354073677318062153>: *"Ahhh... you've got a discerning eye. That **${constants.RARITY_NAMES[item.rarity]} ${item.name}** is one-of-a-kind. Lucky for you, we're currently running a HUGE discount on it! For the meager price of **${price}** <:bells:1349182767958855853>, it can be yours! How about it?"* (y/n)`);
                 const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                 const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
-                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                 collector.on('collect', async (m) => {
                     if (m.content.toLowerCase() == 'y') {

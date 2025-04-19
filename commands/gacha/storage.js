@@ -117,7 +117,6 @@ module.exports = {
                         const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
                         const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                         interaction.client.confirmationState[interaction.user.id] = true;
-                        setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
 
                         collector.on('collect', async (m) => {
                             if (m.content.toLowerCase() == 'y') {

@@ -45,6 +45,7 @@ module.exports = {
             if (recipient.bot) return await interaction.reply({ content: "You supplied a bot for the recipient argument. Please specify a real user.", flags: MessageFlags.Ephemeral });
             if (recipient.id == interaction.user.id) return await interaction.reply({ content: "You cannot gift to yourself.", flags: MessageFlags.Ephemeral });
             if (interaction.client.confirmationState[recipient.id]) return await interaction.reply({ content: "You cannot gift someone who is awaiting confirmation on a key command. Please try again later.", flags: MessageFlags.Ephemeral });
+            if (interaction.client.recipientState[recipient.id]) return await interaction.reply({ content: "That user is already being traded with or gifted to. Please try again later.", flags: MessageFlags.Ephemeral });
             // BELLS SUBCOMMAND
             if (subCommand == "bells") {
                 const amount = interaction.options.getInteger('amount');
@@ -55,7 +56,7 @@ module.exports = {
                 const collectorFilter = m => ((m.author.id == recipient.id && isYesOrNo(m.content)) || (m.author.id == interaction.user.id && m.content == 'cancel'));
                 const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
-                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
+                interaction.client.recipientState[recipient.id] = true;
                 collector.on('collect', async (m) => {
                     // the recipient responded
                     if (m.author.id == recipient.id) {
@@ -96,6 +97,7 @@ module.exports = {
 
                 collector.on('end', async (collected, reason) => {
                     interaction.client.confirmationState[interaction.user.id] = false;
+                    interaction.client.recipientState[recipient.id] = false;
                     if (reason === 'time') {
                         await interaction.followUp(`${recipient}, you didn't type 'y' or 'n' in time. The gift was cancelled.`);
                     }
@@ -127,7 +129,7 @@ module.exports = {
                 const collectorFilter = m => ((m.author.id == recipient.id && isYesOrNo(m.content)) || (m.author.id == interaction.user.id && m.content == 'cancel'));
                 const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
-                setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
+                interaction.client.recipientState[recipient.id] = true;
 
                 collector.on('collect', async (m) => {
                     // the recipient responded
@@ -201,6 +203,7 @@ module.exports = {
 
                 collector.on('end', async (collected, reason) => {
                     interaction.client.confirmationState[interaction.user.id] = false;
+                    interaction.client.recipientState[recipient.id] = false;
                     if (reason === 'time') {
                         await interaction.followUp(`${recipient}, you didn't type 'y' or 'n' in time. The gift was cancelled.`);
                     }

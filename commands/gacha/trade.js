@@ -41,6 +41,7 @@ module.exports = {
             if (target.bot) return await interaction.reply({ content: "You supplied a bot for the target argument. Please specify a real user.", flags: MessageFlags.Ephemeral });
             if (target.id == interaction.user.id) return await interaction.reply({ content: "You cannot trade with yourself.", flags: MessageFlags.Ephemeral });
             if (interaction.client.confirmationState[target.id]) return await interaction.reply({ content: "You cannot trade with someone who is awaiting confirmation on a key command. Please try again later.", flags: MessageFlags.Ephemeral });
+            if (interaction.client.recipientState[target.id]) return await interaction.reply({ content: "That user is already being traded with or gifted to. Please try again later.", flags: MessageFlags.Ephemeral });
             // get options
             const offerString = interaction.options.getString('offeredcards');
             const requestString = interaction.options.getString('requestedcards');
@@ -135,7 +136,7 @@ module.exports = {
             const collectorFilter = m => ((m.author.id == target.id && isYesOrNo(m.content)) || (m.author.id == interaction.user.id && m.content == 'cancel'));
             const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
-            setTimeout(() => interaction.client.confirmationState[interaction.user.id] = false, constants.CONFIRM_TIME_LIMIT);
+            interaction.client.recipientState[target.id] = true;
 
             collector.on('collect', async (m) => {
                 // the target responded
@@ -257,6 +258,7 @@ module.exports = {
 
             collector.on('end', async (collected, reason) => {
                 interaction.client.confirmationState[interaction.user.id] = false;
+                interaction.client.recipientState[target.id] = false;
                 if (reason === 'time') {
                     await interaction.followUp(`${target}, you didn't type 'y' or 'n' in time. The trade was cancelled.`);
                 }
