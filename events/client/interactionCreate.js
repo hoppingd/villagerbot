@@ -1,5 +1,5 @@
 const { Events, MessageFlags } = require('discord.js');
-const READ_ONLY_COMMANDS = ["balance", "claim", "help", "leaderboard", "deck", "view"];
+const READ_ONLY_COMMANDS = ["balance", "claim", "help", "leaderboard", "deck", "decklist", "view"];
 const OPTIONAL_READ_ONLY_COMMANDS = ["shop", "storage", "upgrade", "wish"];
 const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["view"];
 const constants = require('../../constants');

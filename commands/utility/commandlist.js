@@ -9,13 +9,12 @@ module.exports = {
     async execute(interaction) {
         try {
             const helpEmbed = new EmbedBuilder()
-            .setDescription(`<:rover:1354073182629400667>: *"Here's a list of all the commands!"*
-                
-                **/balance** - shows the user's Bell balance
+            .setDescription(`<:rover:1354073182629400667>: *"Here's a list of all the commands!"*\n\n**/balance** - shows the user's Bell balance
                 **/claim** - shows the user's claim timer
                 **/commandlist** - displays a list of commands
                 **/daily** - gives the user a random amount of Bells (NOOK I REQUIRED)
-                **/deck** - views a deck
+                **/deck** - views a deck in carousel format
+                **/decklist** - views a deck in list format
                 **/give** - gives a user bells or a card (levels are reset)
                 **/help** - displays info about the card collecting game and how it works
                 **/leaderboard** - displays the top characters

@@ -67,7 +67,7 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
-                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`);
                             });
                         }
                         break;
@@ -101,7 +101,7 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
-                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`);
                             });
                         }
                         break;
@@ -134,7 +134,7 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
-                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`);
                             });
                         }
                         break;
@@ -168,7 +168,7 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
-                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`);
                             });
                         }
                         break;
@@ -201,7 +201,7 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
-                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`);
                             });
                         }
                         break;
@@ -235,7 +235,7 @@ module.exports = {
                                 if (reason === 'time') {
                                     await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`);
                                 }
-                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, sprout..."*`);
+                                if (isMaxed(profileData) && !wasMaxed) await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`);
                             });
                         }
                         break;

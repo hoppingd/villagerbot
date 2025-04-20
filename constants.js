@@ -3,6 +3,7 @@ const ROLL_CLAIM_TIME_LIMIT = 180 * 1000; // active collector time (sec * ms)
 const CONFIRM_TIME_LIMIT = 180 * 1000; // active collector time (sec * ms)
 const DEFAULT_CARD_LIMIT = 10;
 const DEFAULT_FOIL_CHANCE = 5;
+const DEFAULT_PRISMATIC_CHANCE = 1
 const BASE = 20; // This will control the general scale of points
 const SCALING_FACTOR = 275; // Adjust this to control the spread of points
 const MAX_POINTS = 2000; // Cap the maximum points a character can have
@@ -34,6 +35,7 @@ const TORT_NUMERALS = [
     "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX", "LX"];
 const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
 const UPGRADE_THRESHOLDS = [10, 100, Number.MAX_SAFE_INTEGER];
+const TORT_PRISMATIC_CHANCE_INTERVAL = 5;
 
 module.exports = {
     NUM_VILLAGERS,
@@ -41,6 +43,7 @@ module.exports = {
     CONFIRM_TIME_LIMIT,
     DEFAULT_CARD_LIMIT,
     DEFAULT_FOIL_CHANCE,
+    DEFAULT_PRISMATIC_CHANCE,
     BASE,
     SCALING_FACTOR,
     MAX_POINTS,
@@ -65,5 +68,6 @@ module.exports = {
     MAX_TORT_LVL,
     TORT_NUMERALS,
     GLOBAL_COMMAND_COOLDOWN,
-    UPGRADE_THRESHOLDS
+    UPGRADE_THRESHOLDS,
+    TORT_PRISMATIC_CHANCE_INTERVAL
 };
