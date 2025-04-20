@@ -7,7 +7,7 @@ const baseMin = 20;
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('daily')
-        .setDescription("Recieve daily bells from the Bank of Nook. (NOOK I REQUIRED")
+        .setDescription("Recieve daily bells from the Bank of Nook. (NOOK I REQUIRED)")
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
