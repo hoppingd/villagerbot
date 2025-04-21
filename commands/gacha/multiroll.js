@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getOrCreateProfile, getOwnershipFooter, getRank, getTimeString } = require('../../util');
+const { calculatePoints, getClaimDate, getOrCreateProfile, getOwnershipFooter, getRank, getRechargeDate, getTimeString } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,11 +19,7 @@ module.exports = {
             if (profileData.energy > 0 || shouldReset) {
                 // replenish the rolls if the roll timer has passed
                 if (shouldReset) {
-                    let rechargeDate = new Date(Date.now());
-                    rechargeDate.setMinutes(0);
-                    rechargeDate.setSeconds(0);
-                    rechargeDate.setMilliseconds(0);
-                    profileData.rechargeTimestamp = rechargeDate;
+                    profileData.rechargeTimestamp = getRechargeDate();
                     profileData.energy = constants.DEFAULT_ENERGY + profileData.brewTier;
                 }
                 await profileData.save();
@@ -142,13 +138,15 @@ module.exports = {
                     let timeSinceClaim = Date.now() - reactorData.claimTimestamp;
                     const reactorCardIdx = reactorData.cards.findIndex(card => card.name === villager.name);
                     const reactorStorageIdx = reactorData.storage.findIndex(card => card.name === villager.name)
-                    // if user's claim isn't available
+                    // if user's claim isn't available and they aren't claiming a lower rarity of a card they own
                     if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
-                        let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
-                        return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${getTimeString(timeRemaining)} before claiming again.`);
+                        if (reactorCardIdx != -1 && rarity <= reactorData.cards[reactorCardIdx].rarity) {
+                            let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
+                            return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${getTimeString(timeRemaining)} before claiming again.`);
+                        }
                     }
                     // if user already has the card
-                    else if (reactorCardIdx != -1) {
+                    if (reactorCardIdx != -1) {
                         // if the rarity is lower or equal
                         if (rarity <= reactorData.cards[reactorCardIdx].rarity) {
                             reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[rarity];
@@ -160,7 +158,7 @@ module.exports = {
                             }
                             await reactorData.save();
                             collector.stop();
-                            await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732> )`);
+                            await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732>)`);
                         }
                         // if the rarity is higher
                         else {
@@ -169,15 +167,8 @@ module.exports = {
                             reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[oldRarity];
                             const oldPoints = Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
                             reactorData.bells += oldPoints;
-                            // set the claim timestamp
-                            let claimDate = new Date(Date.now());
-                            let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
-                            claimDate.setHours(claimHour);
-                            claimDate.setMinutes(0);
-                            claimDate.setSeconds(0);
-                            claimDate.setMilliseconds(0);
-                            reactorData.claimTimestamp = claimDate;
-                            let followUpMsg = `**${reactor.displayName}** upgraded their **${villager.name}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732> )`;
+                            reactorData.claimTimestamp = getClaimDate();
+                            let followUpMsg = `**${reactor.displayName}** upgraded their **${villager.name}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`;
                             if (profileData.nookTier > 1 && reactorData.wish == villager.name) {
                                 reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
                                 followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
@@ -199,14 +190,7 @@ module.exports = {
                     // if the user has less cards than their max deck size
                     else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(reactorData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
                         reactorData.cards.push({ name: villager.name, rarity: rarity });
-                        // set the claim timestamp
-                        let claimDate = new Date(Date.now());
-                        let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
-                        claimDate.setHours(claimHour);
-                        claimDate.setMinutes(0);
-                        claimDate.setSeconds(0);
-                        claimDate.setMilliseconds(0);
-                        reactorData.claimTimestamp = claimDate;
+                        reactorData.claimTimestamp = getClaimDate();
                         let followUpMsg = `${reactor.displayName} claimed **${villager.name}**!`;
                         if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {
                             reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
@@ -244,14 +228,7 @@ module.exports = {
                         else {
                             reactorData.storage.push({ name: villager.name, rarity: rarity, level: 1 + constants.BLATHERS_BONUS_LVLS });
                         }
-                        // set the claim timestamp
-                        let claimDate = new Date(Date.now());
-                        let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
-                        claimDate.setHours(claimHour);
-                        claimDate.setMinutes(0);
-                        claimDate.setSeconds(0);
-                        claimDate.setMilliseconds(0);
-                        reactorData.claimTimestamp = claimDate;
+                        reactorData.claimTimestamp = getClaimDate();
                         let followUpMsg = `${reactor.displayName} claimed **${villager.name}**! The card was sent to their storage.`;
                         // NOOK II BONUS
                         if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {

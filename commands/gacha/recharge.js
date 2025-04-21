@@ -1,6 +1,6 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile, getTimeString } = require('../../util');
+const { getOrCreateProfile, getRechargeDate, getTimeString } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -22,11 +22,7 @@ module.exports = {
             let timeSinceReset = Date.now() - profileData.rechargeTimestamp;
             if (timeSinceReset >= constants.DEFAULT_ROLL_TIMER) {
                 // replenish the rolls if the roll timer has passed
-                let rechargeDate = new Date(Date.now());
-                rechargeDate.setMinutes(0);
-                rechargeDate.setSeconds(0);
-                rechargeDate.setMilliseconds(0);
-                profileData.rechargeTimestamp = rechargeDate;
+                profileData.rechargeTimestamp = getRechargeDate();
                 profileData.energy = constants.DEFAULT_ENERGY + profileData.brewTier;
                 await profileData.save();
             }

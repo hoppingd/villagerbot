@@ -1,7 +1,6 @@
 const profileModel = require('./models/profileSchema');
 const charModel = require('./models/charSchema');
 const constants = require('./constants');
-const ntp = require('ntp-client');
 
 // function to calculate bell value of a card
 async function calculatePoints(charClaims, rarity) {
@@ -27,6 +26,16 @@ async function calculatePoints(charClaims, rarity) {
     }
 
     return points;
+}
+
+function getClaimDate() {
+    let claimDate = new Date(Date.now());
+    let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
+    claimDate.setHours(claimHour);
+    claimDate.setMinutes(0);
+    claimDate.setSeconds(0);
+    claimDate.setMilliseconds(0);
+    return claimDate;
 }
 
 // Utility function to fetch or create profile data
@@ -68,6 +77,14 @@ async function getRank(cardName) {
     return rank;
 }
 
+function getRechargeDate() {
+    let rechargeDate = new Date(Date.now());
+    rechargeDate.setMinutes(0);
+    rechargeDate.setSeconds(0);
+    rechargeDate.setMilliseconds(0);
+    return rechargeDate;
+}
+
 function getTimeString(timeRemaining) {
     let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
     let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
@@ -91,9 +108,11 @@ function isYesOrNo(content) {
 
 module.exports = {
     calculatePoints,
+    getClaimDate,
     getOrCreateProfile,
     getOwnershipFooter,
     getRank,
+    getRechargeDate,
     getTimeString,
     isYesOrNo,
 };
