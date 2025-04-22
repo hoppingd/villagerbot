@@ -35,14 +35,9 @@ module.exports = {
                         name: `${deckName} (${page + 1}/${deck.length})`,
                         iconURL: target.displayAvatarURL(),
                     });
-                try {
-                    deckEmbed.setColor(deckColor);
-                }
-                catch (err) {
-                    deckEmbed.setColor("White");
-                }
+                if (deckColor) deckEmbed.setColor(deckColor);
                 // get the card embed
-                let cardEmbed = await getCardEmbed(deck[page], target);
+                let cardEmbed = await getCardEmbed(deck[page], target, profileData.deckColor);
                 // add pagination
                 const left = new ButtonBuilder()
                     .setCustomId('left')
@@ -73,13 +68,8 @@ module.exports = {
                         name: `${deckName} (${page + 1}/${deck.length})`,
                         iconURL: target.displayAvatarURL(),
                     });
-                    try {
-                        deckEmbed.setColor(deckColor);
-                    }
-                    catch (err) {
-                        deckEmbed.setColor("White");
-                    }
-                    cardEmbed = await getCardEmbed(deck[page], target);
+                    if (deckColor) deckEmbed.setColor(deckColor);
+                    cardEmbed = await getCardEmbed(deck[page], target, profileData.deckColor);
                     await interaction.editReply({
                         embeds: [deckEmbed, cardEmbed],
                         components: [row],
@@ -102,7 +92,7 @@ module.exports = {
     },
 };
 
-async function getCardEmbed(card, owner) {
+async function getCardEmbed(card, owner, deckColor) {
     const villager = villagers.find(v => v.name == card.name);
     // get villager data
     let charData = await charModel.findOne({ name: villager.name });
@@ -118,7 +108,9 @@ async function getCardEmbed(card, owner) {
         .setTitle(villager.name)
         .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`)
         .setImage(villager.image_url);
-    try { viewEmbed.setColor(villager.title_color); } catch (err) { viewEmbed.setColor("White"); } // set color
+        // set color
+    if (deckColor) viewEmbed.setColor(deckColor);
+    // update name based on rarity
     if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
     else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
     viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });

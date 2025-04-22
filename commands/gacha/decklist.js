@@ -137,12 +137,7 @@ module.exports = {
                     .setThumbnail(topVillager.image_url)
                     .setDescription(replyMessage)
                     .setFooter({ text: `${constants.DEFAULT_CARD_LIMIT + Math.min(profileData.isaTier, constants.ADDITIONAL_CARD_SLOTS) - deck.length} card slots remaining.` });
-                try {
-                    deckEmbed.setColor(deckColor);
-                }
-                catch (err) {
-                    deckEmbed.setColor("White");
-                }
+                if (deckColor) deckEmbed.setColor(deckColor);
                 await interaction.reply({
                     embeds: [deckEmbed]
                 });

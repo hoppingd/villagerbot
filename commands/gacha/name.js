@@ -32,7 +32,7 @@ module.exports = {
                     await interaction.reply({
                         content: `Custom deck names cannot be more than ${constants.DECK_NAME_CHAR_LIMIT} characters.`,
                         flags: MessageFlags.Ephemeral,
-                    })
+                    });
                 }
                 else {
                     profileData.deckName = newName;
@@ -50,7 +50,7 @@ module.exports = {
                 }
                 await interaction.reply({
                     content: `<:resetti:1349263941179674645>: *"${interaction.user}, yer deck name's been reset! Pleasure doin' business with ya!"*`,
-                })
+                });
             }
         } catch (err) {
             console.log(err);

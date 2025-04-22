@@ -6,7 +6,7 @@ const profileSchema = new mongoose.Schema({
     bells: { type: Number, default: 0, min: [0, 'Negative bells are not allowed.'], max: [Number.MAX_VALUE, 'Max level reached.'] },
     wish: { type: String, default: null },
     deckName: { type: String, default: null },
-    deckColor: { type: String, default: "green" },
+    deckColor: { type: String, default: null },
     cards: {
         type: [{
             name: { type: String, default: null },
