@@ -119,10 +119,6 @@ module.exports = {
                                 await shopData.save();
                                 collector.stop();
                                 await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${interaction.user.displayName}** leveled up their **${item.name}**! (+**${constants.RARITY_LVL[item.rarity]}** <:love:1352200821072199732>)`);
-                                const shopEmbed = await getShopEmbed(shopData, now);
-                                await interaction.editReply({
-                                    embeds: [shopEmbed]
-                                });
                             }
                             // if the rarity is higher
                             else {
@@ -137,11 +133,7 @@ module.exports = {
                                 await profileData.save();
                                 await shopData.save();
                                 collector.stop();
-                                await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${interaction.user.displayName}** upgraded their **${item.name}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`);
-                                const shopEmbed = await getShopEmbed(shopData, now);
-                                await interaction.editReply({
-                                    embeds: [shopEmbed]
-                                });
+                                await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${interaction.user.displayName}** upgraded their **${item.name}** to **${constants.RARITY_NAMES[item.rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`);
                             }
                         }
                         // the user has the card in storage
@@ -158,11 +150,6 @@ module.exports = {
                             await shopData.save();
                             collector.stop();
                             await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n ${interaction.user.displayName} claimed **${item.name}**!`);
-                            // update the shop embed
-                            const shopEmbed = await getShopEmbed(shopData, now);
-                            await interaction.editReply({
-                                embeds: [shopEmbed]
-                            });
                             // track the claim in the db
                             charData.numClaims += 1;
                             charData.save();
@@ -194,11 +181,6 @@ module.exports = {
                             await shopData.save();
                             collector.stop();
                             await interaction.followUp(followUpMsg);
-                            // update the shop embed
-                            const shopEmbed = await getShopEmbed(shopData, now);
-                            await interaction.editReply({
-                                embeds: [shopEmbed]
-                            });
                             // track the claim in the db
                             charData.numClaims += 1;
                             charData.save();

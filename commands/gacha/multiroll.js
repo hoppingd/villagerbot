@@ -168,7 +168,7 @@ module.exports = {
                             const oldPoints = Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
                             reactorData.bells += oldPoints;
                             reactorData.claimTimestamp = getClaimDate();
-                            let followUpMsg = `**${reactor.displayName}** upgraded their **${villager.name}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`;
+                            let followUpMsg = `**${reactor.displayName}** upgraded their **${villager.name}** to **${constants.RARITY_NAMES[rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`;
                             if (profileData.nookTier > 1 && reactorData.wish == villager.name) {
                                 reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
                                 followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`

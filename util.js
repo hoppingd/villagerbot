@@ -2,7 +2,7 @@ const profileModel = require('./models/profileSchema');
 const charModel = require('./models/charSchema');
 const constants = require('./constants');
 
-// function to calculate bell value of a card
+// calculates the bell value of a card
 async function calculatePoints(charClaims, rarity) {
     let points = constants.MIN_POINTS;
     if (charClaims != 0) {
@@ -28,6 +28,7 @@ async function calculatePoints(charClaims, rarity) {
     return points;
 }
 
+// returns the current date rounded to the nearest past claim interval
 function getClaimDate() {
     let claimDate = new Date(Date.now());
     let claimHour = Math.floor(claimDate.getHours() / 4) * 4;
@@ -38,7 +39,7 @@ function getClaimDate() {
     return claimDate;
 }
 
-// Utility function to fetch or create profile data
+// fetches or creates profile data
 async function getOrCreateProfile(userID, serverID) {
     let profileData = await profileModel.findOne({ userID, serverID });
     if (!profileData) {
@@ -51,6 +52,7 @@ async function getOrCreateProfile(userID, serverID) {
     return profileData;
 }
 
+// constructs an ownership footer for card embeds based on a list of owners sorted by level
 function getOwnershipFooter(usernames) {
     const numUsers = usernames.length;
     if (numUsers == 0) return "";
@@ -60,7 +62,7 @@ function getOwnershipFooter(usernames) {
     else return `Owned by ${usernames[0]}, ${usernames[1]}, and ${remainingCount = numUsers - 2} more...`;
 }
 
-// function to get the rank of a card
+// gets the rank of a card
 async function getRank(cardName) {
     const result = await charModel.aggregate([
         { $sort: { numClaims: -1, name: 1 } }, // Sort characters by numClaims in descending order, then by name
@@ -77,6 +79,7 @@ async function getRank(cardName) {
     return rank;
 }
 
+// returns the current date rounded to the nearest recharge interval
 function getRechargeDate() {
     let rechargeDate = new Date(Date.now());
     rechargeDate.setMinutes(0);
@@ -85,6 +88,7 @@ function getRechargeDate() {
     return rechargeDate;
 }
 
+// converts milliseconds to an hours and minutes string
 function getTimeString(timeRemaining) {
     let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
     let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
@@ -102,6 +106,7 @@ function getTimeString(timeRemaining) {
     return timeString;
 }
 
+// validates wheter message content is y or n, case-insensitive
 function isYesOrNo(content) {
     return content == 'y' || content == 'n' || content == 'Y' || content == 'N';
 }
