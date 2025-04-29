@@ -345,7 +345,7 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with **/upgrade**: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
+            await interaction.reply(`There was an error with **/upgrade**: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
         }
     },
 };

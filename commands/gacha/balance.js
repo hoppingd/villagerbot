@@ -12,7 +12,7 @@ module.exports = {
             await interaction.reply(`You have **${profileData.bells}** <:bells:1349182767958855853>.`)
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error checking the user's balance: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
+            await interaction.reply(`There was an error checking the user's balance: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
         }
     },
 };

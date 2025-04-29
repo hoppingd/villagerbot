@@ -19,7 +19,7 @@ module.exports = {
             return await interaction.reply(`${interaction.user}, you are currently able to claim a card!`);
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error checking if the user can claim: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
+            await interaction.reply(`There was an error checking if the user can claim: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
         }
     },
 };

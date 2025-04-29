@@ -257,8 +257,8 @@ module.exports = {
             });
         } catch (err) {
             console.log(err);
-            if (interaction.replied) interaction.followUp(`There was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
-            else await interaction.reply(`There was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
+            if (interaction.replied) interaction.followUp(`There was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            else await interaction.reply(`There was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
         }
     },
 };

@@ -78,7 +78,7 @@ module.exports = {
 
         } catch (err) {
             console.log(err);
-            if (interaction.replied) await interaction.followUp(`There was an error displaying the leaderboard: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
+            if (interaction.replied) await interaction.followUp(`There was an error displaying the leaderboard: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
             else await interaction.reply(`There was an error displaying the leaderboard: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
         }
     },

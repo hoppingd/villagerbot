@@ -13,8 +13,7 @@
     "axios": "^1.8.4",
     "discord.js": "^14.18.0",
     "fs": "^0.0.1-security",
-    "mongoose": "^8.12.1",
-    "ntp-client": "^0.5.3"
+    "mongoose": "^8.12.1"
   },
   "devDependencies": {
     "@eslint/js": "^9.22.0",
