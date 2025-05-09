@@ -345,7 +345,9 @@ module.exports = {
             }
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error with **/upgrade**: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            try {
+                await interaction.reply(`There was an error with **/upgrade**: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
         }
     },
 };

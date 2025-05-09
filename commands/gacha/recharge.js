@@ -40,7 +40,9 @@ module.exports = {
             await interaction.reply(`<:brewster:1349263645380710431>: *"All right then, before it gets cold... One fresh brewed cup... Enjoy, ${interaction.user}."*`);
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error recharging: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            try {
+                await interaction.reply(`There was an error recharging: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
         }
     },
 };

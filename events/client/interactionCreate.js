@@ -40,11 +40,14 @@ module.exports = {
 			await command.execute(interaction);
 		} catch (error) {
 			console.error(error);
-			if (interaction.replied || interaction.deferred) {
-				await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
-			} else {
-				await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
-			}
+			try {
+				if (interaction.replied || interaction.deferred) {
+					await interaction.followUp({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+				} else {
+					await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
+				}
+			} catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+			
 		}
 	},
 };

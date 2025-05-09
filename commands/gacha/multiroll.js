@@ -264,7 +264,9 @@ module.exports = {
         } catch (err) {
             interaction.client.confirmationState[interaction.user.id] = false;
             console.log(err);
-            await interaction.channel.send(`${interaction.user}, there was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            try {
+                await interaction.channel.send(`${interaction.user}, there was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
         }
     },
 };

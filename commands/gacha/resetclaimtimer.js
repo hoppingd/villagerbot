@@ -33,7 +33,9 @@ module.exports = {
             await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just make a quick call to our mutual friend <:resetti:1349263941179674645> and... yup, looks like you're all set. You should be able to claim another card now!"*`);
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error setting the deck name: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            try {
+                await interaction.reply(`There was an error resetting the claim timer: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
         }
     },
 };

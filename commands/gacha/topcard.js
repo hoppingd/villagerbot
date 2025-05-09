@@ -29,7 +29,9 @@ module.exports = {
             await interaction.reply(`**${realName}** was successfully moved to the top of your deck.`);
         } catch (err) {
             console.log(err);
-            await interaction.reply(`There was an error moving a card to the top of your deck: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            try {
+                await interaction.reply(`There was an error moving a card to the top of your deck: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
         }
     },
 };
