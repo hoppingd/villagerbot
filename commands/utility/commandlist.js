@@ -33,6 +33,7 @@ module.exports = {
                 **/trade** - trades with another user (levels are reset). offered and requested cards must be in list format, separated by commas (i.e. Tom Nook, Isabelle, Rover). order matters, as later cards in the list may be placed into storage
                 **/upgrade** - view or purchase upgrades
                 **/view** - view a card
+                **/vote** - replenishes the user's energy if they have voted in the last 12 hours
                 **/wish** - wish for a card. wished cards have a higher chance to be rolled by the person wishing them`);
                 await interaction.reply({
                     embeds: [helpEmbed]
@@ -40,7 +41,7 @@ module.exports = {
         } catch (err) {
             console.log(err);
             try {
-                await interaction.reply(`There was an error with /help: ${err.name}.  Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+                await interaction.reply(`There was an error with /commandlist: ${err.name}.  Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
             } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
         }
     },
