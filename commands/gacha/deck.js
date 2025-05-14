@@ -70,26 +70,31 @@ module.exports = {
                     });
                     if (deckColor) deckEmbed.setColor(deckColor);
                     cardEmbed = await getCardEmbed(deck[page], target, profileData.deckColor);
-                    await interaction.editReply({
-                        embeds: [deckEmbed, cardEmbed],
-                        components: [row],
-                    });
+                    try {
+                        await interaction.editReply({
+                            embeds: [deckEmbed, cardEmbed],
+                            components: [row],
+                        });
+                    } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
+                    
                 });
 
                 collector.on('end', async end => {
                     left.setDisabled(true);
                     right.setDisabled(true);
-                    await interaction.editReply({
-                        embeds: [deckEmbed, cardEmbed],
-                        components: [row],
-                    });
+                    try {
+                        await interaction.editReply({
+                            embeds: [deckEmbed, cardEmbed],
+                            components: [row],
+                        });
+                    } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                 });
             }
         } catch (err) {
             console.log(err);
             try {
                 await interaction.reply(`There was an error showing the specified deck: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.")}
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };
@@ -110,7 +115,7 @@ async function getCardEmbed(card, owner, deckColor) {
         .setTitle(villager.name)
         .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`)
         .setImage(villager.image_url);
-        // set color
+    // set color
     if (deckColor) viewEmbed.setColor(deckColor);
     // update name based on rarity
     if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);

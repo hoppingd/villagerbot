@@ -22,9 +22,11 @@ module.exports = {
             if (profileData.energy > 0) return await interaction.reply(`<:rover:1354073182629400667>: *"You still have* ***${profileData.energy}*** *energy left, ${interaction.user}. Try this command again when you're all out."*`);
             // check if the user has voted
             const hasVoted = await checkIfUserVoted(`https://top.gg/api/bots/${botId}/check?userId=${interaction.user.id}`);
+            // if there was a network error, it's likely because the user hasn't linked Discord to top.gg
             if (hasVoted == 2) {
-                return await interaction.reply(`There was an error getting your vote data from Top.gg. Please try again later.`);
+                return await interaction.reply(`<:rover:1354073182629400667>: *"Visit [our page](https://top.gg/bot/1348066482067603456) on Top.gg to vote."*`)
             }
+            // the user exists, but they haven't voted yet
             if (!hasVoted) {
                 return await interaction.reply(`<:rover:1354073182629400667>: *"You haven't voted yet. Visit [our page](https://top.gg/bot/1348066482067603456) on Top.gg to vote."*.`);
             }
@@ -33,7 +35,7 @@ module.exports = {
             const timeSinceVote = currDate - profileData.lastSuccessfulVote;
             if (timeSinceVote < constants.HALF_DAY) {
                 const timeRemaining = constants.HALF_DAY - timeSinceVote;
-                return await interaction.reply(`<:rover:1354073182629400667>: *"You already used* ***/vote*** *in the last 12 hours. Try again in ${getTimeString(timeRemaining)}.*`);
+                return await interaction.reply(`<:rover:1354073182629400667>: *"You already used* ***/vote*** *in the last 12 hours. Try again in ${getTimeString(timeRemaining)}."*`);
             }
             // the user has 0 energy, has voted, and their timer is up. we can reset their roll timer
             let newDate = new Date(currDate);
@@ -45,7 +47,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.reply(`There was an error with **/vote**: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

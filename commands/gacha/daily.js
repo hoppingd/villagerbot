@@ -23,7 +23,7 @@ module.exports = {
                 return await interaction.reply(`<:tom_nook:1349263649356779562>: *"You already visited the Bank of Nook today, ${interaction.user}. Come back in ${getTimeString(timeRemaining)}, hm?*`);
             }
             // recieve daily bells
-            const bells = Math.floor(Math.random() * (baseMax*nookTier - baseMin*nookTier + 1)) + baseMin*nookTier;
+            const bells = Math.floor(Math.random() * (baseMax * nookTier - baseMin * nookTier + 1)) + baseMin * nookTier;
             profileData.bells += bells;
             let newDate = new Date(currDate);
             newDate.setHours(0);
@@ -37,7 +37,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.reply(`There was an error recieving daily bells: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.")}
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

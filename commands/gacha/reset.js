@@ -33,10 +33,10 @@ module.exports = {
                     profileData.cards = [];
                     profileData.storage = [];
                     profileData.save();
-                    interaction.channel.send(`<:resetti:1349263941179674645>: *"${interaction.user}, yer deck's been reset! Best of luck to ya!"*`);
+                    try { await interaction.channel.send(`<:resetti:1349263941179674645>: *"${interaction.user}, yer deck's been reset! Best of luck to ya!"*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                 }
                 else {
-                    await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, the reset's been cancelled! That was a close one!"*`);
+                    try { await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, the reset's been cancelled! That was a close one!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                 }
                 collector.stop();
             });
@@ -44,7 +44,7 @@ module.exports = {
             collector.on('end', async (collected, reason) => {
                 interaction.client.confirmationState[interaction.user.id] = false;
                 if (reason === 'time') {
-                    await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, ye didn't confirm in time! What were ye thinkin'?! The reset's been cancelled!"*`);
+                    try { await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, ye didn't confirm in time! What were ye thinkin'?! The reset's been cancelled!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                 }
             });
 
@@ -52,7 +52,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.reply(`There was an error resetting: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

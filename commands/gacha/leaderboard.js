@@ -61,19 +61,23 @@ module.exports = {
                 }
                 leaderboard.setDescription(replyMessage);
                 leaderboard.setFooter({ text: `Page ${page + 1}/${Math.floor(constants.NUM_VILLAGERS / PAGE_SIZE + 1)}.` });
-                await interaction.editReply({
-                    embeds: [leaderboard],
-                    components: [row],
-                });
+                try {
+                    await interaction.editReply({
+                        embeds: [leaderboard],
+                        components: [row],
+                    });
+                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
             });
 
             collector.on('end', async end => {
                 left.setDisabled(true);
                 right.setDisabled(true);
-                await interaction.editReply({
-                    embeds: [leaderboard],
-                    components: [row],
-                });
+                try {
+                    await interaction.editReply({
+                        embeds: [leaderboard],
+                        components: [row],
+                    });
+                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
             });
 
         } catch (err) {
@@ -81,7 +85,7 @@ module.exports = {
             try {
                 if (interaction.replied) await interaction.followUp(`There was an error displaying the leaderboard: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
                 else await interaction.reply(`There was an error displaying the leaderboard: ${err.name}. Please report bugs [here](https://discord.gg/RDqSXdHpay).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

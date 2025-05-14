@@ -122,7 +122,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.reply(`There was an error trying to view the card: ${err.name}.  Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

@@ -71,13 +71,13 @@ module.exports = {
                         followUpMsg += ` (+**${blaBonus}** <:bells:1349182767958855853> from <:blathers:1349263646206857236> **Blathers II**)`
                     }
                     profileData.save();
-                    interaction.followUp(followUpMsg);
+                    try { await interaction.followUp(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                     // track the sale in the db
                     charData.numClaims -= 1;
                     charData.save();
                 }
                 else {
-                    interaction.followUp(`Sale cancelled.`);
+                    try { await interaction.followUp(`Sale cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                 }
                 collector.stop();
             });
@@ -85,7 +85,7 @@ module.exports = {
             collector.on('end', async (collected, reason) => {
                 interaction.client.confirmationState[interaction.user.id] = false;
                 if (reason === 'time') {
-                    await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The sale was cancelled.`);
+                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The sale was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                 }
             });
 
@@ -93,7 +93,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.reply(`There was an error with the sale: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

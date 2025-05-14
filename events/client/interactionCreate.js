@@ -51,7 +51,7 @@ module.exports = {
 				} else {
 					await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
 				}
-			} catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+			} catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
 			
 		}
 	},

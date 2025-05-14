@@ -63,14 +63,14 @@ module.exports = {
                         if (m.content.toLowerCase() == 'y') {
                             // check if the recipient is in the middle of a key operation
                             if (interaction.client.confirmationState[recipient.id]) {
-                                return await interaction.channel.send(`${recipient}, you cannot accept a gift while awaiting confirmation on another key operation.`);
+                                try { return await interaction.channel.send(`${recipient}, you cannot accept a gift while awaiting confirmation on another key operation.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                             // check if the recipient is using commands too quickly
                             const now = Date.now();
                             if (interaction.client.cooldowns[recipient.id]) {
                                 const expirationTime = interaction.client.cooldowns[recipient.id] + constants.GLOBAL_COMMAND_COOLDOWN;
                                 if (now < expirationTime) {
-                                    return interaction.channel.send(`${recipient}, you are using commands too quickly. Please slow down.`);
+                                    try { return await interaction.channel.send(`${recipient}, you are using commands too quickly. Please slow down.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                                 }
                             }
                             interaction.client.cooldowns[interaction.user.id] = now;
@@ -80,17 +80,17 @@ module.exports = {
                             profileData.bells -= amount;
                             await profileData.save();
                             await recipientData.save();
-                            await interaction.followUp(`Gift successful! ${interaction.user} gave **${amount}** <:bells:1349182767958855853> to ${recipient}!`);
+                            try { await interaction.followUp(`Gift successful! ${interaction.user} gave **${amount}** <:bells:1349182767958855853> to ${recipient}!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             collector.stop();
                         }
                         else {
-                            interaction.followUp(`The gift was refused.`);
+                            try { interaction.followUp(`The gift was refused.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             collector.stop();
                         }
                     }
                     // the gifter responded
                     else {
-                        interaction.followUp(`The gift was cancelled.`);
+                        try { interaction.followUp(`The gift was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         collector.stop();
                     }
                 });
@@ -99,7 +99,7 @@ module.exports = {
                     interaction.client.confirmationState[interaction.user.id] = false;
                     interaction.client.recipientState[recipient.id] = false;
                     if (reason === 'time') {
-                        await interaction.followUp(`${recipient}, you didn't type 'y' or 'n' in time. The gift was cancelled.`);
+                        try { await interaction.followUp(`${recipient}, you didn't type 'y' or 'n' in time. The gift was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                     }
                 });
             }
@@ -137,14 +137,14 @@ module.exports = {
                         if (m.content.toLowerCase() == 'y') {
                             // check if the recipient is in the middle of a key operation
                             if (interaction.client.confirmationState[recipient.id]) {
-                                return await interaction.channel.send(`${recipient}, you cannot accept a gift while awaiting confirmation on another key operation.`);
+                                try { return await interaction.channel.send(`${recipient}, you cannot accept a gift while awaiting confirmation on another key operation.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                             // check if the recipient is using commands too quickly
                             const now = Date.now();
                             if (interaction.client.cooldowns[recipient.id]) {
                                 const expirationTime = interaction.client.cooldowns[recipient.id] + constants.GLOBAL_COMMAND_COOLDOWN;
                                 if (now < expirationTime) {
-                                    return interaction.channel.send(`${recipient}, you are using commands too quickly. Please slow down.`);
+                                    try { return await interaction.channel.send(`${recipient}, you are using commands too quickly. Please slow down.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                                 }
                             }
                             interaction.client.cooldowns[interaction.user.id] = now;
@@ -152,11 +152,11 @@ module.exports = {
                             const recipientData = await getOrCreateProfile(recipient.id, interaction.guild.id);
                             // check if the recipient already owns the card
                             if (recipientData.cards.some(card => card.name === realName) || recipientData.storage.some(card => card === realName)) {
-                                return await interaction.channel.send(`You already own **${realName}**, ${recipient}. In order to accept this gift, you must first get rid of your **${realName}**.`)
+                                try { return await interaction.channel.send(`You already own **${realName}**, ${recipient}. In order to accept this gift, you must first get rid of your **${realName}**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                             // there is room for the card in deck
                             if (recipientData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(recipientData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
-                                recipientData.cards.push({ name: realName, rarity: rarity});
+                                recipientData.cards.push({ name: realName, rarity: rarity });
                                 if (cardIdx != -1) {
                                     profileData.cards[cardIdx] = null;
                                     profileData.cards = profileData.cards.filter(card => card !== null);
@@ -167,12 +167,12 @@ module.exports = {
                                 }
                                 profileData.save();
                                 recipientData.save();
-                                await interaction.followUp(`Gift successful! ${interaction.user} gave their **${realName}** to ${recipient}!`);
+                                try { await interaction.followUp(`Gift successful! ${interaction.user} gave their **${realName}** to ${recipient}!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 collector.stop();
                             }
                             // there is room for the card in storage
                             else if (recipientData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[reactorData.blaTier]) {
-                                recipientData.storage.push({ name: realName, rarity: rarity});
+                                recipientData.storage.push({ name: realName, rarity: rarity });
                                 if (cardIdx != -1) {
                                     profileData.cards[cardIdx] = null;
                                     profileData.cards = profileData.cards.filter(card => card !== null);
@@ -183,20 +183,20 @@ module.exports = {
                                 }
                                 profileData.save();
                                 recipientData.save();
-                                await interaction.followUp(`Gift successful! ${interaction.user} gave their **${realName}** to ${recipient}! The card was put into storage.`);
+                                try { await interaction.followUp(`Gift successful! ${interaction.user} gave their **${realName}** to ${recipient}! The card was put into storage.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                             else {
-                                return await interaction.channel.send(`Your deck is full, so you cannot accept **${realName}**, ${recipient}. In order to accept this gift, you must first free up space in your deck or storage.`)
+                                return await interaction.channel.send(`Your deck is full, so you cannot accept **${realName}**, ${recipient}. In order to accept this gift, you must first free up space in your deck or storage.`);
                             }
                         }
                         else {
-                            interaction.followUp(`The gift was refused.`);
+                            try { interaction.followUp(`The gift was refused.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             collector.stop();
                         }
                     }
                     // the gifter responded
                     else {
-                        interaction.followUp(`The gift was cancelled.`);
+                        try { interaction.followUp(`The gift was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         collector.stop();
                     }
                 });
@@ -205,7 +205,7 @@ module.exports = {
                     interaction.client.confirmationState[interaction.user.id] = false;
                     interaction.client.recipientState[recipient.id] = false;
                     if (reason === 'time') {
-                        await interaction.followUp(`${recipient}, you didn't type 'y' or 'n' in time. The gift was cancelled.`);
+                        try { await interaction.followUp(`${recipient}, you didn't type 'y' or 'n' in time. The gift was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                     }
                 });
             }
@@ -213,7 +213,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.reply(`There was an error with the gift: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.")}
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

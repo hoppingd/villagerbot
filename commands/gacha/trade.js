@@ -144,14 +144,14 @@ module.exports = {
                     if (m.content.toLowerCase() == 'y') {
                         // check if the target is in the middle of a key operation
                         if (interaction.client.confirmationState[target.id]) {
-                            return await interaction.channel.send(`${target}, you cannot accept a trade while awaiting confirmation on another key operation.`);
+                            try { return await interaction.channel.send(`${target}, you cannot accept a trade while awaiting confirmation on another key operation.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                         }
                         // check if the target is using commands too quickly
                         const now = Date.now();
                         if (interaction.client.cooldowns[target.id]) {
                             const expirationTime = interaction.client.cooldowns[target.id] + constants.GLOBAL_COMMAND_COOLDOWN;
                             if (now < expirationTime) {
-                                return interaction.channel.send(`${target}, you are using commands too quickly. Please slow down.`);
+                                try { return await interaction.channel.send(`${target}, you are using commands too quickly. Please slow down.`);} catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                         }
                         interaction.client.cooldowns[interaction.user.id] = now;
@@ -163,7 +163,7 @@ module.exports = {
                             if (!requestedCards.includes(cardName)) {
                                 const cardIdx = targetData.cards.findIndex(card => card.name == cardName);
                                 const storageIdx = targetData.storage.findIndex(card => card.name == cardName);
-                                if (cardIdx != -1 || storageIdx != -1) return await interaction.channel.send(`${target}, you cannot accept ${cardName}, since you already own it and are not giving it in the trade. You can sell your copy with **/sell**.`);
+                                if (cardIdx != -1 || storageIdx != -1) try { return await interaction.channel.send(`${target}, you cannot accept ${cardName}, since you already own it and are not giving it in the trade. You can sell your copy with **/sell**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                         }
                         // check if that the target has the requested cards and store their indices
@@ -174,19 +174,19 @@ module.exports = {
                             const storageIdx = targetData.storage.findIndex(card => card.name == cardName);
                             if (cardIdx == -1 && storageIdx == -1) {
                                 collector.stop();
-                                return await interaction.channel.followUp(`${target}, I could not find a card named **${cardName}** in your deck or storage. The trade has been cancelled.`);
+                                try { return await interaction.channel.send(`${target}, I could not find a card named **${cardName}** in your deck or storage. The trade has been cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                             requestedCardIndices.push({ cardIdx: cardIdx, storageIdx: storageIdx });
                         }
                         // check requestedBells
                         if (requestedBells > targetData.bells) {
                             collector.stop();
-                            return await interaction.followUp(`You don't have enough Bells for that, ${target}. (Current: **${targetData.bells}** <:bells:1349182767958855853>, Needed: **${requestedBells}** <:bells:1349182767958855853>) The trade has been cancelled.`);
+                            try { return await interaction.followUp(`You don't have enough Bells for that, ${target}. (Current: **${targetData.bells}** <:bells:1349182767958855853>, Needed: **${requestedBells}** <:bells:1349182767958855853>) The trade has been cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         }
                         // check that there is room in the target's deck
                         const targetOpenDeckSlots = constants.DEFAULT_CARD_LIMIT + Math.min(targetData.isaTier, constants.ADDITIONAL_CARD_SLOTS) - targetData.cards.length + requestedCards.length;
                         const targetOpenStorageSlots = constants.BLATIER_TO_STORAGE_LIMIT[targetData.blaTier] - targetData.storage.length;
-                        if (offeredCards.length > targetOpenDeckSlots + targetOpenStorageSlots) return await interaction.channel.send(`You don't have enough room for the offered cards, ${target}. Try selling some cards with **/sell** or purchasing more slots with **/upgrade**.`);
+                        if (offeredCards.length > targetOpenDeckSlots + targetOpenStorageSlots) try { return await interaction.channel.send(`You don't have enough room for the offered cards, ${target}. Try selling some cards with **/sell** or purchasing more slots with **/upgrade**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                         // get offered cards from user's deck
                         const offeredCardData = [];
                         for (let i = 0; i < offeredCardIndices.length; i++) {
@@ -241,17 +241,17 @@ module.exports = {
                         // wrap up
                         await profileData.save();
                         await targetData.save();
-                        interaction.followUp(`Trade successful!`);
+                        try { interaction.followUp(`Trade successful!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         collector.stop();
                     }
                     else {
-                        interaction.followUp(`The trade was refused.`);
+                        try { interaction.followUp(`The trade was refused.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         collector.stop();
                     }
                 }
                 // the trade initiator responded
                 else {
-                    interaction.followUp(`The trade was cancelled.`);
+                    try { interaction.followUp(`The trade was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                     collector.stop();
                 }
             });
@@ -260,14 +260,14 @@ module.exports = {
                 interaction.client.confirmationState[interaction.user.id] = false;
                 interaction.client.recipientState[target.id] = false;
                 if (reason === 'time') {
-                    await interaction.followUp(`${target}, you didn't type 'y' or 'n' in time. The trade was cancelled.`);
+                    try { await interaction.followUp(`${target}, you didn't type 'y' or 'n' in time. The trade was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                 }
             });
         } catch (err) {
             console.log(err);
             try {
                 await interaction.reply(`There was an error with the trade: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

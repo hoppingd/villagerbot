@@ -142,7 +142,7 @@ module.exports = {
                     if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
                         if (reactorCardIdx != -1 && rarity <= reactorData.cards[reactorCardIdx].rarity) {
                             let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
-                            return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${getTimeString(timeRemaining)} before claiming again.`);
+                            try { return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${getTimeString(timeRemaining)} before claiming again.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                         }
                     }
                     // if user already has the card
@@ -154,11 +154,11 @@ module.exports = {
                             // upgrade the card if a level threshold was reached
                             if (reactorData.cards[reactorCardIdx].level >= constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity]) {
                                 reactorData.cards[reactorCardIdx].rarity += 1;
-                                await interaction.channel.send(`${reactor}, your **${villager.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity - 1]} and was automatically upgraded to ${constants.RARITY_NAMES[reactorData.cards[reactorCardIdx].rarity]}!`);
+                                try { await interaction.channel.send(`${reactor}, your **${villager.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity - 1]} and was automatically upgraded to ${constants.RARITY_NAMES[reactorData.cards[reactorCardIdx].rarity]}!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                             await reactorData.save();
                             collector.stop();
-                            await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732>)`);
+                            try { await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         }
                         // if the rarity is higher
                         else {
@@ -180,12 +180,12 @@ module.exports = {
                             // wrap up
                             await reactorData.save();
                             collector.stop();
-                            await reaction.message.reply(followUpMsg);
+                            try { await reaction.message.reply(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         }
                     }
                     // the user has the card in storage
                     else if (reactorStorageIdx != -1) {
-                        await interaction.channel.send(`${reactor}, you cannot claim cards you already have in storage. You must first sell the card with **/sell** or move it to your deck with **/storage move**.`);
+                        try { await interaction.channel.send(`${reactor}, you cannot claim cards you already have in storage. You must first sell the card with **/sell** or move it to your deck with **/storage move**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                     }
                     // if the user has less cards than their max deck size
                     else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(reactorData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
@@ -207,8 +207,10 @@ module.exports = {
                         rollEmbed.setFooter({
                             text: getOwnershipFooter(cardOwners),
                         })
-                        await reaction.message.edit({ content: wishMessage, embeds: [rollEmbed] });
-                        await reaction.message.reply(followUpMsg);
+                        try {
+                            await reaction.message.edit({ content: wishMessage, embeds: [rollEmbed] });
+                            await reaction.message.reply(followUpMsg);
+                        } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         // track the claim in the db
                         charData.numClaims += 1;
                         charData.save();
@@ -220,7 +222,7 @@ module.exports = {
                             let randIdx = Math.floor(Math.random() * 101);
                             if (randIdx < constants.BLATHERS_BONUS_CHANCE && rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
                                 rarity += 1;
-                                interaction.channel.send(`${villager.name} rarity upgraded to ${constants.RARITY_NAMES[rarity]} by <:blathers:1349263646206857236> **Blathers V**.`);
+                                try { await interaction.channel.send(`${villager.name} rarity upgraded to ${constants.RARITY_NAMES[rarity]} by <:blathers:1349263646206857236> **Blathers V**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                         }
                         // BLATHERS III BONUS
@@ -247,14 +249,14 @@ module.exports = {
                         // wrap up
                         await reactorData.save();
                         collector.stop();
-                        await reaction.message.reply(followUpMsg);
+                        try { await reaction.message.reply(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         // track the claim in the db
                         charData.numClaims += 1;
                         charData.save();
                     }
                     else {
                         // send a message to the reactor that they couldn't claim because their deck is full
-                        await interaction.channel.send(`${reactor}, your deck is full, so you could not claim **${villager.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`);
+                        try { await interaction.channel.send(`${reactor}, your deck is full, so you could not claim **${villager.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                     }
                 });
             }
@@ -266,7 +268,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.channel.send(`${interaction.user}, there was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };

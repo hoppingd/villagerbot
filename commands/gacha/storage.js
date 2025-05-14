@@ -125,10 +125,10 @@ module.exports = {
                                 profileData.storage[cardIdx] = null;
                                 profileData.storage = profileData.storage.filter(card => card !== null);
                                 profileData.save();
-                                interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo!* ***${realName}*** *has been transferred to your deck!"*`);
+                                try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo!* ***${realName}*** *has been transferred to your deck!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                             else {
-                                interaction.followUp(`<:blathers:1349263646206857236>: *"Very well... I shall hold onto your* ***${realName}*** *for the time being."*`);
+                                try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Very well... I shall hold onto your* ***${realName}*** *for the time being."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                             collector.stop();
                         });
@@ -136,7 +136,7 @@ module.exports = {
                         collector.on('end', async (collected, reason) => {
                             interaction.client.confirmationState[interaction.user.id] = false;
                             if (reason === 'time') {
-                                await interaction.followUp(`<:blathers:1349263646206857236>: *"Hooooo... WHO?! ${interaction.user}, you didn't respond in time!"*`);
+                                try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Hooooo... WHO?! ${interaction.user}, you didn't respond in time!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                         });
                     }
@@ -149,7 +149,7 @@ module.exports = {
             console.log(err);
             try {
                 await interaction.reply(`There was an error with /storage: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
-            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server.") }
+            } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
         }
     },
 };
