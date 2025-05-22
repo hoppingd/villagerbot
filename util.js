@@ -43,11 +43,16 @@ function getClaimDate() {
 async function getOrCreateProfile(userID, serverID) {
     let profileData = await profileModel.findOne({ userID, serverID });
     if (!profileData) {
-        profileData = await profileModel.create({
-            userID,
-            serverID,
-        });
-        await profileData.save();
+        try {
+            profileData = await profileModel.create({
+                userID,
+                serverID,
+            });
+            await profileData.save();
+        } catch (err) {
+            console.log("There was an error in getOrCreateProfile.");
+            console.log(err);
+        }
     }
     return profileData;
 }

@@ -19,6 +19,7 @@ module.exports = {
             }
             await profileModel.findOneAndDelete({userID: member.id, serverID: member.guild.id});
         } catch (err) {
+            console.log("There was an error in GuildMemberRemove.");
             console.log(err);
         }
     },
