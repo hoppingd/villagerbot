@@ -80,7 +80,7 @@ module.exports = {
             const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
             for (const profile of guildProfiles) {
                 for (const card of profile.cards) {
-                    if (card.name == villager.name && card.rarity == rarity) {
+                    if (card.name == villager.name && card.rarity <= rarity) {
                         const user = await interaction.client.users.fetch(profile.userID);
                         if (profile.userID == interaction.user.id) cardOwners.unshift({ name: user.displayName, level: card.level });
                         else insertSorted(cardOwners, { name: user.displayName, level: card.level });
@@ -137,7 +137,7 @@ module.exports = {
                 const reactorStorageIdx = reactorData.storage.findIndex(card => card.name === villager.name);
                 // if user's claim isn't available and they aren't claiming a lower rarity of a card they own
                 if (timeSinceClaim < constants.DEFAULT_CLAIM_TIMER) {
-                    if (reactorCardIdx != -1 && rarity <= reactorData.cards[reactorCardIdx].rarity) {
+                    if (reactorCardIdx == -1 || rarity > reactorData.cards[reactorCardIdx].rarity) {
                         let timeRemaining = constants.DEFAULT_CLAIM_TIMER - timeSinceClaim;
                         try { return await interaction.channel.send(`${reactor}, you claimed a card recently. You must wait ${getTimeString(timeRemaining)} before claiming again.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                     }
