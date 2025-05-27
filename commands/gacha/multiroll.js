@@ -170,8 +170,8 @@ module.exports = {
                             reactorData.claimTimestamp = getClaimDate();
                             let followUpMsg = `**${reactor.displayName}** upgraded their **${villager.name}** to **${constants.RARITY_NAMES[rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`;
                             if (profileData.nookTier > 1 && reactorData.wish == villager.name) {
-                                reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
-                                followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
+                                reactorData.bells += constants.WISH_CLAIM_BONUS; // NOOK II BONUS
+                                followUpMsg += ` (+**${constants.WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                             }
                             if (profileData.nookTier > 2) {
                                 reactorData.bells += points;  // NOOK III BONUS
@@ -193,8 +193,8 @@ module.exports = {
                         reactorData.claimTimestamp = getClaimDate();
                         let followUpMsg = `${reactor.displayName} claimed **${villager.name}**!`;
                         if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {
-                            reactorData.bells += WISH_CLAIM_BONUS; // NOOK II BONUS
-                            followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
+                            reactorData.bells += constants.WISH_CLAIM_BONUS; // NOOK II BONUS
+                            followUpMsg += ` (+**${constants.WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                         }
                         if (profileData.nookTier > 2) {
                             reactorData.bells += points;  // NOOK III BONUS
@@ -234,8 +234,8 @@ module.exports = {
                         let followUpMsg = `${reactor.displayName} claimed **${villager.name}**! The card was sent to their storage.`;
                         // NOOK II BONUS
                         if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {
-                            reactorData.bells += WISH_CLAIM_BONUS;
-                            followUpMsg += ` (+**${WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
+                            reactorData.bells += constants.WISH_CLAIM_BONUS;
+                            followUpMsg += ` (+**${constants.WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                         }
                         // NOOK III BONUS
                         if (profileData.nookTier > 2) {
