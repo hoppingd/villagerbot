@@ -80,7 +80,7 @@ module.exports = {
             const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
             for (const profile of guildProfiles) {
                 for (const card of profile.cards) {
-                    if (card.name == villager.name && card.rarity <= rarity) {
+                    if (card.name == villager.name && card.rarity >= rarity) {
                         const user = await interaction.client.users.fetch(profile.userID);
                         if (profile.userID == interaction.user.id) cardOwners.unshift({ name: user.displayName, level: card.level });
                         else insertSorted(cardOwners, { name: user.displayName, level: card.level });
