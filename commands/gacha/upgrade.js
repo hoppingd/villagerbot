@@ -108,7 +108,7 @@ module.exports = {
                     // CELESTE UPGRADES
                     case "cel":
                         if (profileData.celTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:celeste:1349263647121346662>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
-                        else if (profileData.bells < getUpgradeCost(profileData.celTier, profileData.nookTier)) await interaction.reply(`<:celeste:1349263647121346662>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
+                        else if (profileData.bells < getUpgradeCost(profileData.celTier, profileData.nookTier)) await interaction.reply(`<:celeste:1349263647121346662>: *"My sincerest apologies. You don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
                             await interaction.reply(`Purchase <:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** for **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
@@ -140,7 +140,7 @@ module.exports = {
                         break;
                     // ISABELLE UPGRADES
                     case "isa":
-                        if (profileData.isaTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:isabelle:1349263650191315034>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.isaTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:isabelle:1349263650191315034>: *"You already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.isaTier, profileData.nookTier)) await interaction.reply(`<:isabelle:1349263650191315034>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.isaTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -174,7 +174,7 @@ module.exports = {
                         break;
                     // KATRINA UPGRADES
                     case "kat":
-                        if (profileData.katTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:katrina:1349263648144625694> *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
+                        if (profileData.katTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:katrina:1349263648144625694> *"Hm... you've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.katTier, profileData.nookTier)) await interaction.reply(`<:katrina:1349263648144625694>: *"Hmm... it appears you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.katTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
                             // confirm the purchase
@@ -334,10 +334,10 @@ module.exports = {
                 // TORTIMER
                 if (isMaxed(profileData)) {
                     upgradeInfo += `<:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** · `;
-                    upgradeInfo += `Cost: **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> · Reward: empower /daily, `;
+                    upgradeInfo += `Cost: **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> ·  `;
                     if (profileData.tortTier == constants.MAX_TORT_LVL) upgradeInfo += `Max level reached!\n`;
-                    else if (profileData.tortTier + 1 % 5 == 0) upgradeInfo += `+1% prismatic chance\n`;
-                    else upgradeInfo += `+1% foil chance\n`;
+                    else if (profileData.tortTier + 1 % 5 == 0) upgradeInfo += `Reward: +1% prismatic chance\n`;
+                    else upgradeInfo += `Reward: +1% foil chance\n`;
                 }
                 const upgradeEmbed = new EmbedBuilder()
                     .setDescription(upgradeInfo);

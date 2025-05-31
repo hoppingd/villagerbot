@@ -4,6 +4,7 @@ const profileModel = require('../../models/profileSchema');
 const { calculatePoints } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
+const { guildId, devId } = require('../../config.json');
 
 const PAGE_SIZE = 10;
 
@@ -111,7 +112,8 @@ module.exports = {
                             {
                                 $project: {
                                     userID: "$userID", // Keep user ID
-                                    level: "$cards.level"
+                                    serverID: "$serverID", // Keep server ID
+                                    level: "$cards.level",
                                 }
                             },
                             { $sort: { level: -1 } }, // Sort by love descending
@@ -124,7 +126,9 @@ module.exports = {
                         let replyMessage = "";
                         for (let i = 0; i < result.length; i++) {
                             const user = await interaction.client.users.fetch(result[i].userID);
-                            replyMessage += `#${i + 1}. ${user.displayName} - **${result[i].level}** <:love:1352200821072199732>\n`;
+                            let username = user.displayName;
+                            if (result[i].serverID == guildId && user.id == devId) username = "Tortimer"; // easter egg
+                            replyMessage += `#${i + 1}. ${username} - **${result[i].level}** <:love:1352200821072199732>\n`;
                         }
                         // form the embed
                         const leaderboard = new EmbedBuilder()

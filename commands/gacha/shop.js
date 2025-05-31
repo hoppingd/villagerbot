@@ -113,7 +113,7 @@ module.exports = {
                                 // upgrade the card if a level threshold was reached
                                 if (profileData.cards[cardIdx].level >= constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity]) {
                                     profileData.cards[cardIdx].rarity += 1;
-                                    try { await interaction.channel.send(`${reactor}, your **${card.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity - 1]} and was automatically upgraded to ${constants.RARITY_NAMES[profileData.cards[reactorCardIdx].rarity]}!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
+                                    try { await interaction.channel.send(`${reactor}, your **${card.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity - 1]} and was automatically upgraded to **${constants.RARITY_NAMES[profileData.cards[reactorCardIdx].rarity]}**!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                                 }
                                 await profileData.save();
                                 await shopData.save();
@@ -149,19 +149,20 @@ module.exports = {
                             await profileData.save();
                             await shopData.save();
                             collector.stop();
-                            try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n ${interaction.user.displayName} claimed **${item.name}**!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                            try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"* (**${item.name}** was added to your deck!)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             // track the claim in the db
                             charData.numClaims += 1;
                             charData.save();
                         }
                         // if user has room in storage
                         else if (profileData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[profileData.blaTier]) {
+                            let rarityUpgradeMsg = null;
                             // BLATHERS V BONUS
                             if (profileData.blaTier == constants.UPGRADE_COSTS.length) {
                                 let randIdx = Math.floor(Math.random() * 101);
                                 if (randIdx < constants.BLATHERS_BONUS_CHANCE && item.rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
                                     shopData.merchandise[idx].rarity += 1;
-                                    try { interaction.channel.send(`${item.name} rarity upgraded to ${constants.RARITY_NAMES[shopData.merchandise[idx].rarity]} by <:blathers:1349263646206857236> **Blathers V**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
+                                    rarityUpgradeMsg = `(Upgraded to **${constants.RARITY_NAMES[rarity]}** by <:blathers:1349263646206857236> **Blathers V**)`;
                                 }
                             }
                             // BLATHERS III BONUS
@@ -169,13 +170,15 @@ module.exports = {
                             else {
                                 profileData.storage.push({ name: item.name, rarity: shopData.merchandise[idx].rarity, level: 1 + constants.BLATHERS_BONUS_LVLS });
                             }
-                            let followUpMsg = `<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n${interaction.user.displayName} claimed **${item.name}**! The card was sent to their storage.`;
+                            let followUpMsg = `<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"* (**${item.name}** was sent to your storage.)`;
                             // BLATHERS III BONUS
                             if (profileData.blaTier >= 3) {
                                 followUpMsg += ` (+**${constants.BLATHERS_BONUS_LVLS}** <:love:1352200821072199732> from <:blathers:1349263646206857236> **Blathers III**)`
                             }
                             profileData.bells -= price;
                             shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
+                            // BLATHERS V MESSAGE
+                            if (rarityUpgradeMsg) followUpMsg += rarityUpgradeMsg;
                             // wrap up
                             await profileData.save();
                             await shopData.save();

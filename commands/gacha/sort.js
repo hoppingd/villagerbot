@@ -41,7 +41,7 @@ module.exports = {
                     });
                 }
                 else if (category == "l") {
-                    deck.sort((a, b) => b.level - a.level);
+                    profileData.cards.sort((a, b) => b.level - a.level);
                 }
                 else if (category == "rand") {
                     // Fisher-Yates Shuffle
@@ -51,7 +51,7 @@ module.exports = {
                     }
                 }
                 else if (category == "rar") {
-                    deck.sort((a, b) => b.rarity - a.rarity);
+                    profileData.cards.sort((a, b) => b.rarity - a.rarity);
                 }
                 await profileData.save();
                 if (category == "a") await interaction.reply(`Your deck has been sorted alphabetically.`);

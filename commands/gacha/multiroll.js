@@ -154,7 +154,7 @@ module.exports = {
                             // upgrade the card if a level threshold was reached
                             if (reactorData.cards[reactorCardIdx].level >= constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity]) {
                                 reactorData.cards[reactorCardIdx].rarity += 1;
-                                try { await interaction.channel.send(`${reactor}, your **${villager.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity - 1]} and was automatically upgraded to ${constants.RARITY_NAMES[reactorData.cards[reactorCardIdx].rarity]}!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
+                                try { await interaction.channel.send(`${reactor}, your **${villager.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity - 1]} and was automatically upgraded to **${constants.RARITY_NAMES[reactorData.cards[reactorCardIdx].rarity]}**!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
                             await reactorData.save();
                             collector.stop();
@@ -217,12 +217,13 @@ module.exports = {
                     }
                     // if user has room in storage
                     else if (reactorData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[reactorData.blaTier]) {
+                        let rarityUpgradeMsg = null;
                         // BLATHERS V BONUS
                         if (reactorData.blaTier == constants.UPGRADE_COSTS.length) {
                             let randIdx = Math.floor(Math.random() * 101);
                             if (randIdx < constants.BLATHERS_BONUS_CHANCE && rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
                                 rarity += 1;
-                                try { await interaction.channel.send(`${villager.name} rarity upgraded to ${constants.RARITY_NAMES[rarity]} by <:blathers:1349263646206857236> **Blathers V**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
+                                rarityUpgradeMsg = `(Upgraded to **${constants.RARITY_NAMES[rarity]}** by <:blathers:1349263646206857236> **Blathers V**)`;
                             }
                         }
                         // BLATHERS III BONUS
@@ -246,6 +247,8 @@ module.exports = {
                         if (reactorData.blaTier >= 3) {
                             followUpMsg += ` (+**${constants.BLATHERS_BONUS_LVLS}** <:love:1352200821072199732> from <:blathers:1349263646206857236> **Blathers III**)`
                         }
+                        // BLATHERS V MESSAGE
+                        if (rarityUpgradeMsg) followUpMsg += rarityUpgradeMsg;
                         // wrap up
                         await reactorData.save();
                         collector.stop();
