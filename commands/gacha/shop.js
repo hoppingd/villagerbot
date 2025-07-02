@@ -113,7 +113,7 @@ module.exports = {
                                 // upgrade the card if a level threshold was reached
                                 if (profileData.cards[cardIdx].level >= constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity]) {
                                     profileData.cards[cardIdx].rarity += 1;
-                                    try { await interaction.channel.send(`${reactor}, your **${card.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity - 1]} and was automatically upgraded to **${constants.RARITY_NAMES[profileData.cards[reactorCardIdx].rarity]}**!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
+                                    try { await interaction.channel.send(`${interaction.user}, your **${card.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity - 1]} and was automatically upgraded to **${constants.RARITY_NAMES[profileData.cards[cardIdx].rarity]}**!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                                 }
                                 await profileData.save();
                                 await shopData.save();
@@ -189,7 +189,7 @@ module.exports = {
                             charData.save();
                         }
                         else {
-                            await interaction.channel.send(`${reactor}, your deck is full, so you cannot purchase **${item.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`);
+                            await interaction.channel.send(`${interaction.user}, your deck is full, so you cannot purchase **${item.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`);
                         }
                         collector.stop();
                     }
