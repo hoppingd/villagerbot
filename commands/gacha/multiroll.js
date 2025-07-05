@@ -180,7 +180,14 @@ module.exports = {
                             // wrap up
                             await reactorData.save();
                             collector.stop();
-                            try { await reaction.message.reply(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                            cardOwners.unshift(reactor.displayName);
+                            rollEmbed.setFooter({
+                                text: getOwnershipFooter(cardOwners),
+                            })
+                            try {
+                                await reaction.message.edit({ content: wishMessage, embeds: [rollEmbed] });
+                                await interaction.followUp(followUpMsg);
+                            } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         }
                     }
                     // the user has the card in storage
