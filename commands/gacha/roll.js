@@ -178,12 +178,12 @@ module.exports = {
                         await reactorData.save();
                         collector.stop();
                         rollEmbed.setFooter({
-                                text: getOwnershipFooter(cardOwners),
-                            })
-                            try {
-                                await reaction.message.edit({ content: wishMessage, embeds: [rollEmbed] });
-                                await interaction.followUp(followUpMsg);
-                            } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                            text: getOwnershipFooter(cardOwners),
+                        })
+                        try {
+                            await reaction.message.edit({ content: wishMessage, embeds: [rollEmbed] });
+                            await interaction.followUp(followUpMsg);
+                        } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                     }
                 }
                 // the user has the card in storage
