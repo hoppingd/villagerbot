@@ -171,7 +171,7 @@ module.exports = {
                                 collector.stop();
                             }
                             // there is room for the card in storage
-                            else if (recipientData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[reactorData.blaTier]) {
+                            else if (recipientData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[recipientData.blaTier]) {
                                 recipientData.storage.push({ name: realName, rarity: rarity });
                                 if (cardIdx != -1) {
                                     profileData.cards[cardIdx] = null;
@@ -184,6 +184,7 @@ module.exports = {
                                 profileData.save();
                                 recipientData.save();
                                 try { await interaction.followUp(`Gift successful! ${interaction.user} gave their **${realName}** to ${recipient}! The card was put into storage.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                collector.stop();
                             }
                             else {
                                 return await interaction.channel.send(`Your deck is full, so you cannot accept **${realName}**, ${recipient}. In order to accept this gift, you must first free up space in your deck or storage.`);
