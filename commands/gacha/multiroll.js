@@ -86,15 +86,25 @@ module.exports = {
                 for (const profile of guildProfiles) {
                     for (const card of profile.cards) {
                         if (card.name == villager.name && card.rarity >= rarity) {
-                            const user = await interaction.client.users.fetch(profile.userID);
-                            if (profile.userID == interaction.user.id) cardOwners.unshift({ name: user.displayName, level: card.level });
-                            else insertSorted(cardOwners, { name: user.displayName, level: card.level });
+                            try {
+                                const user = await interaction.client.users.fetch(profile.userID);
+                                if (profile.userID == interaction.user.id) cardOwners.unshift({ name: user.displayName, level: card.level });
+                                else insertSorted(cardOwners, { name: user.displayName, level: card.level });
+                            }
+                            catch (err) {
+                                console.log(`Card owner not found: `, err)
+                            }
                         }
                     }
                     if (profile.wish == villager.name) {
-                        const user = await interaction.client.users.fetch(profile.userID);
-                        if (profile.userID == interaction.user.id) cardWishers.unshift(user);
-                        else cardWishers.push(user);
+                        try {
+                            const user = await interaction.client.users.fetch(profile.userID);
+                            if (profile.userID == interaction.user.id) cardWishers.unshift(user);
+                            else cardWishers.push(user);
+                        }
+                        catch (err) {
+                            console.log(`Card wisher not found: `, err)
+                        }
                     }
                 }
                 // remove the level field so cardOwners only tracks names
