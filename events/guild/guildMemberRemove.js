@@ -6,7 +6,6 @@ module.exports = {
     name: Events.GuildMemberRemove,
     async execute(member) {
         try {
-            console.log(`Heard ${member.displayName} leave.`)
             let profileData = await profileModel.findOne({userID: member.id, serverID: member.guild.id});
             if (!profileData) return; // the user never had profileData
             if (profileData.cards) {

@@ -240,7 +240,7 @@ module.exports = {
                             let randIdx = Math.floor(Math.random() * 101);
                             if (randIdx < constants.BLATHERS_BONUS_CHANCE && rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
                                 rarity += 1;
-                                rarityUpgradeMsg = `(Upgraded to **${constants.RARITY_NAMES[rarity]}** by <:blathers:1349263646206857236> **Blathers V**)`;
+                                rarityUpgradeMsg = ` (Upgraded to **${constants.RARITY_NAMES[rarity]}** by <:blathers:1349263646206857236> **Blathers V**)`;
                             }
                         }
                         // BLATHERS III BONUS

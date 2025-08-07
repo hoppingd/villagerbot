@@ -7,7 +7,6 @@ module.exports = {
     name: Events.GuildDelete,
     async execute(guild) {
         try {
-            console.log(`Heard ${guild.name} get deleted, or I was removed from it.`)
             const profiles = await profileModel.find({ serverID: guild.id });
             if (profiles) {
                 for (let profile of profiles) {
