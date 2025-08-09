@@ -22,7 +22,7 @@ module.exports = {
                 **/name** - sets or clears the user's deck name
                 **/ping** - displays the ping between the bot and Discord API
                 **/recharge** - replenishes the user's energy daily (BREWSTER V REQUIRED)
-                **/reset** - resets the user's deck nand storage
+                **/reset** - resets the all of the user's progress
                 **/resetclaimtimer** - resets the user's claim timer daily (ISABELLE V REQUIRED)
                 **/roll** - roll a card
                 **/sell** - sell a card for its Bell value

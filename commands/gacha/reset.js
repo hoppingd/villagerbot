@@ -1,4 +1,5 @@
 const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
+const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const { getOrCreateProfile } = require('../../util');
 const constants = require('../../constants');
@@ -30,9 +31,7 @@ module.exports = {
                         charData.numClaims -= 1;
                         await charData.save();
                     }
-                    profileData.cards = [];
-                    profileData.storage = [];
-                    profileData.save();
+                    await profileModel.findOneAndDelete({userID: profileData.userID, serverID: profileData.serverID});
                     try { await interaction.channel.send(`<:resetti:1349263941179674645>: *"${interaction.user}, yer deck's been reset! Best of luck to ya!"*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                 }
                 else {
