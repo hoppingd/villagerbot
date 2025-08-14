@@ -1,5 +1,5 @@
-const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile, isYesOrNo } = require('../../util');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { getOrCreateProfile } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -14,7 +14,7 @@ module.exports = {
         )
         .addStringOption(option =>
             option.setName('offeredcards')
-                .setDescription('A list of the cards you want to offer (levels will be reset).')
+                .setDescription('A list of the cards you want to offer.')
         )
         .addIntegerOption(option =>
             option.setName('offeredbells')
@@ -24,7 +24,7 @@ module.exports = {
         )
         .addStringOption(option =>
             option.setName('requestedcards')
-                .setDescription('A list of the cards you want to request (levels will be reset).')
+                .setDescription('A list of the cards you want to request.')
         )
         .addIntegerOption(option =>
             option.setName('requestedbells')
@@ -131,17 +131,37 @@ module.exports = {
                 if (requestedCards.length == 0) tradeMsg += `**${requestedBells}** <:bells:1349182767958855853>`;
                 else tradeMsg += ` and **${requestedBells}** <:bells:1349182767958855853>`;
             }
-            tradeMsg += `. Do you accept? (y/n, or ${interaction.user} can type 'cancel')`;
-            await interaction.reply(tradeMsg);
-            const collectorFilter = m => ((m.author.id == target.id && isYesOrNo(m.content)) || (m.author.id == interaction.user.id && m.content == 'cancel'));
-            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+            tradeMsg += `. Do you accept?`;
+            // build the reply
+            const yes = new ButtonBuilder()
+                .setCustomId('yes')
+                .setLabel('Yes')
+                .setStyle(ButtonStyle.Success);
+            const no = new ButtonBuilder()
+                .setCustomId('no')
+                .setLabel('No')
+                .setStyle(ButtonStyle.Danger);
+            const cancel = new ButtonBuilder()
+                .setCustomId('cancel')
+                .setLabel('Cancel')
+                .setStyle(ButtonStyle.Secondary);
+            const row = new ActionRowBuilder()
+                .addComponents(yes, no, cancel);
+            const reply = await interaction.reply({
+                content: tradeMsg,
+                components: [row],
+                withResponse: true,
+            });
+            // listen with a collector
+            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
             interaction.client.recipientState[target.id] = true;
 
             collector.on('collect', async (m) => {
+                i.deferUpdate();
                 // the target responded
-                if (m.author.id == target.id) {
-                    if (m.content.toLowerCase() == 'y') {
+                if (i.user.id == target.id) {
+                    if (i.customId == 'yes') {
                         // check if the target is in the middle of a key operation
                         if (interaction.client.confirmationState[target.id]) {
                             try { return await interaction.channel.send(`${target}, you cannot accept a trade while awaiting confirmation on another key operation.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
@@ -151,7 +171,7 @@ module.exports = {
                         if (interaction.client.cooldowns[target.id]) {
                             const expirationTime = interaction.client.cooldowns[target.id] + constants.GLOBAL_COMMAND_COOLDOWN;
                             if (now < expirationTime) {
-                                try { return await interaction.channel.send(`${target}, you are using commands too quickly. Please slow down.`);} catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                try { return await interaction.channel.send(`${target}, you are using commands too quickly. Please slow down.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                         }
                         interaction.client.cooldowns[interaction.user.id] = now;
@@ -222,16 +242,16 @@ module.exports = {
                         // put offered cards in target's deck
                         for (let i = 0; i < offeredCardData.length; i++) {
                             if (targetData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(targetData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
-                                targetData.cards.push({name: offeredCardData[i].name, rarity: offeredCardData[i].rarity});
+                                targetData.cards.push({ name: offeredCardData[i].name, rarity: offeredCardData[i].rarity, level: offeredCardData[i].level });
                             }
-                            else targetData.storage.push({name: offeredCardData[i].name, rarity: offeredCardData[i].rarity});
+                            else targetData.storage.push({ name: offeredCardData[i].name, rarity: offeredCardData[i].rarity, level: offeredCardData[i].level });
                         }
                         // put requested cards in user's deck
                         for (let i = 0; i < requestedCardData.length; i++) {
                             if (profileData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(profileData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
-                                profileData.cards.push({name: requestedCardData[i].name, rarity: requestedCardData[i].rarity});
+                                profileData.cards.push({ name: requestedCardData[i].name, rarity: requestedCardData[i].rarity, level: requestedCardData[i].level });
                             }
-                            else profileData.storage.push({name: requestedCardData[i].name, rarity: requestedCardData[i].rarity});
+                            else profileData.storage.push({ name: requestedCardData[i].name, rarity: requestedCardData[i].rarity, level: requestedCardData[i].level });
                         }
                         // trade bells
                         profileData.bells -= offeredBells;
@@ -250,17 +270,26 @@ module.exports = {
                     }
                 }
                 // the trade initiator responded
-                else {
+                else if (i.user.id == interaction.user.id && i.customId == 'cancel') {
                     try { interaction.followUp(`The trade was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                     collector.stop();
                 }
             });
 
             collector.on('end', async (collected, reason) => {
+                yes.setDisabled(true);
+                no.setDisabled(true);
+                cancel.setDisabled(true);
+                try {
+                    await interaction.editReply({
+                        content: tradeMsg,
+                        components: [row],
+                    });
+                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                 interaction.client.confirmationState[interaction.user.id] = false;
                 interaction.client.recipientState[target.id] = false;
                 if (reason === 'time') {
-                    try { await interaction.followUp(`${target}, you didn't type 'y' or 'n' in time. The trade was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                    try { await interaction.followUp(`${target}, you didn't choose Yes or No in time. The trade was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                 }
             });
         } catch (err) {

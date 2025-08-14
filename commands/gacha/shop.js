@@ -1,9 +1,9 @@
-const { EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const villagers = require('../../villagerdata/data.json');
 const shopModel = require('../../models/shopSchema');
 const charModel = require('../../models/charSchema');
 const constants = require('../../constants');
-const { calculatePoints, getOrCreateProfile, getTimeString, isYesOrNo } = require('../../util');
+const { calculatePoints, escapeMarkdown, getOrCreateProfile, getTimeString } = require('../../util');
 const NUM_ITEMS = 4;
 const REDD_PRICE_MULTIPLIER = 4;
 const REDD_QUOTES = ["Instead of tryin' to decide if it's real or not, it's more important to decide if ya really like it or not.",
@@ -93,14 +93,31 @@ module.exports = {
                 else {
                     interaction.client.activeShops[interaction.guild.id] = true;
                 }
-                // send confirmation msg
-                await interaction.reply(`<:redd:1354073677318062153>: *"Ahhh... you've got a discerning eye. That **${constants.RARITY_NAMES[item.rarity]} ${item.name}** is one-of-a-kind. Lucky for you, we're currently running a HUGE discount on it! For the meager price of **${price}** <:bells:1349182767958855853>, it can be yours! How about it?"* (y/n)`);
-                const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                // build reply
+                const yes = new ButtonBuilder()
+                    .setCustomId('yes')
+                    .setLabel('Yes')
+                    .setStyle(ButtonStyle.Success);
+                const no = new ButtonBuilder()
+                    .setCustomId('no')
+                    .setLabel('No')
+                    .setStyle(ButtonStyle.Danger);
+                const row = new ActionRowBuilder()
+                    .addComponents(yes, no);
+                const messageContent = `<:redd:1354073677318062153>: *"Ahhh... you've got a discerning eye. That **${constants.RARITY_NAMES[item.rarity]} ${item.name}** is one-of-a-kind. Lucky for you, we're currently running a HUGE discount on it! For the meager price of **${price}** <:bells:1349182767958855853>, it can be yours! How about it?"*`;
+                const reply = await interaction.reply({
+                    content: messageContent,
+                    components: [row],
+                    withResponse: true,
+                });
+                // listen with a collector
+                const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
 
-                collector.on('collect', async (m) => {
-                    if (m.content.toLowerCase() == 'y') {
+                collector.on('collect', async i => {
+                    i.deferUpdate();
+                    if (i.user.id != interaction.user.id) return;
+                    if (i.customId == 'yes') {
                         const cardIdx = profileData.cards.findIndex(card => card.name === item.name);
                         const storageIdx = profileData.storage.findIndex(card => card.name === item.name)
                         // if user already has the card
@@ -118,7 +135,7 @@ module.exports = {
                                 await profileData.save();
                                 await shopData.save();
                                 collector.stop();
-                                try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${interaction.user.displayName}** leveled up their **${item.name}**! (+**${constants.RARITY_LVL[item.rarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${escapeMarkdown(interaction.user.displayName)}** leveled up their **${item.name}**! (+**${constants.RARITY_LVL[item.rarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                             // if the rarity is higher
                             else {
@@ -133,7 +150,7 @@ module.exports = {
                                 await profileData.save();
                                 await shopData.save();
                                 collector.stop();
-                                try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${interaction.user.displayName}** upgraded their **${item.name}** to **${constants.RARITY_NAMES[item.rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${escapeMarkdown(interaction.user.displayName)}** upgraded their **${item.name}** to **${constants.RARITY_NAMES[item.rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                         }
                         // the user has the card in storage
@@ -200,6 +217,14 @@ module.exports = {
                 });
 
                 collector.on('end', async (collected, reason) => {
+                    yes.setDisabled(true);
+                    no.setDisabled(true);
+                    try {
+                        await interaction.editReply({
+                            content: messageContent,
+                            components: [row],
+                        });
+                    } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                     interaction.client.confirmationState[interaction.user.id] = false;
                     interaction.client.activeShops[interaction.guild.id] = false;
                     if (reason === 'time') {

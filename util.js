@@ -28,6 +28,17 @@ async function calculatePoints(charClaims, rarity) {
     return points;
 }
 
+function escapeMarkdown(text) {
+    return text
+        .replace(/\\/g, '\\\\')
+        .replace(/\*/g, '\\*')
+        .replace(/_/g, '\\_')
+        .replace(/~/g, '\\~')
+        .replace(/\|/g, '\\|')
+        .replace(/>/g, '\\>')
+        .replace(/`/g, '\\`');
+}
+
 // returns the current date rounded to the nearest past claim interval
 function getClaimDate() {
     let claimDate = new Date(Date.now());
@@ -111,18 +122,13 @@ function getTimeString(timeRemaining) {
     return timeString;
 }
 
-// validates wheter message content is y or n, case-insensitive
-function isYesOrNo(content) {
-    return content == 'y' || content == 'n' || content == 'Y' || content == 'N';
-}
-
 module.exports = {
     calculatePoints,
+    escapeMarkdown,
     getClaimDate,
     getOrCreateProfile,
     getOwnershipFooter,
     getRank,
     getRechargeDate,
-    getTimeString,
-    isYesOrNo,
+    getTimeString
 };

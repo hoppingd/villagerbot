@@ -1,6 +1,6 @@
-const { EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile, isYesOrNo } = require('../../util');
+const { getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -36,24 +36,42 @@ module.exports = {
             // BUY SUBCOMMAND
             if (subCommand == 'buy') {
                 const upgradeFlag = interaction.options.getString('type');
+                // build buttons
+                const yes = new ButtonBuilder()
+                    .setCustomId('yes')
+                    .setLabel('Yes')
+                    .setStyle(ButtonStyle.Success);
+                const no = new ButtonBuilder()
+                    .setCustomId('no')
+                    .setLabel('No')
+                    .setStyle(ButtonStyle.Danger);
+                const row = new ActionRowBuilder()
+                    .addComponents(yes, no);
                 switch (upgradeFlag) {
                     // BLATHERS UPGRADES
                     case "bla":
                         if (profileData.blaTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:blathers:1349263646206857236>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.blaTier, profileData.nookTier)) await interaction.reply(`<:blathers:1349263646206857236>: *"Hm... upon close persual, I see you require more bells for this upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
-                            // confirm the purchase
-                            await interaction.reply(`Purchase <:blathers:1349263646206857236> **Blathers ${constants.ROMAN_NUMERALS[profileData.blaTier]}** for **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                            // build reply
+                            const messageContent = `Purchase <:blathers:1349263646206857236> **Blathers ${constants.ROMAN_NUMERALS[profileData.blaTier]}** for **${getUpgradeCost(profileData.blaTier, profileData.nookTier)}** <:bells:1349182767958855853> ?`;
+                            const reply = await interaction.reply({
+                                content: messageContent,
+                                components: [row],
+                                withResponse: true,
+                            });
+                            // listen with a collector
+                            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
-                            collector.on('collect', async (m) => {
-                                if (m.content.toLowerCase() == 'y') {
+                            collector.on('collect', async i => {
+                                i.deferUpdate();
+                                if (i.user.id != interaction.user.id) return;
+                                if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.blaTier, profileData.nookTier);
                                     profileData.blaTier += 1;
                                     await profileData.save();
-                                    if (profileData.blaTier == 1) try{ await interaction.followUp(`<:blathers:1349263646206857236>: *"Oh hoo hoo... are those cards I see, ${interaction.user}? If your deck is full, I can hold onto new cards for you. Use* ***/storage move*** *to transfer them to your deck."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    if (profileData.blaTier == 1) try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Oh hoo hoo... are those cards I see, ${interaction.user}? If your deck is full, I can hold onto new cards for you. Use* ***/storage move*** *to transfer them to your deck."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                     else try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo... thank you for the donation, ${interaction.user}! Rest assured all upgrades will be in effect immediately!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 else {
@@ -63,9 +81,17 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
+                                yes.setDisabled(true);
+                                no.setDisabled(true);
+                                try {
+                                    await interaction.editReply({
+                                        content: messageContent,
+                                        components: [row],
+                                    });
+                                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                                 interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
-                                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, you didn't confirm in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 if (isMaxed(profileData) && !wasMaxed) try { await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             });
@@ -76,14 +102,21 @@ module.exports = {
                         if (profileData.brewTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:brewster:1349263645380710431>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.brewTier, profileData.nookTier)) await interaction.reply(`<:brewster:1349263645380710431>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.brewTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
-                            // confirm the purchase
-                            await interaction.reply(`Purchase <:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** for **${getUpgradeCost(profileData.brewTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                            // build reply
+                            const messageContent = `Purchase <:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** for **${getUpgradeCost(profileData.brewTier, profileData.nookTier)}** <:bells:1349182767958855853> ?`;
+                            const reply = await interaction.reply({
+                                content: messageContent,
+                                components: [row],
+                                withResponse: true,
+                            });
+                            // listen with a collector
+                            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
-                            collector.on('collect', async (m) => {
-                                if (m.content.toLowerCase() == 'y') {
+                            collector.on('collect', async i => {
+                                i.deferUpdate();
+                                if (i.user.id != interaction.user.id) return;
+                                if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.brewTier, profileData.nookTier);
                                     profileData.brewTier += 1;
                                     await profileData.save();
@@ -97,9 +130,17 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
+                                yes.setDisabled(true);
+                                no.setDisabled(true);
+                                try {
+                                    await interaction.editReply({
+                                        content: messageContent,
+                                        components: [row],
+                                    });
+                                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                                 interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
-                                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, you didn't confirm 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 if (isMaxed(profileData) && !wasMaxed) try { await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             });
@@ -110,29 +151,44 @@ module.exports = {
                         if (profileData.celTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:celeste:1349263647121346662>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.celTier, profileData.nookTier)) await interaction.reply(`<:celeste:1349263647121346662>: *"My sincerest apologies. You don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
-                            // confirm the purchase
-                            await interaction.reply(`Purchase <:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** for **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                            // build reply
+                            const messageContent = `Purchase <:celeste:1349263647121346662> **Celeste ${constants.ROMAN_NUMERALS[profileData.celTier]}** for **${getUpgradeCost(profileData.celTier, profileData.nookTier)}** <:bells:1349182767958855853> ?`;
+                            const reply = await interaction.reply({
+                                content: messageContent,
+                                components: [row],
+                                withResponse: true,
+                            });
+                            // listen with a collector
+                            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
-                            collector.on('collect', async (m) => {
-                                if (m.content.toLowerCase() == 'y') {
+                            collector.on('collect', async i => {
+                                i.deferUpdate();
+                                if (i.user.id != interaction.user.id) return;
+                                if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.celTier, profileData.nookTier);
                                     profileData.celTier += 1;
                                     await profileData.save();
                                     try { await interaction.followUp(`<:celeste:1349263647121346662>: *"Upgrade purchased! Your wishes are now more powerful, ${interaction.user}!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 else {
-                                    try{ await interaction.followUp(`${interaction.user}, the upgrade purchase has been cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, the upgrade purchase has been cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 collector.stop();
                             });
 
                             collector.on('end', async (collected, reason) => {
+                                yes.setDisabled(true);
+                                no.setDisabled(true);
+                                try {
+                                    await interaction.editReply({
+                                        content: messageContent,
+                                        components: [row],
+                                    });
+                                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                                 interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
-                                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, you didn't confirm in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 if (isMaxed(profileData) && !wasMaxed) try { await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             });
@@ -143,14 +199,21 @@ module.exports = {
                         if (profileData.isaTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:isabelle:1349263650191315034>: *"You already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.isaTier, profileData.nookTier)) await interaction.reply(`<:isabelle:1349263650191315034>: *"Sorry, you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.isaTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
-                            // confirm the purchase
-                            await interaction.reply(`Purchase <:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[profileData.isaTier]}** for **${getUpgradeCost(profileData.isaTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                            // buildReply
+                            const messageContent = `Purchase <:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[profileData.isaTier]}** for **${getUpgradeCost(profileData.isaTier, profileData.nookTier)}** <:bells:1349182767958855853> ?`;
+                            const reply = await interaction.reply({
+                                content: messageContent,
+                                components: [row],
+                                withResponse: true,
+                            });
+                            // listen with a collector
+                            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
-                            collector.on('collect', async (m) => {
-                                if (m.content.toLowerCase() == 'y') {
+                            collector.on('collect', async i => {
+                                i.deferUpdate();
+                                if (i.user.id != interaction.user.id) return;
+                                if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.isaTier, profileData.nookTier);
                                     profileData.isaTier += 1;
                                     await profileData.save();
@@ -164,9 +227,17 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
+                                yes.setDisabled(true);
+                                no.setDisabled(true);
+                                try {
+                                    await interaction.editReply({
+                                        content: messageContent,
+                                        components: [row],
+                                    });
+                                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                                 interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
-                                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, you didn't confirm in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 if (isMaxed(profileData) && !wasMaxed) try { await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             });
@@ -177,14 +248,21 @@ module.exports = {
                         if (profileData.katTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:katrina:1349263648144625694> *"Hm... you've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getUpgradeCost(profileData.katTier, profileData.nookTier)) await interaction.reply(`<:katrina:1349263648144625694>: *"Hmm... it appears you don't have enough Bells for that upgrade, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getUpgradeCost(profileData.katTier, profileData.nookTier)}** <:bells:1349182767958855853>)`);
                         else {
-                            // confirm the purchase
-                            await interaction.reply(`Purchase <:katrina:1349263648144625694> **Katrina ${constants.ROMAN_NUMERALS[profileData.katTier]}** for **${getUpgradeCost(profileData.katTier, profileData.nookTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                            // build reply
+                            const messageContent = `Purchase <:katrina:1349263648144625694> **Katrina ${constants.ROMAN_NUMERALS[profileData.katTier]}** for **${getUpgradeCost(profileData.katTier, profileData.nookTier)}** <:bells:1349182767958855853> ?`;
+                            const reply = await interaction.reply({
+                                content: messageContent,
+                                components: [row],
+                                withResponse: true,
+                            });
+                            // listen with a collector
+                            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
                             collector.on('collect', async (m) => {
-                                if (m.content.toLowerCase() == 'y') {
+                                i.deferUpdate();
+                                if (i.user.id != interaction.user.id) return;
+                                if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.katTier, profileData.nookTier);
                                     profileData.katTier += 1;
                                     await profileData.save();
@@ -197,9 +275,17 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
+                                yes.setDisabled(true);
+                                no.setDisabled(true);
+                                try {
+                                    await interaction.editReply({
+                                        content: messageContent,
+                                        components: [row],
+                                    });
+                                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                                 interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
-                                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, you didn't confirm in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 if (isMaxed(profileData) && !wasMaxed) try { await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             });
@@ -210,14 +296,21 @@ module.exports = {
                         if (profileData.nookTier == constants.UPGRADE_COSTS.length) await interaction.reply(`<:tom_nook:1349263649356779562>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < constants.UPGRADE_COSTS[profileData.nookTier]) await interaction.reply(`<:tom_nook:1349263649356779562>: *"You need more Bells, yes? Come back when you have more, ${interaction.user}."*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853>)`);
                         else {
-                            // confirm the purchase
-                            await interaction.reply(`Purchase <:tom_nook:1349263649356779562> **Nook ${constants.ROMAN_NUMERALS[profileData.nookTier]}** for **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                            // build reply
+                            const messageContent = `Purchase <:tom_nook:1349263649356779562> **Nook ${constants.ROMAN_NUMERALS[profileData.nookTier]}** for **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853> ?`;
+                            const reply = await interaction.reply({
+                                content: messageContent,
+                                components: [row],
+                                withResponse: true,
+                            });
+                            // listen with a collector
+                            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
-                            collector.on('collect', async (m) => {
-                                if (m.content.toLowerCase() == 'y') {
+                            collector.on('collect', async i => {
+                                i.deferUpdate();
+                                if (i.user.id != interaction.user.id) return;
+                                if (i.customId == 'yes') {
                                     profileData.bells -= constants.UPGRADE_COSTS[profileData.nookTier];
                                     profileData.nookTier += 1;
                                     await profileData.save();
@@ -231,9 +324,17 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
+                                yes.setDisabled(true);
+                                no.setDisabled(true);
+                                try {
+                                    await interaction.editReply({
+                                        content: messageContent,
+                                        components: [row],
+                                    });
+                                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                                 interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
-                                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, you didn't confirm in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 if (isMaxed(profileData) && !wasMaxed) try { await interaction.channel.send(`<:tortimer:1354073717776453733>: *"Heh heh horf... you thought that was all, ${interaction.user}? You have much to learn, young sprout..."*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             });
@@ -245,14 +346,21 @@ module.exports = {
                         else if (profileData.tortTier == constants.MAX_TORT_LVL) await interaction.reply(`<:tortimer:1354073717776453733>: *"You've already purchased all of my upgrades, ${interaction.user}!"*`);
                         else if (profileData.bells < getTortCost(profileData.tortTier)) await interaction.reply(`<:tortimer:1354073717776453733>: *"Fool! You need more Bells for that upgrade!"*\n(Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853>)`);
                         else {
-                            // confirm the purchase
-                            await interaction.reply(`Purchase <:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** for **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> ? (y/n)`);
-                            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                            // buildReply
+                            const messageContent = `Purchase <:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** for **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> ?`;
+                            const reply = await interaction.reply({
+                                content: messageContent,
+                                components: [row],
+                                withResponse: true,
+                            });
+                            // listen with a collector
+                            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
-                            collector.on('collect', async (m) => {
-                                if (m.content.toLowerCase() == 'y') {
+                            collector.on('collect', async i => {
+                                i.deferUpdate();
+                                if (i.user.id != interaction.user.id) return;
+                                if (i.customId == 'yes') {
                                     profileData.bells -= getTortCost(profileData.tortTier);
                                     profileData.tortTier += 1;
                                     await profileData.save();
@@ -265,9 +373,17 @@ module.exports = {
                             });
 
                             collector.on('end', async (collected, reason) => {
+                                yes.setDisabled(true);
+                                no.setDisabled(true);
+                                try {
+                                    await interaction.editReply({
+                                        content: messageContent,
+                                        components: [row],
+                                    });
+                                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                                 interaction.client.confirmationState[interaction.user.id] = false;
                                 if (reason === 'time') {
-                                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                    try { await interaction.followUp(`${interaction.user}, you didn't confirm in time. The upgrade purchase was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                             });
                         }
@@ -326,7 +442,7 @@ module.exports = {
                 else if (profileData.nookTier == 0) upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853> · Reward: /daily\n`;
                 else {
                     upgradeInfo += `Cost: **${constants.UPGRADE_COSTS[profileData.nookTier]}** <:bells:1349182767958855853> · Reward: empower /daily, `;
-                    if (profileData.nookTier == 1) upgradeInfo += `gain bells when claiming your wish\n`;
+                    if (profileData.nookTier == 1) upgradeInfo += `gain bells when claiming or collecting rent on wish\n`;
                     if (profileData.nookTier == 2) upgradeInfo += `gain bells on claim as well as sale\n`;
                     if (profileData.nookTier == 3) upgradeInfo += `cards sell for 50% more\n`;
                     if (profileData.nookTier == 4) upgradeInfo += `reduce all upgrade costs by 25%\n`;
@@ -358,9 +474,9 @@ function getUpgradeCost(upgradeTier, nookTier) {
 }
 
 function isMaxed(profileData) {
-    return profileData.blaTier == constants.UPGRADE_COSTS.length && profileData.brewTier == constants.UPGRADE_COSTS.length && 
-            profileData.celTier == constants.UPGRADE_COSTS.length && profileData.isaTier == constants.UPGRADE_COSTS.length &&
-            profileData.katTier == constants.UPGRADE_COSTS.length && profileData.nookTier == constants.UPGRADE_COSTS.length;
+    return profileData.blaTier == constants.UPGRADE_COSTS.length && profileData.brewTier == constants.UPGRADE_COSTS.length &&
+        profileData.celTier == constants.UPGRADE_COSTS.length && profileData.isaTier == constants.UPGRADE_COSTS.length &&
+        profileData.katTier == constants.UPGRADE_COSTS.length && profileData.nookTier == constants.UPGRADE_COSTS.length;
 }
 
 function getTortCost(tortTier) {

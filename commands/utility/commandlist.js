@@ -11,7 +11,7 @@ module.exports = {
             const helpEmbed = new EmbedBuilder()
             .setDescription(`<:rover:1354073182629400667>: *"Here's a list of all the commands!"*\n\n**/balance** - shows the user's Bell balance
                 **/claim** - shows the user's claim timer
-                **/commandlist** - displays a list of commands
+                **/commandlist** - displays the list of commands
                 **/daily** - gives the user a random amount of Bells (NOOK I REQUIRED)
                 **/deck** - views a deck in carousel format
                 **/decklist** - views a deck in list format
@@ -22,7 +22,7 @@ module.exports = {
                 **/name** - sets or clears the user's deck name
                 **/ping** - displays the ping between the bot and Discord API
                 **/recharge** - replenishes the user's energy daily (BREWSTER V REQUIRED)
-                **/reset** - resets the all of the user's progress
+                **/reset** - resets the user's progress
                 **/resetclaimtimer** - resets the user's claim timer daily (ISABELLE V REQUIRED)
                 **/roll** - roll a card
                 **/sell** - sell a card for its Bell value
@@ -30,7 +30,7 @@ module.exports = {
                 **/sort** - sort your deck
                 **/storage** - manage your storage
                 **/topcard** - moves a card to the top of your deck
-                **/trade** - trades with another user (levels are reset). offered and requested cards must be in list format, separated by commas (i.e. Tom Nook, Isabelle, Rover). order matters, as later cards in the list may be placed into storage
+                **/trade** - trades with another user. offered and requested cards must be in list format, separated by commas (i.e. Tom Nook, Isabelle, Rover). order matters, as later cards in the list may be placed into storage
                 **/upgrade** - view or purchase upgrades
                 **/view** - view a card
                 **/vote** - replenishes the user's energy if they have voted in the last 12 hours

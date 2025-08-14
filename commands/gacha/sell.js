@@ -1,6 +1,6 @@
-const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile, isYesOrNo } = require('../../util');
+const { calculatePoints, getOrCreateProfile } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -39,14 +39,31 @@ module.exports = {
             // get the points
             let charData = await charModel.findOne({ name: villager.name });
             const points = await calculatePoints(charData.numClaims, rarity);
-            // confirm the sale
-            await interaction.reply(`Sell your **${villager.name}** for **${points} <:bells:1349182767958855853>**? (y/n)`);
-            const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+            // build reply
+            const yes = new ButtonBuilder()
+                .setCustomId('yes')
+                .setLabel('Yes')
+                .setStyle(ButtonStyle.Success);
+            const no = new ButtonBuilder()
+                .setCustomId('no')
+                .setLabel('No')
+                .setStyle(ButtonStyle.Danger);
+            const row = new ActionRowBuilder()
+                .addComponents(yes, no);
+            const messageContent = `Sell your **${villager.name}** for **${points} <:bells:1349182767958855853>**?`;
+            const reply = await interaction.reply({
+                content: messageContent,
+                components: [row],
+                withResponse: true,
+            });
+            // listen with a collector
+            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
 
-            collector.on('collect', async (m) => {
-                if (m.content.toLowerCase() == 'y') {
+            collector.on('collect', async i => {
+                i.deferUpdate();
+                if (i.user.id != interaction.user.id) return;
+                if (i.customId == 'yes') {
                     if (storageIdx != -1) {
                         profileData.storage[storageIdx] = null;
                         profileData.storage = profileData.storage.filter(card => card !== null);
@@ -83,9 +100,17 @@ module.exports = {
             });
 
             collector.on('end', async (collected, reason) => {
+                yes.setDisabled(true);
+                no.setDisabled(true);
+                try {
+                    await interaction.editReply({
+                        content: messageContent,
+                        components: [row],
+                    });
+                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                 interaction.client.confirmationState[interaction.user.id] = false;
                 if (reason === 'time') {
-                    try { await interaction.followUp(`${interaction.user}, you didn't type 'y' or 'n' in time. The sale was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                    try { await interaction.followUp(`${interaction.user}, you didn't confirm the sale in time. The sale was cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                 }
             });
 

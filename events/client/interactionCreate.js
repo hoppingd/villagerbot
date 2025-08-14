@@ -3,14 +3,14 @@ const READ_ONLY_COMMANDS = ["balance", "claim", "help", "leaderboard", "deck", "
 const OPTIONAL_READ_ONLY_COMMANDS = ["shop", "storage", "upgrade", "wish"];
 const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["view"];
 const constants = require('../../constants');
-const { devId } = require('../../config.json');
-const MAINTENANCE_MODE = false; // change to true while bot is under maintenance
+const { devId, altDevId } = require('../../config.json');
+const MAINTENANCE_MODE = true; // change to true while bot is under maintenance
 
 module.exports = {
 	name: Events.InteractionCreate,
 	async execute(interaction) {
 		if (!interaction.isChatInputCommand()) return;
-		if (MAINTENANCE_MODE && interaction.user.id != devId) {
+		if (MAINTENANCE_MODE && !(interaction.user.id == devId || interaction.user.id == altDevId)) {
 			return await interaction.reply({ content: 'Villager Bot is currently under maintenance. Please try again later.', flags: MessageFlags.Ephemeral });
 		}
 

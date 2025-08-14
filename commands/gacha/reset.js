@@ -1,4 +1,4 @@
-const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const { getOrCreateProfile } = require('../../util');
@@ -7,18 +7,36 @@ const constants = require('../../constants');
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('reset')
-        .setDescription("Reset's the user's deck.")
+        .setDescription("Reset's the user's progress.")
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
             const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
-            await interaction.reply(`<:resetti:1349263941179674645>: *"${interaction.user}, are ye sure ye wanna reset? All yer cards'll be deleted! If yer sure, type* ***'confirm'*** *below! If yer not, type* ***'cancel'**!"*`);
-            const collectorFilter = m => (m.author.id == interaction.user.id && (m.content.toLowerCase() == 'confirm' || m.content.toLowerCase() == 'cancel'));
-            const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+            // build reply
+            const confirm = new ButtonBuilder()
+                .setCustomId('confirm')
+                .setLabel('Confirm')
+                .setStyle(ButtonStyle.Success);
+            const cancel = new ButtonBuilder()
+                .setCustomId('cancel')
+                .setLabel('Cancel')
+                .setStyle(ButtonStyle.Danger);
+            const row = new ActionRowBuilder()
+                .addComponents(confirm, cancel);
+            const messageContent = `<:resetti:1349263941179674645>: *"${interaction.user}, are ye sure ye wanna reset? All yer cards'll be deleted! If yer sure, hit* ***Confirm*** *below! If yer not, hit* ***Cancel**!"*`;
+            const reply = await interaction.reply({
+                content: messageContent,
+                components: [row],
+                withResponse: true,
+            });
+            // listen with a collector
+            const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
             interaction.client.confirmationState[interaction.user.id] = true;
 
-            collector.on('collect', async(m) => {
-                if (m.content.toLowerCase() == 'confirm') {
+            collector.on('collect', async i => {
+                i.deferUpdate();
+                if (i.user.id != interaction.user.id) return;
+                if (i.customId == 'confirm') {
                     for (const card of profileData.cards) {
                         // track the loss of the card in the db
                         let charData = await charModel.findOne({ name: card.name });
@@ -31,8 +49,8 @@ module.exports = {
                         charData.numClaims -= 1;
                         await charData.save();
                     }
-                    await profileModel.findOneAndDelete({userID: profileData.userID, serverID: profileData.serverID});
-                    try { await interaction.channel.send(`<:resetti:1349263941179674645>: *"${interaction.user}, yer deck's been reset! Best of luck to ya!"*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
+                    await profileModel.findOneAndDelete({ userID: profileData.userID, serverID: profileData.serverID });
+                    try { await interaction.channel.send(`<:resetti:1349263941179674645>: *"${interaction.user}, yer progress has been reset! Best of luck to ya!"*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                 }
                 else {
                     try { await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, the reset's been cancelled! That was a close one!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
@@ -41,6 +59,14 @@ module.exports = {
             });
 
             collector.on('end', async (collected, reason) => {
+                confirm.setDisabled(true);
+                cancel.setDisabled(true);
+                try {
+                    await interaction.editReply({
+                        content: messageContent,
+                        components: [row],
+                    });
+                } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                 interaction.client.confirmationState[interaction.user.id] = false;
                 if (reason === 'time') {
                     try { await interaction.followUp(`<:resetti:1349263941179674645>: *"${interaction.user}, ye didn't confirm in time! What were ye thinkin'?! The reset's been cancelled!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }

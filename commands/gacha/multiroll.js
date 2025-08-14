@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getClaimDate, getOrCreateProfile, getOwnershipFooter, getRank, getRechargeDate, getTimeString } = require('../../util');
+const { calculatePoints, escapeMarkdown, getClaimDate, getOrCreateProfile, getOwnershipFooter, getRank, getRechargeDate, getTimeString } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -48,7 +48,7 @@ module.exports = {
                     let randIdx = Math.floor(Math.random() * constants.NUM_VILLAGERS);
                     villager = villagers[randIdx];
                 }
-                console.log(`${interaction.user.displayName} rolled ${villager.name}`);
+
                 // villager = villagers.find(v => v.name.toLowerCase() == "skye"); // FOR TESTING TO ROLL CERTAIN CHARACTERS
 
                 // determine rarity
@@ -80,6 +80,7 @@ module.exports = {
                 if (rarity == constants.RARITY_NUMS.FOIL) rollEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
                 else if (rarity == constants.RARITY_NUMS.PRISMATIC) rollEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                 // get card owners and wishers
+                let isUserWish = false;
                 let cardOwners = [];
                 let cardWishers = [];
                 const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
@@ -99,7 +100,10 @@ module.exports = {
                     if (profile.wish == villager.name) {
                         try {
                             const user = await interaction.client.users.fetch(profile.userID);
-                            if (profile.userID == interaction.user.id) cardWishers.unshift(user);
+                            if (profile.userID == interaction.user.id) {
+                                cardWishers.unshift(user);
+                                isUserWish = true;
+                            }
                             else cardWishers.push(user);
                         }
                         catch (err) {
@@ -133,12 +137,13 @@ module.exports = {
                     embeds: [rollEmbed],
                     withResponse: true,
                 });
-                // listen for the first reaction within 2 minutes
+                // listen for the first reaction within time limit
                 const filter = (reaction, reactor) => !reactor.bot;
                 const collector = response.createReactionCollector({
                     filter,
                     time: constants.ROLL_CLAIM_TIME_LIMIT,
                 });
+
                 collector.on('collect', async (reaction, reactor) => {
                     if (interaction.client.confirmationState[reactor.id]) {
                         // send a message to the reactor that they couldn't claim because they are in the middle of a key operation
@@ -161,6 +166,11 @@ module.exports = {
                         if (rarity <= reactorData.cards[reactorCardIdx].rarity) {
                             reactorData.cards[reactorCardIdx].level += constants.RARITY_LVL[rarity];
                             reactorData.bells += points;
+                            let followUpMsg = `**${escapeMarkdown(reactor.displayName)}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732>)`;
+                            if (profileData.nookTier > 1 && isUserWish) {
+                                reactorData.bells += constants.WISH_CLAIM_BONUS; // NOOK II BONUS
+                                followUpMsg += ` (+**${constants.WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
+                            }
                             // upgrade the card if a level threshold was reached
                             if (reactorData.cards[reactorCardIdx].level >= constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity]) {
                                 reactorData.cards[reactorCardIdx].rarity += 1;
@@ -168,7 +178,7 @@ module.exports = {
                             }
                             await reactorData.save();
                             collector.stop();
-                            try { await interaction.followUp(`**${reactor.displayName}** collected rent on **${villager.name}**! (+**${points}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[rarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                            try { await interaction.followUp(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         }
                         // if the rarity is higher
                         else {
@@ -178,8 +188,8 @@ module.exports = {
                             const oldPoints = Math.floor(points / constants.RARITY_VALUE_MULTIPLIER[rarity]) * constants.RARITY_VALUE_MULTIPLIER[oldRarity]; // gets the base value, then finds the value of the card being sold, avoiding another call to calculatePoints()
                             reactorData.bells += oldPoints;
                             reactorData.claimTimestamp = getClaimDate();
-                            let followUpMsg = `**${reactor.displayName}** upgraded their **${villager.name}** to **${constants.RARITY_NAMES[rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`;
-                            if (profileData.nookTier > 1 && reactorData.wish == villager.name) {
+                            let followUpMsg = `**${escapeMarkdown(reactor.displayName)}** upgraded their **${villager.name}** to **${constants.RARITY_NAMES[rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`;
+                            if (profileData.nookTier > 1 && isUserWish) {
                                 reactorData.bells += constants.WISH_CLAIM_BONUS; // NOOK II BONUS
                                 followUpMsg += ` (+**${constants.WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                             }
@@ -208,8 +218,8 @@ module.exports = {
                     else if (reactorData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(reactorData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
                         reactorData.cards.push({ name: villager.name, rarity: rarity });
                         reactorData.claimTimestamp = getClaimDate();
-                        let followUpMsg = `${reactor.displayName} claimed **${villager.name}**!`;
-                        if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {
+                        let followUpMsg = `**${escapeMarkdown(reactor.displayName)}** claimed **${villager.name}**!`;
+                        if (profileData.nookTier > 1 && isUserWish) {
                             reactorData.bells += constants.WISH_CLAIM_BONUS; // NOOK II BONUS
                             followUpMsg += ` (+**${constants.WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                         }
@@ -249,9 +259,9 @@ module.exports = {
                             reactorData.storage.push({ name: villager.name, rarity: rarity, level: 1 + constants.BLATHERS_BONUS_LVLS });
                         }
                         reactorData.claimTimestamp = getClaimDate();
-                        let followUpMsg = `${reactor.displayName} claimed **${villager.name}**! The card was sent to their storage.`;
+                        let followUpMsg = `**${escapeMarkdown(reactor.displayName)}** claimed **${villager.name}**! The card was sent to their storage.`;
                         // NOOK II BONUS
-                        if (profileData.nookTier > 1 && cardWishers.includes(reactor.displayName)) {
+                        if (profileData.nookTier > 1 && isUserWish) {
                             reactorData.bells += constants.WISH_CLAIM_BONUS;
                             followUpMsg += ` (+**${constants.WISH_CLAIM_BONUS}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook II**)`
                         }

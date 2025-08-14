@@ -1,7 +1,7 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
 const profileModel = require('../../models/profileSchema');
-const { calculatePoints } = require('../../util');
+const { calculatePoints, escapeMarkdown } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 const { guildId, devId } = require('../../config.json');
@@ -128,7 +128,7 @@ module.exports = {
                             const user = await interaction.client.users.fetch(result[i].userID);
                             let username = user.displayName;
                             if (result[i].serverID == guildId && user.id == devId) username = "Tortimer"; // easter egg
-                            replyMessage += `#${i + 1}. ${username} - **${result[i].level}** <:love:1352200821072199732>\n`;
+                            replyMessage += `#${i + 1}. ${escapeMarkdown(username)} - **${result[i].level}** <:love:1352200821072199732>\n`;
                         }
                         // form the embed
                         const leaderboard = new EmbedBuilder()

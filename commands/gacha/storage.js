@@ -1,8 +1,8 @@
-const { EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile, isYesOrNo } = require('../../util');
+const { calculatePoints, getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -112,14 +112,31 @@ module.exports = {
                     // the card exists
                     if (cardIdx != -1) {
                         const realName = profileData.storage[cardIdx].name;
-                        // confirm the move
-                        await interaction.reply(`<:blathers:1349263646206857236>: *"Would you like to retrieve your* ***${realName}*** *from storage?" (y/n)*`);
-                        const collectorFilter = m => (m.author.id == interaction.user.id && isYesOrNo(m.content));
-                        const collector = interaction.channel.createMessageCollector({ filter: collectorFilter, time: constants.CONFIRM_TIME_LIMIT });
+                        // build reply
+                        const yes = new ButtonBuilder()
+                            .setCustomId('yes')
+                            .setLabel('Yes')
+                            .setStyle(ButtonStyle.Success);
+                        const no = new ButtonBuilder()
+                            .setCustomId('no')
+                            .setLabel('No')
+                            .setStyle(ButtonStyle.Danger);
+                        const row = new ActionRowBuilder()
+                            .addComponents(yes, no);
+                        const messageContent = `<:blathers:1349263646206857236>: *"Would you like to retrieve your* ***${realName}*** *from storage?"*`;
+                        const reply = await interaction.reply({
+                            content: messageContent,
+                            components: [row],
+                            withResponse: true,
+                        });
+                        // listen with a collector
+                        const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                         interaction.client.confirmationState[interaction.user.id] = true;
 
-                        collector.on('collect', async (m) => {
-                            if (m.content.toLowerCase() == 'y') {
+                        collector.on('collect', async i => {
+                            i.deferUpdate();
+                            if (i.user.id != interaction.user.id) return;
+                            if (i.customId == 'yes') {
                                 const card = profileData.storage[cardIdx];
                                 profileData.cards.push({ name: card.name, rarity: card.rarity, level: card.level });
                                 profileData.storage[cardIdx] = null;
@@ -128,12 +145,20 @@ module.exports = {
                                 try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo!* ***${realName}*** *has been transferred to your deck!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                             else {
-                                try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Very well... I shall hold onto your* ***${realName}*** *for the time being."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                                try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Very well... I shall hold onto your* ***${realName}*** *for now."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                             collector.stop();
                         });
 
                         collector.on('end', async (collected, reason) => {
+                            yes.setDisabled(true);
+                            no.setDisabled(true);
+                            try {
+                                await interaction.editReply({
+                                    content: messageContent,
+                                    components: [row],
+                                });
+                            } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
                             interaction.client.confirmationState[interaction.user.id] = false;
                             if (reason === 'time') {
                                 try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Hooooo... WHO?! ${interaction.user}, you didn't respond in time!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
