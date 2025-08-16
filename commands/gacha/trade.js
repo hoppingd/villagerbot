@@ -157,7 +157,7 @@ module.exports = {
             interaction.client.confirmationState[interaction.user.id] = true;
             interaction.client.recipientState[target.id] = true;
 
-            collector.on('collect', async (m) => {
+            collector.on('collect', async i => {
                 i.deferUpdate();
                 // the target responded
                 if (i.user.id == target.id) {
@@ -264,7 +264,7 @@ module.exports = {
                         try { interaction.followUp(`Trade successful!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         collector.stop();
                     }
-                    else {
+                    else if (i.customId == 'no') {
                         try { interaction.followUp(`The trade was refused.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         collector.stop();
                     }
