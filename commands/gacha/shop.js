@@ -166,7 +166,7 @@ module.exports = {
                             await profileData.save();
                             await shopData.save();
                             collector.stop();
-                            try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"* (**${item.name}** was added to your deck!)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
+                            try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*  (**${item.name}** was added to your deck!)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             // track the claim in the db
                             charData.numClaims += 1;
                             charData.save();
@@ -187,7 +187,7 @@ module.exports = {
                             else {
                                 profileData.storage.push({ name: item.name, rarity: shopData.merchandise[idx].rarity, level: 1 + constants.BLATHERS_BONUS_LVLS });
                             }
-                            let followUpMsg = `<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"* (**${item.name}** was sent to your storage.)`;
+                            let followUpMsg = `<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*  (**${item.name}** was sent to your storage!)`;
                             // BLATHERS III BONUS
                             if (profileData.blaTier >= 3) {
                                 followUpMsg += ` (+**${constants.BLATHERS_BONUS_LVLS}** <:love:1352200821072199732> from <:blathers:1349263646206857236> **Blathers III**)`

@@ -259,7 +259,7 @@ module.exports = {
                             const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                             interaction.client.confirmationState[interaction.user.id] = true;
 
-                            collector.on('collect', async (m) => {
+                            collector.on('collect', async i => {
                                 i.deferUpdate();
                                 if (i.user.id != interaction.user.id) return;
                                 if (i.customId == 'yes') {
