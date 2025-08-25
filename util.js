@@ -1,6 +1,7 @@
 const profileModel = require('./models/profileSchema');
 const charModel = require('./models/charSchema');
 const serverDataModel = require('./models/serverDataSchema');
+const shopModel = require('./models/shopSchema');
 const constants = require('./constants');
 
 // calculates the bell value of a card
@@ -74,10 +75,16 @@ async function getOrCreateProfile(userID, serverID) {
 async function getOrCreateServerData(serverID) {
     let serverData = await serverDataModel.findOne({ serverID: serverID });
     if (!serverData) {
-        serverData = await serverDataModel.create({
-            serverID: serverID
-        });
-        await serverData.save();
+        try {
+            serverData = await serverDataModel.create({
+                serverID: serverID
+            });
+            await serverData.save();
+        }
+        catch (err) {
+            console.log("There was an error in getOrCreateServerData.");
+            console.log(err);
+        }
     }
     return serverData;
 }
@@ -86,11 +93,17 @@ async function getOrCreateServerData(serverID) {
 async function getOrCreateShop(serverID) {
     let shopData = await shopModel.findOne({ serverID: serverID });
     if (!shopData) {
-        shopData = await shopModel.create({
+        try {
+            shopData = await shopModel.create({
             serverID: serverID
         });
         await shopData.save();
         getOrCreateServerData(serverID);
+        }
+        catch (err) {
+            console.log("There was an error in getOrCreateShopData.");
+            console.log(err);
+        }
     }
     return shopData;
 }

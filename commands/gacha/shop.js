@@ -36,7 +36,7 @@ module.exports = {
         try {
             const subCommand = interaction.options.getSubcommand();
             // create or get shopData
-            let shopData = getOrCreateShop(interaction.guild.id);
+            let shopData = await getOrCreateShop(interaction.guild.id);
             // check if the merchandise should be updated
             const now = Date.now();
             if (now - shopData.lastRefreshed > constants.DAY) {
