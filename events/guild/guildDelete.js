@@ -2,6 +2,7 @@ const { Events } = require('discord.js');
 const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const shopModel = require('../../models/shopSchema');
+const serverDataModel = require('../../models/serverDataSchema');
 
 module.exports = {
     name: Events.GuildDelete,
@@ -20,6 +21,7 @@ module.exports = {
                 await profileModel.deleteMany({ serverID: guild.id });
             }
             await shopModel.deleteOne({ serverID: guild.id });
+            await serverDataModel.deleteOne({ serverID: guild.id });
         } catch (err) {
             console.log("There was an error in GuildDelete.");
             console.log(err);

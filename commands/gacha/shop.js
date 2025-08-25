@@ -1,9 +1,8 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const villagers = require('../../villagerdata/data.json');
-const shopModel = require('../../models/shopSchema');
 const charModel = require('../../models/charSchema');
 const constants = require('../../constants');
-const { calculatePoints, escapeMarkdown, getOrCreateProfile, getTimeString } = require('../../util');
+const { calculatePoints, escapeMarkdown, getOrCreateProfile, getOrCreateShop, getTimeString } = require('../../util');
 const NUM_ITEMS = 4;
 const REDD_PRICE_MULTIPLIER = 4;
 const REDD_QUOTES = ["Instead of tryin' to decide if it's real or not, it's more important to decide if ya really like it or not.",
@@ -37,13 +36,7 @@ module.exports = {
         try {
             const subCommand = interaction.options.getSubcommand();
             // create or get shopData
-            let shopData = await shopModel.findOne({ serverID: interaction.guild.id });
-            if (!shopData) {
-                shopData = await shopModel.create({
-                    serverID: interaction.guild.id
-                });
-                await shopData.save();
-            }
+            let shopData = getOrCreateShop(interaction.guild.id);
             // check if the merchandise should be updated
             const now = Date.now();
             if (now - shopData.lastRefreshed > constants.DAY) {

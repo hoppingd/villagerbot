@@ -107,6 +107,7 @@ module.exports = {
                     const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
                     if (villager) {
                         const result = await profileModel.aggregate([
+                            { $match: { isPrivate: { $ne: true } } }, // Exclude private profiles
                             { $unwind: "$cards" }, // Break out each card
                             { $match: { "cards.name": villager.name } }, // Filter by character
                             {

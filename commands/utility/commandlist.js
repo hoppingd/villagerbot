@@ -21,6 +21,7 @@ module.exports = {
                 **/multiroll** - rolls until the user has 0 energy left
                 **/name** - sets or clears the user's deck name
                 **/ping** - displays the ping between the bot and Discord API
+                **/private** - toggles whether the user's name or server are visible on global leaderboards
                 **/recharge** - replenishes the user's energy daily (BREWSTER V REQUIRED)
                 **/reset** - resets the user's progress
                 **/resetclaimtimer** - resets the user's claim timer daily (ISABELLE V REQUIRED)

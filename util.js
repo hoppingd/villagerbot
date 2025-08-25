@@ -1,5 +1,6 @@
 const profileModel = require('./models/profileSchema');
 const charModel = require('./models/charSchema');
+const serverDataModel = require('./models/serverDataSchema');
 const constants = require('./constants');
 
 // calculates the bell value of a card
@@ -60,12 +61,38 @@ async function getOrCreateProfile(userID, serverID) {
                 serverID,
             });
             await profileData.save();
+            getOrCreateServerData(serverID);
         } catch (err) {
             console.log("There was an error in getOrCreateProfile.");
             console.log(err);
         }
     }
     return profileData;
+}
+
+// fetches or creates server data
+async function getOrCreateServerData(serverID) {
+    let serverData = await serverDataModel.findOne({ serverID: serverID });
+    if (!serverData) {
+        serverData = await serverDataModel.create({
+            serverID: serverID
+        });
+        await serverData.save();
+    }
+    return serverData;
+}
+
+// fetches or creates shop data
+async function getOrCreateShop(serverID) {
+    let shopData = await shopModel.findOne({ serverID: serverID });
+    if (!shopData) {
+        shopData = await shopModel.create({
+            serverID: serverID
+        });
+        await shopData.save();
+        getOrCreateServerData(serverID);
+    }
+    return shopData;
 }
 
 // constructs an ownership footer for card embeds based on a list of owners sorted by level
@@ -127,6 +154,8 @@ module.exports = {
     escapeMarkdown,
     getClaimDate,
     getOrCreateProfile,
+    getOrCreateServerData,
+    getOrCreateShop,
     getOwnershipFooter,
     getRank,
     getRechargeDate,

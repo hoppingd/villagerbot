@@ -35,6 +35,7 @@ const profileSchema = new mongoose.Schema({
     resetClaimTimestamp: { type: Date, default: new Date(0) },
     rechargeCommandTimestamp: { type: Date, default: new Date(0) },
     lastSuccessfulVote: { type: Date, default: new Date(0) },
+    isPrivate: { type: Boolean, default: false },
 });
 
 profileSchema.index({ userID: 1, serverID: 1 }, { unique: true });
