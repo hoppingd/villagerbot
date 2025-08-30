@@ -11,7 +11,7 @@ module.exports = {
 	async execute(interaction) {
 		if (!interaction.isChatInputCommand()) return;
 		if (MAINTENANCE_MODE && !(interaction.user.id == devId || interaction.user.id == altDevId)) {
-			return await interaction.reply({ content: 'Villager Bot is currently under maintenance. Please try again later.', flags: MessageFlags.Ephemeral });
+			try { return await interaction.reply({ content: 'Villager Bot is currently under maintenance. Please try again later.', flags: MessageFlags.Ephemeral }); } catch (error) { return; }
 		}
 
 		const command = interaction.client.commands.get(interaction.commandName);
@@ -25,7 +25,7 @@ module.exports = {
 		if (interaction.client.cooldowns[interaction.user.id]) {
 			const expirationTime = interaction.client.cooldowns[interaction.user.id] + constants.GLOBAL_COMMAND_COOLDOWN;
 			if (now < expirationTime) {
-				return interaction.reply({ content: `You are using commands too quickly. Please slow down.`, flags: MessageFlags.Ephemeral });
+				try { return interaction.reply({ content: `You are using commands too quickly. Please slow down.`, flags: MessageFlags.Ephemeral }); } catch (error) { return; }
 			}
 		}
 		interaction.client.cooldowns[interaction.user.id] = now;
@@ -34,10 +34,12 @@ module.exports = {
 		if (interaction.client.confirmationState[interaction.user.id]) {
 			// check if the new command is not read only
 			if (!READ_ONLY_COMMANDS.includes(interaction.commandName) && (!OPTIONAL_READ_ONLY_COMMANDS.includes(interaction.commandName) || !OPTIONAL_READ_ONLY_SUBCOMMANDS.includes(interaction.options.getSubcommand()))) {
-				return interaction.reply({
-					content: 'You cannot use this command while in the middle of a key operation.',
-					flags: MessageFlags.Ephemeral,
-				});
+				try {
+					return interaction.reply({
+						content: 'You cannot use this command while in the middle of a key operation.',
+						flags: MessageFlags.Ephemeral,
+					});
+				} catch (error) { return; }
 			}
 		}
 
@@ -52,7 +54,6 @@ module.exports = {
 					await interaction.reply({ content: 'There was an error while executing this command!', flags: MessageFlags.Ephemeral });
 				}
 			} catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
-			
 		}
 	},
 };
