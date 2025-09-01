@@ -87,11 +87,11 @@ module.exports = {
                         profileData.bells += blaBonus;
                         followUpMsg += ` (+**${blaBonus}** <:bells:1349182767958855853> from <:blathers:1349263646206857236> **Blathers II**)`
                     }
-                    profileData.save();
+                    try { await profileData.save(); } catch (err) { console.log(`The was an error updating the user profile in /sell: : ${err}`); collector.stop(); return;}
                     try { await interaction.followUp(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                     // track the sale in the db
                     charData.numClaims -= 1;
-                    charData.save();
+                    try { await charData.save(); } catch (err) { console.log(`There was an error updating numClaims: ${err}`); }
                 }
                 else {
                     try { await interaction.followUp(`Sale cancelled.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }

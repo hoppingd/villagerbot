@@ -41,13 +41,13 @@ module.exports = {
                         // track the loss of the card in the db
                         let charData = await charModel.findOne({ name: card.name });
                         charData.numClaims -= 1;
-                        await charData.save();
+                        try { await charData.save(); } catch (err) { console.log(`There was an error updating numClaims: ${err}`); }
                     }
                     for (const card of profileData.storage) {
                         // track the loss of the card in the db
                         let charData = await charModel.findOne({ name: card.name });
                         charData.numClaims -= 1;
-                        await charData.save();
+                        try { await charData.save(); } catch (err) { console.log(`There was an error updating numClaims: ${err}`); }
                     }
                     await profileModel.findOneAndDelete({ userID: profileData.userID, serverID: profileData.serverID });
                     try { await interaction.channel.send(`<:resetti:1349263941179674645>: *"${interaction.user}, yer progress has been reset! Best of luck to ya!"*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }

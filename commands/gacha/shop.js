@@ -125,8 +125,8 @@ module.exports = {
                                     profileData.cards[cardIdx].rarity += 1;
                                     try { await interaction.channel.send(`${interaction.user}, your **${card.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[profileData.cards[cardIdx].rarity - 1]} and was automatically upgraded to **${constants.RARITY_NAMES[profileData.cards[cardIdx].rarity]}**!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                                 }
-                                await profileData.save();
-                                await shopData.save();
+                                try { await profileData.save(); } catch (err) { console.log(`There was an error updating the user profile in /shop: ${err}`); collector.stop(); return; }
+                                try { await shopData.save(); } catch (err) { console.log(`There was an error updating the shop profile in /shop: ${err}`); collector.stop(); return; }
                                 collector.stop();
                                 try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${escapeMarkdown(interaction.user.displayName)}** leveled up their **${item.name}**! (+**${constants.RARITY_LVL[item.rarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
@@ -140,8 +140,8 @@ module.exports = {
                                 profileData.bells -= price;
                                 shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
                                 // wrap up
-                                await profileData.save();
-                                await shopData.save();
+                                try { await profileData.save(); } catch (err) { console.log(`There was an error updating the user profile in /shop: ${err}`); collector.stop(); return; }
+                                try { await shopData.save(); } catch (err) { console.log(`There was an error updating the shop profile in /shop: ${err}`); collector.stop(); return; }
                                 collector.stop();
                                 try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*\n**${escapeMarkdown(interaction.user.displayName)}** upgraded their **${item.name}** to **${constants.RARITY_NAMES[item.rarity]}**! (+**${oldPoints}** <:bells:1349182767958855853>, +**${constants.RARITY_LVL[oldRarity]}** <:love:1352200821072199732>)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
@@ -156,13 +156,13 @@ module.exports = {
                             profileData.bells -= price;
                             shopData.merchandise[idx].purchasedBy = interaction.user.displayName;
                             // wrap up
-                            await profileData.save();
-                            await shopData.save();
+                            try { await profileData.save(); } catch (err) { console.log(`There was an error updating the user profile in /shop: ${err}`); collector.stop(); return; }
+                            try { await shopData.save(); } catch (err) { console.log(`There was an error updating the shop profile in /shop: ${err}`); collector.stop(); return; }
                             collector.stop();
                             try { await interaction.followUp(`<:redd:1354073677318062153>: *"Pleasure doin' business with ya, ${interaction.user}!"*  (**${item.name}** was added to your deck!)`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             // track the claim in the db
                             charData.numClaims += 1;
-                            charData.save();
+                            try { await charData.save(); } catch (err) { console.log(`There was an error updating numClaims: ${err}`); }
                         }
                         // if user has room in storage
                         else if (profileData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[profileData.blaTier]) {
@@ -190,13 +190,13 @@ module.exports = {
                             // BLATHERS V MESSAGE
                             if (rarityUpgradeMsg) followUpMsg += rarityUpgradeMsg;
                             // wrap up
-                            await profileData.save();
-                            await shopData.save();
+                            try { await profileData.save(); } catch (err) { console.log(`There was an error updating the user profile in /shop: ${err}`); collector.stop(); return; }
+                            try { await shopData.save(); } catch (err) { console.log(`There was an error updating the shop profile in /shop: ${err}`); collector.stop(); return; }
                             collector.stop();
                             try { await interaction.followUp(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             // track the claim in the db
                             charData.numClaims += 1;
-                            charData.save();
+                            try { await charData.save(); } catch (err) { console.log(`There was an error updating numClaims: ${err}`); }
                         }
                         else {
                             await interaction.channel.send(`${interaction.user}, your deck is full, so you cannot purchase **${item.name}**. Try selling a card for Bells using **/sell**, or getting more deck slots with **/upgrade**.`);

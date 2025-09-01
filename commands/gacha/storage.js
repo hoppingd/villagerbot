@@ -141,7 +141,7 @@ module.exports = {
                                 profileData.cards.push({ name: card.name, rarity: card.rarity, level: card.level });
                                 profileData.storage[cardIdx] = null;
                                 profileData.storage = profileData.storage.filter(card => card !== null);
-                                profileData.save();
+                                try { await profileData.save(); } catch (err) { console.log(`There was an error updating the user profile in /storage: ${err}`); collector.stop(); return;}
                                 try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo!* ***${realName}*** *has been transferred to your deck!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             }
                             else {

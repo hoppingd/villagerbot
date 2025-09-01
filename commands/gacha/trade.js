@@ -259,8 +259,8 @@ module.exports = {
                         targetData.bells -= requestedBells;
                         targetData.bells += offeredBells;
                         // wrap up
-                        await profileData.save();
-                        await targetData.save();
+                        try { await profileData.save(); } catch (err) { console.log(`There was an error updating the gifter's profile: ${err}`); collector.stop(); return; }
+                        try { await targetData.save(); } catch (err) { console.log(`There was an error updating the target's profile: ${err}`); collector.stop(); return; }
                         try { interaction.followUp(`Trade successful!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         collector.stop();
                     }

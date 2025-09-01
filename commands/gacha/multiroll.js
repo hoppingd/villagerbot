@@ -176,7 +176,7 @@ module.exports = {
                                 reactorData.cards[reactorCardIdx].rarity += 1;
                                 try { await interaction.channel.send(`${reactor}, your **${villager.name}** reached or passed level ${constants.UPGRADE_THRESHOLDS[reactorData.cards[reactorCardIdx].rarity - 1]} and was automatically upgraded to **${constants.RARITY_NAMES[reactorData.cards[reactorCardIdx].rarity]}**!`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                             }
-                            await reactorData.save();
+                            try { await reactorData.save(); } catch (err) { console.log(`There was an error updating the reactor profile: ${err}`); }
                             collector.stop();
                             try { await interaction.followUp(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         }
@@ -198,7 +198,7 @@ module.exports = {
                                 followUpMsg += ` (+**${points}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook III**)`
                             }
                             // wrap up
-                            await reactorData.save();
+                            try { await reactorData.save(); } catch (err) { console.log(`There was an error updating the reactor profile: ${err}`); collector.stop(); return; }
                             collector.stop();
                             cardOwners.unshift(reactor.displayName);
                             rollEmbed.setFooter({
@@ -228,7 +228,7 @@ module.exports = {
                             followUpMsg += ` (+**${points}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook III**)`
                         }
                         // wrap up
-                        await reactorData.save();
+                        try { await reactorData.save(); } catch (err) { console.log(`There was an error updating the reactor profile: ${err}`); collector.stop(); return; }
                         collector.stop();
                         cardOwners.unshift(reactor.displayName);
                         rollEmbed.setFooter({
@@ -240,7 +240,7 @@ module.exports = {
                         } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         // track the claim in the db
                         charData.numClaims += 1;
-                        charData.save();
+                        try { await charData.save(); } catch (err) { console.log(`There was an error updating numClaims: ${err}`); }
                     }
                     // if user has room in storage
                     else if (reactorData.storage.length < constants.BLATIER_TO_STORAGE_LIMIT[reactorData.blaTier]) {
@@ -277,12 +277,12 @@ module.exports = {
                         // BLATHERS V MESSAGE
                         if (rarityUpgradeMsg) followUpMsg += rarityUpgradeMsg;
                         // wrap up
-                        await reactorData.save();
+                        try { await reactorData.save(); } catch (err) { console.log(`There was an error updating the reactor profile: ${err}`); collector.stop(); return; }
                         collector.stop();
                         try { await reaction.message.reply(followUpMsg); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                         // track the claim in the db
                         charData.numClaims += 1;
-                        charData.save();
+                        try { await charData.save(); } catch (err) { console.log(`There was an error updating numClaims: ${err}`); }
                     }
                     else {
                         // send a message to the reactor that they couldn't claim because their deck is full

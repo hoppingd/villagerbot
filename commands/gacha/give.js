@@ -73,7 +73,7 @@ module.exports = {
                     withResponse: true,
                 });
                 // listen with a collector
-                const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT  });
+                const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
                 interaction.client.recipientState[recipient.id] = true;
 
@@ -99,8 +99,8 @@ module.exports = {
                             const recipientData = await getOrCreateProfile(recipient.id, interaction.guild.id);
                             recipientData.bells += amount;
                             profileData.bells -= amount;
-                            await profileData.save();
-                            await recipientData.save();
+                            try { await profileData.save(); } catch (err) { console.log(`There was an error updating the gifter's profile: ${err}`); collector.stop(); return; }
+                            try { await recipientData.save(); } catch (err) { console.log(`There was an error updating the recipient's profile: ${err}`); collector.stop(); return; }
                             try { await interaction.followUp(`Gift successful! ${interaction.user} gave **${amount}** <:bells:1349182767958855853> to ${recipient}!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                             collector.stop();
                         }
@@ -179,7 +179,7 @@ module.exports = {
                     withResponse: true,
                 });
                 // listen with a collector
-                const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT  });
+                const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.CONFIRM_TIME_LIMIT });
                 interaction.client.confirmationState[interaction.user.id] = true;
                 interaction.client.recipientState[recipient.id] = true;
 
@@ -209,7 +209,7 @@ module.exports = {
                             }
                             // there is room for the card in deck
                             if (recipientData.cards.length < constants.DEFAULT_CARD_LIMIT + Math.min(recipientData.isaTier, constants.ADDITIONAL_CARD_SLOTS)) {
-                                recipientData.cards.push({ name: realName, rarity: rarity, level: level});
+                                recipientData.cards.push({ name: realName, rarity: rarity, level: level });
                                 if (cardIdx != -1) {
                                     profileData.cards[cardIdx] = null;
                                     profileData.cards = profileData.cards.filter(card => card !== null);
@@ -218,8 +218,8 @@ module.exports = {
                                     profileData.storage[storageIdx] = null;
                                     profileData.storage = profileData.storage.filter(card => card !== null);
                                 }
-                                profileData.save();
-                                recipientData.save();
+                                try { await profileData.save(); } catch (err) { console.log(`There was an error updating the gifter's profile: ${err}`); collector.stop(); return; }
+                                try { await recipientData.save(); } catch (err) { console.log(`There was an error updating the recipient's profile: ${err}`); collector.stop(); return; }
                                 try { await interaction.followUp(`Gift successful! ${interaction.user} gave their **${realName}** to ${recipient}!`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 collector.stop();
                             }
@@ -234,8 +234,8 @@ module.exports = {
                                     profileData.storage[storageIdx] = null;
                                     profileData.storage = profileData.storage.filter(card => card !== null);
                                 }
-                                profileData.save();
-                                recipientData.save();
+                                try { await profileData.save(); } catch (err) { console.log(`There was an error updating the gifter's profile: ${err}`); collector.stop(); return; }
+                                try { await recipientData.save(); } catch (err) { console.log(`There was an error updating the recipient's profile: ${err}`); collector.stop(); return; }
                                 try { await interaction.followUp(`Gift successful! ${interaction.user} gave their **${realName}** to ${recipient}! The card was put into storage.`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 collector.stop();
                             }

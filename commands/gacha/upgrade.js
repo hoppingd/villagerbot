@@ -70,7 +70,7 @@ module.exports = {
                                 if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.blaTier, profileData.nookTier);
                                     profileData.blaTier += 1;
-                                    await profileData.save();
+                                    try { await profileData.save(); } catch (err) { console.log(`There was error updating the user profile in /upgrade: ${err}`); collector.stop(); return; }
                                     if (profileData.blaTier == 1) try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Oh hoo hoo... are those cards I see, ${interaction.user}? If your deck is full, I can hold onto new cards for you. Use* ***/storage move*** *to transfer them to your deck."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                     else try { await interaction.followUp(`<:blathers:1349263646206857236>: *"Hoo hoo... thank you for the donation, ${interaction.user}! Rest assured all upgrades will be in effect immediately!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
@@ -119,7 +119,7 @@ module.exports = {
                                 if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.brewTier, profileData.nookTier);
                                     profileData.brewTier += 1;
-                                    await profileData.save();
+                                    try { await profileData.save(); } catch (err) { console.log(`There was error updating the user profile in /upgrade: ${err}`); collector.stop(); return; }
                                     try { await interaction.followUp(`<:brewster:1349263645380710431>: *"This upgrade may seem a tad expensive at... ${getUpgradeCost(profileData.brewTier - 1, profileData.nookTier)} Bells, but it's well worth it. Here you go, ${interaction.user}. You now have more energy for your rolls."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                     if (profileData.brewTier == constants.UPGRADE_COSTS.length) try { await interaction.channel.send(`<:brewster:1349263645380710431>: *"Thanks for buying all of my upgrades, ${interaction.user}. Feel free to stop by the Roost with* ***/recharge***. I'll serve you a fresh brew that resets your rolls once per day."*`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                                 }
@@ -168,7 +168,7 @@ module.exports = {
                                 if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.celTier, profileData.nookTier);
                                     profileData.celTier += 1;
-                                    await profileData.save();
+                                    try { await profileData.save(); } catch (err) { console.log(`There was error updating the user profile in /upgrade: ${err}`); collector.stop(); return; }
                                     try { await interaction.followUp(`<:celeste:1349263647121346662>: *"Upgrade purchased! Your wishes are now more powerful, ${interaction.user}!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 else {
@@ -216,7 +216,7 @@ module.exports = {
                                 if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.isaTier, profileData.nookTier);
                                     profileData.isaTier += 1;
-                                    await profileData.save();
+                                    try { await profileData.save(); } catch (err) { console.log(`There was error updating the user profile in /upgrade: ${err}`); collector.stop(); return; }
                                     if (profileData.isaTier < constants.UPGRADE_COSTS.length) try { await interaction.followUp(`<:isabelle:1349263650191315034>: *"Upgrade purchased! I fixed you up with a new deck slot, ${interaction.user}!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                     else try { await interaction.followUp(`<:isabelle:1349263650191315034>: *"Upgrade purchased! ${interaction.user}, you can now use* ***/resetclaimtimer**! I can refresh your ability to claim cards, but only once per day."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
@@ -265,7 +265,7 @@ module.exports = {
                                 if (i.customId == 'yes') {
                                     profileData.bells -= getUpgradeCost(profileData.katTier, profileData.nookTier);
                                     profileData.katTier += 1;
-                                    await profileData.save();
+                                    try { await profileData.save(); } catch (err) { console.log(`There was error updating the user profile in /upgrade: ${err}`); collector.stop(); return; }
                                     try { await interaction.followUp(`<:katrina:1349263648144625694>: *"Keeeeeeeeeee hamo-ata... Keeee haaaaaamo-atata... There are higher rarity cards in your future, ${interaction.user}..."*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 else {
@@ -313,7 +313,7 @@ module.exports = {
                                 if (i.customId == 'yes') {
                                     profileData.bells -= constants.UPGRADE_COSTS[profileData.nookTier];
                                     profileData.nookTier += 1;
-                                    await profileData.save();
+                                    try { await profileData.save(); } catch (err) { console.log(`There was error updating the user profile in /upgrade: ${err}`); collector.stop(); return; }
                                     if (profileData.nookTier == 1) try { await interaction.followUp(`<:tom_nook:1349263649356779562>: *"The Bank of Nook is now open, ${interaction.user}! Yes, yes, the* ***/daily*** *command... use it to recieve a gift of Bells from yours truly! How generous of me, hm?"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                     else try { await interaction.followUp(`<:tom_nook:1349263649356779562>: *"Thank you for your purchase, ${interaction.user}! Enjoy the upgrade, yes?"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
@@ -363,7 +363,7 @@ module.exports = {
                                 if (i.customId == 'yes') {
                                     profileData.bells -= getTortCost(profileData.tortTier);
                                     profileData.tortTier += 1;
-                                    await profileData.save();
+                                    try { await profileData.save(); } catch (err) { console.log(`There was error updating the user profile in /upgrade: ${err}`); collector.stop(); return; }
                                     try { await interaction.followUp(`<:tortimer:1354073717776453733>: *"Thanks for the Bells, ${interaction.user}! Heh heh HORF!"*`); } catch (APIError) { console.log("Could not send follow up message. The message may have been deleted."); }
                                 }
                                 else {
