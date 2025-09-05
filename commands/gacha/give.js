@@ -78,7 +78,7 @@ module.exports = {
                 interaction.client.recipientState[recipient.id] = true;
 
                 collector.on('collect', async i => {
-                    i.deferUpdate();
+                    try { await i.deferUpdate(); } catch (err) { console.log(`There was an error with deferUpdate: ${err}`); return;}
                     // the recipient responded
                     if (i.user.id == recipient.id) {
                         if (i.customId == 'yes') {
@@ -184,7 +184,7 @@ module.exports = {
                 interaction.client.recipientState[recipient.id] = true;
 
                 collector.on('collect', async i => {
-                    i.deferUpdate();
+                    try { await i.deferUpdate(); } catch (err) { console.log(`There was an error with deferUpdate: ${err}`); return;}
                     // the recipient responded
                     if (i.user.id == recipient.id) {
                         if (i.customId == 'yes') {

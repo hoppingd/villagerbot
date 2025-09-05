@@ -65,7 +65,7 @@ module.exports = {
 
                 let page = 0;
                 collector.on('collect', async i => {
-                    i.deferUpdate();
+                    try { await i.deferUpdate(); } catch (err) { console.log(`There was an error with deferUpdate: ${err}`); return;}
                     if (i.customId == 'left') page -= 1;
                     if (i.customId == 'right') page += 1;
                     replyMessage = "";

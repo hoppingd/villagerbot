@@ -57,7 +57,7 @@ module.exports = {
 
                 const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.ROLL_CLAIM_TIME_LIMIT });
                 collector.on('collect', async i => {
-                    i.deferUpdate();
+                    try { await i.deferUpdate(); } catch (err) { console.log(`There was an error with deferUpdate: ${err}`); }
                     if (i.customId == 'left') page -= 1;
                     if (i.customId == 'right') page += 1;
                     replyMessage = "";
@@ -76,7 +76,7 @@ module.exports = {
                             components: [row],
                         });
                     } catch (APIError) { console.log("Could not edit reply. The message may have been deleted."); }
-                    
+
                 });
 
                 collector.on('end', async end => {
