@@ -67,7 +67,7 @@ module.exports = {
                             if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
                             const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
                             viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
-                            if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                            if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
                             else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                             viewEmbed.setFooter({ text: `Stored by ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
                         }
@@ -80,14 +80,14 @@ module.exports = {
                         if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
                         const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
                         viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
-                        if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                        if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
                         else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                         viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
                         if (ownerData.deckColor) viewEmbed.setColor(ownerData.deckColor);
                     }
                 }
                 else {
-                    if (rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+                    if (rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
                     else if (rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                     // get card owners and wishers
                     let cardOwners = [];

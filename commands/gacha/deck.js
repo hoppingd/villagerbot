@@ -57,7 +57,7 @@ module.exports = {
 
                 const collector = reply.resource.message.createMessageComponentCollector({ componentType: ComponentType.Button, time: constants.ROLL_CLAIM_TIME_LIMIT });
                 collector.on('collect', async i => {
-                    try { await i.deferUpdate(); } catch (err) { console.log(`There was an error with deferUpdate: ${err}`); }
+                    try { await i.deferUpdate(); } catch (err) { console.log(`There was an error with deferUpdate: ${err}`); return;}
                     if (i.customId == 'left') page -= 1;
                     if (i.customId == 'right') page += 1;
                     replyMessage = "";
@@ -118,7 +118,7 @@ async function getCardEmbed(card, owner, deckColor) {
     // set color
     if (deckColor) viewEmbed.setColor(deckColor);
     // update name based on rarity
-    if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+    if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
     else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
     viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
     return viewEmbed;

@@ -89,7 +89,7 @@ module.exports = {
                     if (cardName == topVillager.name) replyMessage += `**${cardName}**`; // bold the top card
                     else replyMessage += `${cardName}`;
 
-                    if (deck[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " :sparkles:";
+                    if (deck[i].rarity == constants.RARITY_NUMS.FOIL) replyMessage += " <:foil:1414625123536732240>";
                     if (deck[i].rarity == constants.RARITY_NUMS.PRISMATIC) replyMessage += " <:prismatic:1359641457702604800>";
                     if (flag) {
                         replyMessage += " - ";

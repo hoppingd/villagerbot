@@ -72,7 +72,7 @@ module.exports = {
             catch (err) {
                 rollEmbed.setColor("White");
             }
-            if (rarity == constants.RARITY_NUMS.FOIL) rollEmbed.setTitle(`:sparkles: ${villager.name} :sparkles:`);
+            if (rarity == constants.RARITY_NUMS.FOIL) rollEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
             else if (rarity == constants.RARITY_NUMS.PRISMATIC) rollEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
             // get card owners and wishers
             let isUserWish = false;

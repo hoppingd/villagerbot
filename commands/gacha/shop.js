@@ -242,7 +242,7 @@ async function getShopEmbed(shopData, now) {
     for (let i = 0; i < NUM_ITEMS; i++) {
         const item = shopData.merchandise[i];
         shopMsg += `**${i + 1}**: **${item.name}** `;
-        if (item.rarity == constants.RARITY_NUMS.FOIL) shopMsg += ":sparkles: ";
+        if (item.rarity == constants.RARITY_NUMS.FOIL) shopMsg += "<:foil:1414625123536732240> ";
         else if (item.rarity == constants.RARITY_NUMS.PRISMATIC) shopMsg += `<:prismatic:1359641457702604800> `;
         if (item.purchasedBy != null) {
             shopMsg += `- *Purchased by ${item.purchasedBy}*\n`
