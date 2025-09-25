@@ -82,7 +82,7 @@ module.exports = {
                         followUpMsg += ` (+**${nookBonus}** <:bells:1349182767958855853> from <:tom_nook:1349263649356779562> **Nook IV**)`
                     }
                     // BLATHERS II BONUS
-                    if (profileData.blaTier > 2 && storageIdx != -1) {
+                    if (profileData.blaTier > 1 && storageIdx != -1) {
                         const blaBonus = Math.ceil(points / 2);
                         profileData.bells += blaBonus;
                         followUpMsg += ` (+**${blaBonus}** <:bells:1349182767958855853> from <:blathers:1349263646206857236> **Blathers II**)`

@@ -1,15 +1,40 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
 const { getOrCreateProfile } = require('../../util');
+const upgradeList =
+                `<:blathers:1349263646206857236> **Blathers Upgrades**
+                **Tier I:** +1 storage slot
+                **Tier II:** cards sold from storage generate 50% more Bells
+                **Tier III:** cards claimed into storage gain 8 levels
+                **Tier IV:** +1 storage slot
+                **Tier V:** cards claimed into storage have a ${constants.BLATHERS_BONUS_CHANCE}% chance to upgrade rarity (if possible)
 
+                <:brewster:1349263645380710431> **Brewster Upgrades**
+                **Tier I-IV:** +1 max energy  
+                **Tier V:** +1 max energy, /recharge
+
+                <:celeste:1349263647121346662> **Celeste Upgrades**
+                **Tier I-V:** x2 wish chance
+
+                <:isabelle:1349263650191315034> **Isabelle Upgrades**
+                **Tier I-IV:** +1 deck slot  
+                **Tier V:** /resetclaimtimer
+
+                <:katrina:1349263648144625694> **Katrina Upgrades**
+                **Tier I-V:** +1% foil chance
+
+                <:tom_nook:1349263649356779562> **Nook Upgrades**
+                **Tier I:** /daily
+                **Tier II:** empower /daily, gain Bells when claiming or collecting rent on wish
+                **Tier III:** empower /daily, gain Bells on claim as well as sale
+                **Tier IV:** empower /daily, cards sell for 50% more
+                **Tier V:** empower /daily, reduce all upgrade costs by 25%
+                `;
+                
 module.exports = {
     data: new SlashCommandBuilder()
         .setName('upgrade')
         .setDescription('Upgrade commands.')
-        .addSubcommand(subcommand =>
-            subcommand
-                .setName('view')
-                .setDescription('View your current upgrades.'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('buy')
@@ -27,6 +52,14 @@ module.exports = {
                             { name: "Tortimer", value: "tort" },
                         )
                         .setRequired(true)))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('list')
+                .setDescription('View all possible upgrades.'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .setName('view')
+                .setDescription('View your current upgrades.'))
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
@@ -396,6 +429,12 @@ module.exports = {
                         })
                 }
             }
+            // LIST SUBCOMMAND
+            else if (subCommand == "list") {
+                const listEmbed = new EmbedBuilder()
+                    .setDescription(upgradeList);
+                await interaction.reply({ embeds: [listEmbed] });
+            }
             // VIEW SUBCOMMAND
             else {
                 let upgradeInfo = "Type **/upgrade buy**, then choose the character you want to purchase an upgrade from. Your current upgrade progress is shown below.\n\n";
@@ -408,7 +447,7 @@ module.exports = {
                     if (profileData.blaTier == 1) upgradeInfo += `cards sold from storage generate 50% more Bells\n`;
                     if (profileData.blaTier == 2) upgradeInfo += `cards claimed into storage gain 8 levels\n`;
                     if (profileData.blaTier == 3) upgradeInfo += `+1 storage slot\n`;
-                    if (profileData.blaTier == 4) upgradeInfo += `cards claimed into storage have a chance to upgrade rarity (if possible)\n`;
+                    if (profileData.blaTier == 4) upgradeInfo += `cards claimed into storage have a ${constants.BLATHERS_BONUS_CHANCE}% chance to upgrade rarity (if possible)\n`;
                 }
                 // BREWSTER
                 upgradeInfo += `<:brewster:1349263645380710431> **Brewster ${constants.ROMAN_NUMERALS[profileData.brewTier]}** · `;
