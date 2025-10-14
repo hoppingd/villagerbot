@@ -4,7 +4,7 @@ const OPTIONAL_READ_ONLY_COMMANDS = ["private", "shop", "storage", "upgrade", "w
 const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["list", "server", "view"];
 const constants = require('../../constants');
 const { devId, altDevId } = require('../../config.json');
-const MAINTENANCE_MODE = true; // change to true while bot is under maintenance
+const MAINTENANCE_MODE = false; // change to true while bot is under maintenance
 
 module.exports = {
 	name: Events.InteractionCreate,
@@ -25,7 +25,7 @@ module.exports = {
 		if (interaction.client.cooldowns[interaction.user.id]) {
 			const expirationTime = interaction.client.cooldowns[interaction.user.id] + constants.GLOBAL_COMMAND_COOLDOWN;
 			if (now < expirationTime) {
-				try { return interaction.reply({ content: `You are using commands too quickly. Please slow down.`, flags: MessageFlags.Ephemeral }); } catch (error) { return; }
+				try { return await interaction.reply({ content: `You are using commands too quickly. Please slow down.`, flags: MessageFlags.Ephemeral }); } catch (error) { return; }
 			}
 		}
 		interaction.client.cooldowns[interaction.user.id] = now;
@@ -35,7 +35,7 @@ module.exports = {
 			// check if the new command is not read only
 			if (!READ_ONLY_COMMANDS.includes(interaction.commandName) && (!OPTIONAL_READ_ONLY_COMMANDS.includes(interaction.commandName) || !OPTIONAL_READ_ONLY_SUBCOMMANDS.includes(interaction.options.getSubcommand()))) {
 				try {
-					return interaction.reply({
+					return await interaction.reply({
 						content: 'You cannot use this command while in the middle of a key operation.',
 						flags: MessageFlags.Ephemeral,
 					});

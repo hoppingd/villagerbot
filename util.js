@@ -54,19 +54,24 @@ function getClaimDate() {
 
 // fetches or creates profile data
 async function getOrCreateProfile(userID, serverID) {
-    let profileData = await profileModel.findOne({ userID, serverID });
-    if (!profileData) {
-        try {
-            profileData = await profileModel.create({
-                userID,
-                serverID,
-            });
-            await profileData.save();
-            getOrCreateServerData(serverID);
-        } catch (err) {
-            console.log("There was an error in getOrCreateProfile.");
-            console.log(err);
-        }
+    const profiles = await profileModel.find({ userID });
+    // check for cross-server profile
+    let profileData = profiles.find(p => p.crossServer == true);
+    if (profileData) return profileData;
+    // check for per-server profile
+    profileData = profiles.find(p => p.serverID === serverID);
+    if (profileData) return profileData;
+    // no profile found, create a new one
+    try {
+        profileData = await profileModel.create({
+            userID,
+            serverID,
+        });
+        await profileData.save();
+        getOrCreateServerData(serverID);
+    } catch (err) {
+        console.log("There was an error in getOrCreateProfile.");
+        console.log(err);
     }
     return profileData;
 }
@@ -95,10 +100,10 @@ async function getOrCreateShop(serverID) {
     if (!shopData) {
         try {
             shopData = await shopModel.create({
-            serverID: serverID
-        });
-        await shopData.save();
-        getOrCreateServerData(serverID);
+                serverID: serverID
+            });
+            await shopData.save();
+            getOrCreateServerData(serverID);
         }
         catch (err) {
             console.log("There was an error in getOrCreateShopData.");
