@@ -31,8 +31,8 @@ module.exports = {
             // VALUE SUBCOMMAND
             if (subCommand == "value") {
                 const result = await charModel.aggregate([
-                    { $sort: { numClaims: -1, name: 1 } }, // Sort characters by numClaims in descending order, then sort alphabetically
-                    { $project: { name: 1, numClaims: 1 } },    // Return both name and numClaims
+                    { $sort: { numClaims: -1, name: 1 } }, // sort characters by numClaims in descending order, then sort alphabetically
+                    { $project: { name: 1, numClaims: 1 } },    // return both name and numClaims
                 ]);
 
                 let replyMessage = "";
@@ -107,18 +107,18 @@ module.exports = {
                     const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
                     if (villager) {
                         const result = await profileModel.aggregate([
-                            { $match: { isPrivate: { $ne: true } } }, // Exclude private profiles
-                            { $unwind: "$cards" }, // Break out each card
-                            { $match: { "cards.name": villager.name } }, // Filter by character
+                            { $match: { isPrivate: { $ne: true } } }, // exclude private profiles
+                            { $unwind: "$cards" }, // break out each card
+                            { $match: { "cards.name": villager.name } }, // filter by character
                             {
                                 $project: {
-                                    userID: "$userID", // Keep user ID
-                                    serverID: "$serverID", // Keep server ID
+                                    userID: "$userID", // keep user ID
+                                    serverID: "$serverID", // keep server ID
                                     level: "$cards.level",
                                 }
                             },
-                            { $sort: { level: -1 } }, // Sort by love descending
-                            { $limit: 10 } // Take top 10
+                            { $sort: { level: -1 } }, // sort by love descending
+                            { $limit: 10 } // take top 10
                         ]);
                         if (result.length == 0) {
                             return await interaction.reply(`No **${villager.name}** owners were found. Become the first by using **/roll**!`);

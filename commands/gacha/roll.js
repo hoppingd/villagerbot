@@ -196,9 +196,8 @@ module.exports = {
                         // wrap up
                         try { await reactorData.save(); } catch (err) { console.log(`There was an error updating the reactor profile: ${err}`); collector.stop(); return; }
                         collector.stop();
-                        rollEmbed.setFooter({
-                            text: getOwnershipFooter(cardOwners),
-                        })
+                        const footerText = getOwnershipFooter(cardOwners);
+                        if (footerText != "") rollEmbed.setFooter({ text: footerText });
                         try {
                             await reaction.message.edit({ content: wishMessage, embeds: [rollEmbed] });
                             await interaction.followUp(followUpMsg);
@@ -227,9 +226,8 @@ module.exports = {
                     try { await reactorData.save(); } catch (err) { console.log(`There was an error updating the reactor profile: ${err}`); collector.stop(); return; }
                     collector.stop();
                     cardOwners.unshift(reactor.displayName);
-                    rollEmbed.setFooter({
-                        text: getOwnershipFooter(cardOwners),
-                    })
+                    const footerText = getOwnershipFooter(cardOwners);
+                    if (footerText != "") rollEmbed.setFooter({ text: footerText });
                     try {
                         await interaction.editReply({ content: wishMessage, embeds: [rollEmbed] });
                         await interaction.followUp(followUpMsg);
