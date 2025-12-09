@@ -2,7 +2,7 @@ const { EmbedBuilder, InteractionContextType, SlashCommandBuilder, MessageFlags 
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile } = require('../../util');
+const { calculatePoints, getLevelRank, getLevelRankEmoji, getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -19,6 +19,7 @@ module.exports = {
                     { name: "Bells", value: "b" },
                     { name: "Gender", value: "g" },
                     { name: "Level", value: "l" },
+                    { name: "Owner Rank", value: "o" },
                     { name: "Personality", value: "p" },
                     { name: "Species", value: "s" }
                 )
@@ -69,6 +70,14 @@ module.exports = {
                     else if (flag == "l") {
                         deck.sort((a, b) => b.level - a.level);
                     }
+                    // OWNER RANK
+                    else if (flag == "o") {
+                        for (let i = 0; i < deck.length; i++) {
+                            const levelRank = await getLevelRank(deck[i].name, deck[i].level);
+                            deck[i].rank = levelRank;
+                        }
+                        deck.sort((a, b) => a.rank - b.rank);
+                    }
                     // PERSONALITY
                     else if (flag == "p") {
                         deck.sort((a, b) => {
@@ -112,6 +121,12 @@ module.exports = {
                         // LEVEL
                         else if (flag == "l") {
                             replyMessage += `**${deck[i].level}** <:love:1352200821072199732>`;
+                        }
+                        // OWNER RANK
+                        else if (flag == "o") {
+                            const levelRank = await getLevelRank(deck[i].name, deck[i].level);
+                            const levelRankEmoji = getLevelRankEmoji(levelRank);
+                            replyMessage += `#${levelRank} ${levelRankEmoji}`;
                         }
                         // PERSONALITY
                         else if (flag == "p") {

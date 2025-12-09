@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilde
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile, getRank } = require('../../util');
+const { calculatePoints, getClaimRank, getLevelRank, getLevelRankEmoji, getOrCreateProfile } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -104,16 +104,19 @@ async function getCardEmbed(card, owner, deckColor) {
     // get villager data
     let charData = await charModel.findOne({ name: villager.name });
     const points = await calculatePoints(charData.numClaims, card.rarity);
-    const rank = await getRank(villager.name);
+    const rank = await getClaimRank(villager.name);
     let personality = villager.personality;
     if (!personality) personality = "Special";
     let gender = villager.gender;
     if (!gender) gender = `:transgender_symbol:`; // edge case for Somebody
     else gender = `:${gender.toLowerCase()}_sign:`;
+    // get the owner rank
+    const levelRank = await getLevelRank(villager.name, card.level);
+    const levelRankEmoji = getLevelRankEmoji(levelRank);
     // make the message look nice
     const viewEmbed = new EmbedBuilder()
         .setTitle(villager.name)
-        .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`)
+        .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${points}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nClaim Rank: #${rank}\nOwner Rank: #${levelRank} ${levelRankEmoji}`)
         .setImage(villager.image_url);
     // set color
     if (deckColor) viewEmbed.setColor(deckColor);

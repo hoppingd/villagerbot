@@ -1,5 +1,5 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile, calculatePoints } = require('../../util');
+const { getOrCreateProfile, calculatePoints, getLevelRank } = require('../../util');
 const charModel = require('../../models/charSchema');
 
 module.exports = {
@@ -13,6 +13,7 @@ module.exports = {
                     { name: "Alphabetical", value: "a" },
                     { name: "Bells", value: "b" },
                     { name: "Level", value: "l" },
+                    { name: "Owner Rank", value: "o" },
                     { name: "Random", value: "rand" },
                     { name: "Rarity", value: "rar" },
                 )
@@ -43,6 +44,16 @@ module.exports = {
                 else if (category == "l") {
                     profileData.cards.sort((a, b) => b.level - a.level);
                 }
+                else if (category == "o") {
+                    for (let i = 0; i < profileData.cards.length; i++) {
+                        const levelRank = await getLevelRank(profileData.cards[i].name, profileData.cards[i].level);
+                        profileData.cards[i].rank = levelRank;
+                    }
+                    profileData.cards.sort((a, b) => a.rank - b.rank);
+                    profileData.cards.forEach(card => {
+                        delete card.rank;
+                    });
+                }
                 else if (category == "rand") {
                     // Fisher-Yates Shuffle
                     for (let i = profileData.cards.length - 1; i > 0; i--) {
@@ -57,6 +68,7 @@ module.exports = {
                 if (category == "a") await interaction.reply(`Your deck has been sorted alphabetically.`);
                 else if (category == "b") await interaction.reply(`Your deck has been sorted by Bells <:bells:1349182767958855853>.`);
                 else if (category == "l") await interaction.reply(`Your deck has been sorted by Level <:love:1352200821072199732>.`);
+                else if (category == "o") await interaction.reply(`Your deck has been sorted by Owner Rank.`);
                 else if (category == "rand") await interaction.reply(`Your deck has been shuffled randomly.`);
                 else if (category == "rar") await interaction.reply(`Your deck has been sorted by rarity.`);
             }

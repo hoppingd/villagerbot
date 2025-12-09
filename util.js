@@ -7,7 +7,7 @@ const constants = require('./constants');
 // calculates the bell value of a card
 async function calculatePoints(charClaims, rarity) {
     let points = constants.MIN_POINTS;
-    if (charClaims != 0) {
+    if (charClaims > 1) {
         let totalClaims;
         try {
             const result = await charModel.aggregate([
@@ -24,9 +24,8 @@ async function calculatePoints(charClaims, rarity) {
         points = Math.floor(constants.BASE * Math.exp(constants.SCALING_FACTOR * claimPercentage));
         points = Math.max(points, constants.MIN_POINTS);
         points = Math.min(points, constants.MAX_POINTS);
-        points *= constants.RARITY_VALUE_MULTIPLIER[rarity];
     }
-
+    points *= constants.RARITY_VALUE_MULTIPLIER[rarity];
     return points;
 }
 
@@ -50,6 +49,57 @@ function getClaimDate() {
     claimDate.setSeconds(0);
     claimDate.setMilliseconds(0);
     return claimDate;
+}
+
+// gets the claim rank of a card
+async function getClaimRank(cardName) {
+    const result = await charModel.aggregate([
+        { $sort: { numClaims: -1, name: 1 } }, // Sort characters by numClaims in descending order, then by name
+        { $project: { name: 1, numClaims: 1 } },
+    ]);
+
+    let rank = -1;
+
+    result.forEach((char, index) => {
+        if (char.name.toLowerCase() === cardName.toLowerCase()) {
+            rank = index + 1;
+        }
+    });
+    return rank;
+}
+
+// returns the owner's rank given the level of their card
+async function getLevelRank(cardName, ownedLevel) {
+    // count how many users have that card at a HIGHER level
+    const higherCount = await profileModel.aggregate([
+        { $match: { isPrivate: false } }, // exclude private profiles
+        { $unwind: "$cards" },
+        { $match: { "cards.name": cardName } },
+        { $match: { "cards.level": { $gt: ownedLevel } } },
+        { $count: "count" }
+    ]);
+
+    const count = higherCount.length > 0 ? higherCount[0].count : 0;
+
+    // Ranking is number of higher-level owners + 1
+    return count + 1;
+}
+
+// returns a string displaying the level rank with the appropriate flair
+function getLevelRankEmoji(levelRank) {
+    if (levelRank === 1) {
+        return constants.PRISMATIC_LEAF_CODE;
+    } 
+    else if (levelRank <= 3) {
+        return constants.GOLD_LEAF_CODE;
+    } 
+    else if (levelRank <= 10) {
+        return constants.SILVER_LEAF_CODE;
+    } 
+    else if (levelRank <= 100) {
+        return constants.BRONZE_LEAF_CODE;
+    }
+    else return "";
 }
 
 // fetches or creates profile data
@@ -123,23 +173,6 @@ function getOwnershipFooter(usernames) {
     else return `Owned by ${usernames[0]}, ${usernames[1]}, and ${remainingCount = numUsers - 2} more...`;
 }
 
-// gets the rank of a card
-async function getRank(cardName) {
-    const result = await charModel.aggregate([
-        { $sort: { numClaims: -1, name: 1 } }, // Sort characters by numClaims in descending order, then by name
-        { $project: { name: 1, numClaims: 1 } },
-    ]);
-
-    let rank = -1;
-
-    result.forEach((char, index) => {
-        if (char.name.toLowerCase() === cardName.toLowerCase()) {
-            rank = index + 1;
-        }
-    });
-    return rank;
-}
-
 // returns the current date rounded to the nearest recharge interval
 function getRechargeDate() {
     let rechargeDate = new Date(Date.now());
@@ -171,11 +204,13 @@ module.exports = {
     calculatePoints,
     escapeMarkdown,
     getClaimDate,
+    getClaimRank,
+    getLevelRank,
+    getLevelRankEmoji,
     getOrCreateProfile,
     getOrCreateServerData,
     getOrCreateShop,
     getOwnershipFooter,
-    getRank,
     getRechargeDate,
     getTimeString
 };

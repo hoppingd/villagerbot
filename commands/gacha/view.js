@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getOrCreateProfile, getOwnershipFooter, getRank } = require('../../util');
+const { calculatePoints, getClaimRank, getLevelRank, getLevelRankEmoji, getOrCreateProfile, getOwnershipFooter,  } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -40,7 +40,7 @@ module.exports = {
                 // get villager data
                 let charData = await charModel.findOne({ name: villager.name });
                 const points = await calculatePoints(charData.numClaims, rarity);
-                const rank = await getRank(villager.name);
+                const rank = await getClaimRank(villager.name);
                 let personality = villager.personality;
                 if (!personality) personality = "Special";
                 let gender = villager.gender;
@@ -49,7 +49,7 @@ module.exports = {
                 // make the message look nice
                 const viewEmbed = new EmbedBuilder()
                     .setTitle(villager.name)
-                    .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
+                    .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nClaim Rank: #${rank}`)
                     .setImage(villager.image_url);
                 try { viewEmbed.setColor(villager.title_color); } catch (err) { viewEmbed.setColor("White"); } // set color
                 const owner = interaction.options.getUser('owner');
@@ -66,7 +66,7 @@ module.exports = {
                             // the rarity was specified, and the owner has a different rarity
                             if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
                             const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
-                            viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                            viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nClaim Rank: #${rank}`);
                             if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
                             else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                             viewEmbed.setFooter({ text: `Stored by ${owner.displayName}`, iconURL: owner.displayAvatarURL() });
@@ -79,7 +79,11 @@ module.exports = {
                         // the rarity was specified, and the owner has a different rarity
                         if (interaction.options.getNumber('rarity') && card.rarity != rarity) { return await interaction.reply(`The specified rarity was not found, but the card itself was. Try using the same command, but without rarity.`); }
                         const realPoints = await calculatePoints(charData.numClaims, card.rarity); // get the points based on the rarity of the card in the owner's deck
-                        viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nRanking: #${rank}`);
+                        // get the owner rank
+                        const levelRank = await getLevelRank(villager.name, card.level);
+                        const levelRankEmoji = getLevelRankEmoji(levelRank);
+                        // create the embed
+                        viewEmbed.setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[card.rarity]}***\n**${realPoints}**  <:bells:1349182767958855853>  |  **${card.level}** <:love:1352200821072199732>\nClaim Rank: #${rank}\nOwner Rank: #${levelRank} ${levelRankEmoji}`);
                         if (card.rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
                         else if (card.rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
                         viewEmbed.setFooter({ text: `Belongs to ${owner.displayName}`, iconURL: owner.displayAvatarURL() });

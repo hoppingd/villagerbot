@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, escapeMarkdown, getClaimDate, getOrCreateProfile, getOwnershipFooter, getRank, getRechargeDate, getTimeString } = require('../../util');
+const { calculatePoints, escapeMarkdown, getClaimDate, getClaimRank, getOrCreateProfile, getOwnershipFooter, getRechargeDate, getTimeString } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -59,7 +59,7 @@ module.exports = {
                 // get card data
                 let charData = await charModel.findOne({ name: villager.name });
                 let points = await calculatePoints(charData.numClaims, rarity);
-                let rank = await getRank(villager.name);
+                let rank = await getClaimRank(villager.name);
                 let personality = villager.personality;
                 if (!personality) personality = "Special";
                 let gender = villager.gender;
@@ -69,7 +69,7 @@ module.exports = {
                 // make the message look nice
                 const rollEmbed = new EmbedBuilder()
                     .setTitle(villager.name)
-                    .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nRanking: #${rank}`)
+                    .setDescription(`${villager.species}  ${gender}\n*${personality}* · ***${constants.RARITY_NAMES[rarity]}***\n**${points}**  <:bells:1349182767958855853>\nClaim Rank: #${rank}`)
                     .setImage(villager.image_url);
                 try {
                     rollEmbed.setColor(villager.title_color);
