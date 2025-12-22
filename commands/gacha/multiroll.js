@@ -54,8 +54,8 @@ module.exports = {
                 // determine rarity
                 let rarity = 0;
                 const rarityRoll = Math.floor(Math.random() * 100 + 1); // 1-100
-                if (rarityRoll <= Math.floor((profileData.tortTier / constants.TORT_PRISMATIC_CHANCE_INTERVAL) + constants.DEFAULT_PRISMATIC_CHANCE)) rarity = 2;
-                else if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier + Math.floor((profileData.tortTier / constants.TORT_PRISMATIC_CHANCE_INTERVAL) + constants.DEFAULT_PRISMATIC_CHANCE)) rarity = 1;
+                if (rarityRoll <= Math.floor((profileData.tortTier / constants.TORT_PRISMATIC_CHANCE_INTERVAL) + constants.DEFAULT_PRISMATIC_CHANCE)) rarity = constants.RARITY_NUMS["PRISMATIC"];
+                else if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier + Math.floor((profileData.tortTier / constants.TORT_PRISMATIC_CHANCE_INTERVAL) + constants.DEFAULT_PRISMATIC_CHANCE)) rarity = constants.RARITY_NUMS["FOIL"];
                 // get card data
                 let charData = await charModel.findOne({ name: villager.name });
                 let points = await calculatePoints(charData.numClaims, rarity);

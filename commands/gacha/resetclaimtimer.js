@@ -24,10 +24,6 @@ module.exports = {
             // the user's claim is down. we can reset their claim timer
             profileData.claimTimestamp = new Date(0);
             let newDate = new Date(currDate);
-            newDate.setHours(0);
-            newDate.setMinutes(0);
-            newDate.setSeconds(0);
-            newDate.setMilliseconds(0);
             profileData.resetClaimTimestamp = newDate;
             await profileData.save();
             await interaction.reply(`<:isabelle:1349263650191315034>: *"Alrighty, ${interaction.user}! Let me just make a quick call to our mutual friend <:resetti:1349263941179674645> and... yup, looks like you're all set. You should be able to claim another card now!"*`);

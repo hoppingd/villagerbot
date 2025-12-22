@@ -26,10 +26,6 @@ module.exports = {
             const bells = Math.floor(Math.random() * (baseMax * nookTier - baseMin * nookTier + 1)) + baseMin * nookTier;
             profileData.bells += bells;
             let newDate = new Date(currDate);
-            newDate.setHours(0);
-            newDate.setMinutes(0);
-            newDate.setSeconds(0);
-            newDate.setMilliseconds(0);
             profileData.dailyBellsTimestamp = newDate;
             await profileData.save();
             return await interaction.reply(`<:tom_nook:1349263649356779562>: *"Here is a gift of **${bells}** <:bells:1349182767958855853> from the Bank of Nook, ${interaction.user}. This is acceptable, yes?"*`);

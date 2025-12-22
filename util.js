@@ -40,6 +40,24 @@ function escapeMarkdown(text) {
         .replace(/`/g, '\\`');
 }
 
+async function fetchGuildName(client, guildID) {
+    try {
+        const guild = await client.guilds.fetch(guildID);
+        return guild?.name ?? "Unknown Server";
+    } catch {
+        return "Unknown Server";
+    }
+}
+
+async function fetchUsername(client, userID) {
+    try {
+        const user = await client.users.fetch(userID);
+        return user.displayName;
+    } catch {
+        return "Unknown User";
+    }
+}
+
 // returns the current date rounded to the nearest past claim interval
 function getClaimDate() {
     let claimDate = new Date(Date.now());
@@ -54,7 +72,7 @@ function getClaimDate() {
 // gets the claim rank of a card
 async function getClaimRank(cardName) {
     const result = await charModel.aggregate([
-        { $sort: { numClaims: -1, name: 1 } }, // Sort characters by numClaims in descending order, then by name
+        { $sort: { numClaims: -1, name: 1 } }, // sort characters by numClaims in descending order, then by name
         { $project: { name: 1, numClaims: 1 } },
     ]);
 
@@ -89,13 +107,13 @@ async function getLevelRank(cardName, ownedLevel) {
 function getLevelRankEmoji(levelRank) {
     if (levelRank === 1) {
         return constants.PRISMATIC_LEAF_CODE;
-    } 
+    }
     else if (levelRank <= 3) {
         return constants.GOLD_LEAF_CODE;
-    } 
+    }
     else if (levelRank <= 10) {
         return constants.SILVER_LEAF_CODE;
-    } 
+    }
     else if (levelRank <= 100) {
         return constants.BRONZE_LEAF_CODE;
     }
@@ -182,27 +200,33 @@ function getRechargeDate() {
     return rechargeDate;
 }
 
-// converts milliseconds to an hours and minutes string
 function getTimeString(timeRemaining) {
-    let hoursRemaining = Math.floor(timeRemaining / (1000 * 60 * 60)); // get hours
-    let minutesRemaining = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)); // get minutes
+    if (!Number.isFinite(timeRemaining) || timeRemaining <= 0) {
+        return "**0 minutes**";
+    }
+
+    // total minutes, rounding up any leftover seconds
+    let totalMinutes = Math.ceil(timeRemaining / (1000 * 60));
+    const hours = Math.floor(totalMinutes / 60);
+    const minutes = totalMinutes % 60;
+
     let timeString = "";
-    if (minutesRemaining == 60) {
-        hoursRemaining += 1;
-        minutesRemaining = 0;
+
+    if (hours > 0) {
+        timeString += hours === 1 ? `**1 hour**` : `**${hours} hours**`;
+        timeString += " and ";
     }
-    if (hoursRemaining > 0) {
-        if (hoursRemaining == 1) timeString += `**${hoursRemaining} hour** and `;
-        else timeString += `**${hoursRemaining} hours** and `;
-    }
-    if (minutesRemaining == 1) timeString += `**${minutesRemaining} minute**`;
-    else timeString += `**${minutesRemaining} minutes**`;
+
+    timeString += minutes === 1 ? `**1 minute**` : `**${minutes} minutes**`;
+
     return timeString;
 }
 
 module.exports = {
     calculatePoints,
     escapeMarkdown,
+    fetchGuildName,
+    fetchUsername,
     getClaimDate,
     getClaimRank,
     getLevelRank,

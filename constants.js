@@ -34,6 +34,13 @@ const TORT_NUMERALS = [
     "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI", "XXXVII", "XXXVIII", "XXXIX", "XL",
     "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII", "XLIX", "L",
     "LI", "LII", "LIII", "LIV", "LV", "LVI", "LVII", "LVIII", "LIX", "LX", "LX"];
+const REDD_NUMERALS = [
+    "I", "II", "III", "IV", "V", "VI", "VII", "VIII", "IX", "X",
+    "XI", "XII", "XIII", "XIV", "XV", "XVI", "XVII", "XVIII", "XIX", "XX",
+    "XXI", "XXII", "XXIII", "XXIV", "XXV", "XXVI", "XXVII", "XXVIII", "XXIX", "XXX",
+    "XXXI", "XXXII", "XXXIII", "XXXIV", "XXXV", "XXXVI", "XXXVII", "XXXVIII", "XXXIX", "XL",
+    "XLI", "XLII", "XLIII", "XLIV", "XLV", "XLVI", "XLVII", "XLVIII", "XLIX", "L"
+];
 const GLOBAL_COMMAND_COOLDOWN = 1000; // 1 second
 const UPGRADE_THRESHOLDS = [10, 100, Number.MAX_SAFE_INTEGER];
 const TORT_PRISMATIC_CHANCE_INTERVAL = 5;
@@ -74,6 +81,7 @@ module.exports = {
     BLATHERS_BONUS_CHANCE,
     MAX_TORT_LVL,
     TORT_NUMERALS,
+    REDD_NUMERALS,
     GLOBAL_COMMAND_COOLDOWN,
     UPGRADE_THRESHOLDS,
     TORT_PRISMATIC_CHANCE_INTERVAL,

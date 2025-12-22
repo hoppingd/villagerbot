@@ -12,7 +12,7 @@ module.exports = {
             .setDescription(`<:rover:1354073182629400667>: *"Here's a list of all the commands!"*\n\n**/balance** - shows the user's Bell balance
                 **/claim** - shows the user's claim timer
                 **/commandlist** - displays the list of commands
-                **/daily** - gives the user a random amount of Bells (NOOK I REQUIRED)
+                **/daily** - gives the user a random amount of Bells with a 24h cooldown (NOOK I REQUIRED)
                 **/deck** - views a deck in carousel format
                 **/decklist** - views a deck in list format
                 **/give** - gives a user bells or a card (levels are reset)
@@ -21,16 +21,15 @@ module.exports = {
                 **/multiroll** - rolls until the user has 0 energy left
                 **/name** - sets or clears the user's deck name
                 **/ping** - displays the ping between the bot and Discord API
-                **/playstyle** - switch between monodeck (a single, cross-server deck) and polydeck (one deck per server) playstyles
-                **/private** - toggles whether the user's name or server are visible on global leaderboards
-                **/recharge** - replenishes the user's energy daily (BREWSTER V REQUIRED)
+                **/recharge** - replenishes the user's energy with a 24h cooldown (BREWSTER V REQUIRED)
                 **/reset** - resets the user's progress
-                **/resetclaimtimer** - resets the user's claim timer daily (ISABELLE V REQUIRED)
+                **/resetclaimtimer** - resets the user's claim timer with a 24h cooldown (ISABELLE V REQUIRED)
                 **/roll** - roll a card
                 **/sell** - sell a card for its Bell value
                 **/shop** - access a shop with high rarity cards. cards refresh daily and can only be purchased once
                 **/sort** - sort your deck
                 **/storage** - manage your storage
+                **/toggle** - toggle a variety of options, such as privacy settings and cross-server play
                 **/topcard** - moves a card to the top of your deck
                 **/trade** - trades with another user. offered and requested cards must be in list format, separated by commas (i.e. Tom Nook, Isabelle, Rover). order matters, as later cards in the list may be placed into storage
                 **/upgrade** - view or purchase upgrades

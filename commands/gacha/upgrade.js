@@ -491,7 +491,7 @@ module.exports = {
                     upgradeInfo += `<:tortimer:1354073717776453733> **Tortimer ${constants.TORT_NUMERALS[profileData.tortTier]}** · `;
                     upgradeInfo += `Cost: **${getTortCost(profileData.tortTier)}** <:bells:1349182767958855853> ·  `;
                     if (profileData.tortTier == constants.MAX_TORT_LVL) upgradeInfo += `Max level reached!\n`;
-                    else if (profileData.tortTier + 1 % 5 == 0) upgradeInfo += `Reward: +1% prismatic chance\n`;
+                    else if ((profileData.tortTier + 1) % 5 == 0) upgradeInfo += `Reward: +1% prismatic chance\n`;
                     else upgradeInfo += `Reward: +1% foil chance\n`;
                 }
                 const upgradeEmbed = new EmbedBuilder()

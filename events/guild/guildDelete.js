@@ -8,7 +8,7 @@ module.exports = {
     name: Events.GuildDelete,
     async execute(guild) {
         try {
-            const profiles = await profileModel.find({ serverID: guild.id });
+            const profiles = await profileModel.find({ serverID: guild.id, crossServer: false });
             if (profiles) {
                 for (let profile of profiles) {
                     if (!profile.cards) break;

@@ -29,10 +29,6 @@ module.exports = {
             if (profileData.energy > 0) return await interaction.reply(`<:brewster:1349263645380710431>: *"You've still got* ***${profileData.energy}*** *energy left, ${interaction.user}. Come back when you're all out, and I'll have a fresh brew waiting for you."*`);
             // the user has 0 energy and their timer is up. we can reset their roll timer
             let newDate = new Date(currDate);
-            newDate.setHours(0);
-            newDate.setMinutes(0);
-            newDate.setSeconds(0);
-            newDate.setMilliseconds(0);
             profileData.rechargeCommandTimestamp = newDate;
             profileData.energy = constants.DEFAULT_ENERGY + profileData.brewTier;
             await profileData.save();

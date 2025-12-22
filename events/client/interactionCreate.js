@@ -1,10 +1,10 @@
 const { Events, MessageFlags } = require('discord.js');
-const READ_ONLY_COMMANDS = ["balance", "claim", "help", "leaderboard", "deck", "decklist", "view"];
-const OPTIONAL_READ_ONLY_COMMANDS = ["private", "shop", "storage", "upgrade", "wish"];
-const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["list", "server", "view"];
+const READ_ONLY_COMMANDS = ["balance", "claim", "commandlist", "deck", "decklist", "help", "leaderboard", "ping", "view"];
+const OPTIONAL_READ_ONLY_COMMANDS = ["toggle", "shop", "storage", "upgrade", "wish"];
+const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["list", "serverprivacy", "view"];
 const constants = require('../../constants');
 const { devId, altDevId } = require('../../config.json');
-const MAINTENANCE_MODE = true; // change to true while bot is under maintenance
+const MAINTENANCE_MODE = false; // change to true while bot is under maintenance
 
 module.exports = {
 	name: Events.InteractionCreate,
