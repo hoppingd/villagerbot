@@ -30,11 +30,7 @@ module.exports = {
         .addSubcommand(subcommand =>
             subcommand
                 .setName('level')
-                .setDescription('Show the cards with the highest level across all decks.')
-                .addStringOption(option =>
-                    option.setName('character')
-                        .setDescription('See the owners with the highest level on a specified character (optional).')
-                ))
+                .setDescription('Show the cards with the highest level across all decks.'))
         .addSubcommand(subcommand =>
             subcommand
                 .setName('ownerrank')

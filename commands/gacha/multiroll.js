@@ -31,8 +31,10 @@ module.exports = {
             if (profileData.energy == 1) { await interaction.reply(`Rolling ${profileData.energy} time for ${interaction.user}.`); }
             else await interaction.reply(`Rolling ${profileData.energy} times for ${interaction.user}.`);
             let energy = profileData.energy;
-            interaction.client.confirmationState[interaction.user.id] = true;
-
+            // set energy to zero before rolling, allowing users to claim while rolling. in the future decrement energy each roll by using atomic updates, so errors don't consume rolls (will require widespread refactoring)
+            profileData.energy = 0;
+            await profileData.save();
+            // roll
             while (energy > 0) {
                 energy -= 1;
                 let villager;
@@ -52,7 +54,7 @@ module.exports = {
                 // villager = villagers.find(v => v.name.toLowerCase() == "skye"); // FOR TESTING TO ROLL CERTAIN CHARACTERS
 
                 // determine rarity
-                let rarity = 0;
+                let rarity = constants.RARITY_NUMS["COMMON"];
                 const rarityRoll = Math.floor(Math.random() * 100 + 1); // 1-100
                 if (rarityRoll <= Math.floor((profileData.tortTier / constants.TORT_PRISMATIC_CHANCE_INTERVAL) + constants.DEFAULT_PRISMATIC_CHANCE)) rarity = constants.RARITY_NUMS["PRISMATIC"];
                 else if (rarityRoll <= constants.DEFAULT_FOIL_CHANCE + profileData.katTier + Math.floor((profileData.tortTier / constants.TORT_PRISMATIC_CHANCE_INTERVAL) + constants.DEFAULT_PRISMATIC_CHANCE)) rarity = constants.RARITY_NUMS["FOIL"];
@@ -288,11 +290,7 @@ module.exports = {
                     }
                 });
             }
-            profileData.energy = 0;
-            await profileData.save();
-            interaction.client.confirmationState[interaction.user.id] = false;
         } catch (err) {
-            interaction.client.confirmationState[interaction.user.id] = false;
             console.log(err);
             try {
                 await interaction.channel.send(`${interaction.user}, there was an error rolling: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
