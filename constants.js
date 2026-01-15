@@ -1,4 +1,4 @@
-const NUM_VILLAGERS = 566;
+const NUM_VILLAGERS = 568;
 const ROLL_CLAIM_TIME_LIMIT = 300 * 1000; // active collector time (sec * ms)
 const CONFIRM_TIME_LIMIT = 180 * 1000; // active collector time (sec * ms)
 const DEFAULT_CARD_LIMIT = 10;
