@@ -15,7 +15,7 @@ module.exports = {
                 **/daily** - gives the user a random amount of Bells with a 24h cooldown (NOOK I REQUIRED)
                 **/deck** - views a deck in carousel format
                 **/decklist** - views a deck in list format
-                **/give** - gives a user bells or a card (levels are reset)
+                **/give** - gives a user bells or a card
                 **/help** - displays info about the card collecting game and how it works
                 **/leaderboard** - displays various leaderboards
                 **/multiroll** - rolls until the user has 0 energy left

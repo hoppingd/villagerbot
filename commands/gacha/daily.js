@@ -1,6 +1,6 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile, getTimeString } = require('../../util');
+const { getOrCreateProfile, getTimeString, linkServer } = require('../../util');
 const baseMax = 200;
 const baseMin = 20;
 
@@ -11,7 +11,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             const nookTier = profileData.nookTier;
             // check the nook level
             if (nookTier == 0) return await interaction.reply(`You must purchase the upgrade <:tom_nook:1349263649356779562> **Nook I** to use this command.`);

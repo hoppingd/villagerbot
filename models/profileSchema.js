@@ -37,6 +37,10 @@ const profileSchema = new mongoose.Schema({
     lastSuccessfulVote: { type: Date, default: new Date(0) },
     isPrivate: { type: Boolean, default: false },
     crossServer: { type: Boolean, default: false },
+    linkedServers: {
+        type: [String],
+        default: []
+    },
 });
 
 profileSchema.index({ userID: 1, serverID: 1 }, { unique: true });

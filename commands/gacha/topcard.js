@@ -1,5 +1,5 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, linkServer } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -13,7 +13,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');

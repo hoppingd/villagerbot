@@ -1,6 +1,6 @@
 const { Colors, EmbedBuilder, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, linkServer } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -25,7 +25,7 @@ module.exports = {
             const subCommand = interaction.options.getSubcommand();
             // SET SUBCOMMAND
             if (subCommand == 'set') {
-                const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+                const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
                 // update the deckcolor based on user input
                 let newColor = interaction.options.getString('color');
                 // clean up input

@@ -1,7 +1,7 @@
-const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, InteractionContextType, SlashCommandBuilder } = require('discord.js');
+const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ChannelType, ComponentType, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
-const { getOrCreateProfile, getOrCreateServerData } = require('../../util');
+const { getOrCreateProfile, getOrCreateServerData, linkServer } = require('../../util');
 const constants = require('../../constants');
 
 module.exports = {
@@ -18,6 +18,10 @@ module.exports = {
                 .setDescription("Toggles whether the server name is visible on leaderboards. (ADMIN ONLY)"))
         .addSubcommand(subcommand =>
             subcommand
+                .setName('presence')
+                .setDescription("Enable presence to appear in ownership lists and recieve wish pings. (MONODECK ONLY)"))
+        .addSubcommand(subcommand =>
+            subcommand
                 .setName('userprivacy')
                 .setDescription("Toggles whether your username is visible on leaderboards."))
         .setContexts(InteractionContextType.Guild),
@@ -25,7 +29,7 @@ module.exports = {
         const subCommand = interaction.options.getSubcommand();
         if (subCommand == 'playstyle') {
             try {
-                const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+                const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
                 // build reply
                 const confirm = new ButtonBuilder()
                     .setCustomId('confirm')
@@ -55,6 +59,7 @@ module.exports = {
                     if (i.customId == 'confirm') {
                         if (profileData.crossServer) {
                             profileData.crossServer = false;
+                            profileData.linkedServers = [];
                             await profileData.save();
                             try { await interaction.channel.send(`Your playstyle has been changed to **Polydeck**.`); } catch (APIError) { console.log("Could not send follow up message. The channel may have been deleted."); }
                         }
@@ -119,6 +124,21 @@ module.exports = {
                 } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
             }
         }
+        if (subCommand == 'presence') {
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
+            try {
+                return await interaction.reply({
+                        content: "Server presence enabled.",
+                        flags: MessageFlags.Ephemeral
+                    });
+            } catch (err) {
+                console.log(err);
+                try {
+                    await interaction.reply(`There was an error enabling server presence: ${err.name}. Please report bugs [here](https://discord.gg/CC9UKF9a6r).`);
+                } catch (APIError) { console.log("Could not send error message. The bot may have been removed from the server."); }
+            }
+
+        }
         // SERVERPRIVACY SUBCOMMAND
         else if (subCommand == 'serverprivacy') {
             try {
@@ -126,7 +146,7 @@ module.exports = {
                 if (interaction.user.id != interaction.guild.ownerId) {
                     return await interaction.reply({
                         content: "Only the server owner can use this command.",
-                        ephemeral: true
+                        flags: MessageFlags.Ephemeral
                     });
                 }
 
@@ -153,7 +173,7 @@ module.exports = {
         // USERPRIVACY SUBCOMMAND
         else if (subCommand == 'userprivacy') {
             try {
-                const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+                const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
                 // toggle the privacy setting
                 const isPrivate = profileData.isPrivate;
                 if (isPrivate) {

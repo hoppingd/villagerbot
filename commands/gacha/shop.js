@@ -3,7 +3,7 @@ const villagers = require('../../villagerdata/data.json');
 const charModel = require('../../models/charSchema');
 const shopModel = require('../../models/shopSchema');
 const constants = require('../../constants');
-const { calculatePoints, escapeMarkdown, getOrCreateProfile, getOrCreateShop, getTimeString } = require('../../util');
+const { calculatePoints, escapeMarkdown, getOrCreateProfile, getOrCreateShop, getTimeString, linkServer } = require('../../util');
 const BASE_NUM_ITEMS = 4;
 const BASE_PRICE_MULTIPLIER = 4;
 const BASE_NUM_PRISMATICS = 1;
@@ -149,7 +149,7 @@ module.exports = {
                 const charData = await charModel.findOne({ name: item.name });
                 const points = await calculatePoints(charData.numClaims, item.rarity);
                 const price = Math.ceil(points * priceMultiplier); // ceil because redd is a scam artist
-                const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+                const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
                 // not enough bells
                 if (profileData.bells < price) return await interaction.reply(`<:redd:1354073677318062153>: *"Er... come back when you've got more Bells, cousin."* (Current: **${profileData.bells}** <:bells:1349182767958855853>, Needed: **${price}** <:bells:1349182767958855853>)`);
                 // build reply
@@ -272,7 +272,7 @@ module.exports = {
                                 let randIdx = Math.floor(Math.random() * 101);
                                 if (randIdx < constants.BLATHERS_BONUS_CHANCE && item.rarity < constants.RARITY_NAMES.length - 1) { // if the odds hit and the card isn't max rarity
                                     shopData.merchandise[idx].rarity += 1;
-                                    rarityUpgradeMsg = ` (Upgraded to **${constants.RARITY_NAMES[rarity]}** by <:blathers:1349263646206857236> **Blathers V**)`;
+                                    rarityUpgradeMsg = ` (Upgraded to **${constants.RARITY_NAMES[shopData.merchandise[idx].rarity]}** by <:blathers:1349263646206857236> **Blathers V**)`;
                                 }
                             }
                             // BLATHERS III BONUS
@@ -339,7 +339,7 @@ module.exports = {
             // DONATE SUBCOMMAND
             else {
                 const amount = interaction.options.getInteger('amount');
-                const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+                const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
                 if (profileData.bells < amount) return await interaction.reply(`<:redd:1354073677318062153>: *"I appreciate the gesture, cousin, but ya don't have enough Bells for it!"*`);
                 // build reply
                 const yes = new ButtonBuilder()

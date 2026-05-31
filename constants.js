@@ -4,10 +4,12 @@ const CONFIRM_TIME_LIMIT = 180 * 1000; // active collector time (sec * ms)
 const DEFAULT_CARD_LIMIT = 10;
 const DEFAULT_FOIL_CHANCE = 5;
 const DEFAULT_PRISMATIC_CHANCE = 1
-const BASE = 19; // This will control the general scale of points
-const SCALING_FACTOR = 245; // Adjust this to control the spread of points
+
+const BASE = 29; // This will control the general scale of points
+const SCALING_FACTOR = 180; // Adjust this to control the spread of points
 const MAX_POINTS = 2000; // Cap the maximum points a character can have
-const MIN_POINTS = 20; // Minimum points for least popular characters
+const MIN_POINTS = 30; // Minimum points for least popular characters
+
 const RARITY_NAMES = ["Common", "Foil", "Prismatic"];
 const RARITY_NUMS = { COMMON: 0, FOIL: 1, PRISMATIC: 2};
 const RARITY_LVL = [1, 10, 100]; // how much lvl you gain for each rarity

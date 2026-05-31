@@ -1,5 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, linkServer } = require('../../util');
 const constants = require('../../constants');
 
 module.exports = {
@@ -39,7 +39,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             const subCommand = interaction.options.getSubcommand();
             const recipient = interaction.options.getUser('recipient');
             if (recipient.bot) return await interaction.reply({ content: "You supplied a bot for the recipient argument. Please specify a real user.", flags: MessageFlags.Ephemeral });

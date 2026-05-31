@@ -4,7 +4,7 @@ const OPTIONAL_READ_ONLY_COMMANDS = ["toggle", "shop", "storage", "upgrade", "wi
 const OPTIONAL_READ_ONLY_SUBCOMMANDS = ["list", "serverprivacy", "view"];
 const constants = require('../../constants');
 const { devId, altDevId } = require('../../config.json');
-const MAINTENANCE_MODE = false; // change to true while bot is under maintenance
+const MAINTENANCE_MODE = true; // change to true while bot is under maintenance
 
 module.exports = {
 	name: Events.InteractionCreate,

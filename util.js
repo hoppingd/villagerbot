@@ -222,6 +222,25 @@ function getTimeString(timeRemaining) {
     return timeString;
 }
 
+// for crossServer decks, link the server if it is not linked
+async function linkServer(profile, serverID) {
+    if (!profile.crossServer) return profile;
+    if (profile.serverID == serverID) return profile;
+    try {
+        return await profileModel.findByIdAndUpdate(
+            profile._id,
+            { $addToSet: { linkedServers: serverID } },
+            { new: true }
+        );
+    }
+    catch (err) {
+        console.log("There was an error linking the server.");
+        console.log(err);
+        return profile;
+    }
+    return profile;
+}
+
 module.exports = {
     calculatePoints,
     escapeMarkdown,
@@ -236,5 +255,6 @@ module.exports = {
     getOrCreateShop,
     getOwnershipFooter,
     getRechargeDate,
-    getTimeString
+    getTimeString,
+    linkServer
 };

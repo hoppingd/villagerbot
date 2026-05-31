@@ -1,6 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile } = require('../../util');
+const { calculatePoints, getOrCreateProfile, linkServer } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -16,7 +16,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
 
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');

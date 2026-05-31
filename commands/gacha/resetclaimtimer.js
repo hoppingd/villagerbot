@@ -1,6 +1,6 @@
 const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile, getTimeString } = require('../../util');
+const { getOrCreateProfile, getTimeString, linkServer } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -9,7 +9,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             if (profileData.isaTier != constants.UPGRADE_COSTS.length) return await interaction.reply(`You must purchase the upgrade <:isabelle:1349263650191315034> **Isabelle ${constants.ROMAN_NUMERALS[constants.UPGRADE_COSTS.length]}** to use this command.`);
             // check the timer
             const currDate = Date.now();

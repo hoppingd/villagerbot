@@ -1,5 +1,5 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile, calculatePoints, getLevelRank } = require('../../util');
+const { getOrCreateProfile, calculatePoints, getLevelRank, linkServer } = require('../../util');
 const charModel = require('../../models/charSchema');
 
 module.exports = {
@@ -22,7 +22,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             if (profileData.cards.length == 0) {
                 await interaction.reply(`You have no cards in your deck to sort.`);
             }

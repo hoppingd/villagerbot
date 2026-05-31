@@ -1,5 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, linkServer } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -35,7 +35,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             const target = interaction.options.getUser('target');
             // check for valid target
             if (target.bot) return await interaction.reply({ content: "You supplied a bot for the target argument. Please specify a real user.", flags: MessageFlags.Ephemeral });

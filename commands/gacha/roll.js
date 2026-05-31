@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, escapeMarkdown, getClaimDate, getClaimRank, getOrCreateProfile, getOwnershipFooter, getRechargeDate, getTimeString } = require('../../util');
+const { calculatePoints, escapeMarkdown, getClaimDate, getClaimRank, getOrCreateProfile, getOwnershipFooter, getRechargeDate, getTimeString, linkServer } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -12,7 +12,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             // check if the user can roll
             const timeSinceReset = Date.now() - profileData.rechargeTimestamp;
             const shouldReset = timeSinceReset >= constants.DEFAULT_ROLL_TIMER;
@@ -77,7 +77,15 @@ module.exports = {
             let isUserWish = false;
             let cardOwners = [];
             let cardWishers = [];
-            const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
+            const guildProfiles = await profileModel.find({
+                $or: [
+                    { serverID: interaction.guild.id },
+                    {
+                        crossServer: true,
+                        linkedServers: interaction.guild.id
+                    }
+                ]
+            });
             for (const profile of guildProfiles) {
                 for (const card of profile.cards) {
                     if (card.name == villager.name && card.rarity >= rarity) {

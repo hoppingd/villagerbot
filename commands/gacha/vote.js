@@ -1,6 +1,6 @@
 const { InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const constants = require('../../constants');
-const { getOrCreateProfile, getRechargeDate, getTimeString } = require('../../util');
+const { getOrCreateProfile, getRechargeDate, getTimeString, linkServer } = require('../../util');
 const { topggToken, botId } = require('../../config.json');
 
 module.exports = {
@@ -10,7 +10,7 @@ module.exports = {
         .setContexts(InteractionContextType.Guild),
     async execute(interaction) {
         try {
-            const profileData = await getOrCreateProfile(interaction.user.id, interaction.guild.id);
+            const profileData = await linkServer(await getOrCreateProfile(interaction.user.id, interaction.guild.id), interaction.guild.id);
             // check if the user can roll
             let timeSinceReset = Date.now() - profileData.rechargeTimestamp;
             if (timeSinceReset >= constants.DEFAULT_ROLL_TIMER) {

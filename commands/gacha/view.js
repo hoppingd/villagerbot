@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getClaimRank, getLevelRank, getLevelRankEmoji, getOrCreateProfile, getOwnershipFooter,  } = require('../../util');
+const { calculatePoints, getClaimRank, getLevelRank, getLevelRankEmoji, getOrCreateProfile, getOwnershipFooter } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -93,19 +93,27 @@ module.exports = {
                 else {
                     if (rarity == constants.RARITY_NUMS.FOIL) viewEmbed.setTitle(`<:foil:1414625123536732240> ${villager.name} <:foil:1414625123536732240>`);
                     else if (rarity == constants.RARITY_NUMS.PRISMATIC) viewEmbed.setTitle(`<:prismatic:1359641457702604800> ${villager.name} <:prismatic:1359641457702604800>`);
-                    // get card owners and wishers
+                    // get card owners
                     let cardOwners = [];
-                    const guildProfiles = await profileModel.find({ serverID: interaction.guild.id });
+                    const guildProfiles = await profileModel.find({
+                        $or: [
+                            { serverID: interaction.guild.id },
+                            {
+                                crossServer: true,
+                                linkedServers: interaction.guild.id
+                            }
+                        ]
+                    });
                     for (const profile of guildProfiles) {
                         for (const card of profile.cards) {
-                            if (card.name == villager.name && card.rarity == rarity) { // >= rarity?
+                            if (card.name == villager.name && card.rarity >= rarity) {
                                 try {
                                     const user = await interaction.client.users.fetch(profile.userID);
                                     if (profile.userID == interaction.user.id) cardOwners.unshift({ name: user.displayName, level: card.level });
                                     else insertSorted(cardOwners, { name: user.displayName, level: card.level });
                                 }
                                 catch (err) {
-                                    console.log(`Card owner not found: `, err)
+                                    console.log(`Card owner not found: `, err);
                                 }
                             }
                         }
