@@ -1,5 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile, linkServer } = require('../../util');
+const { getOrCreateProfile, linkServer, normalizeCardName } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -56,8 +56,8 @@ module.exports = {
             const offeredCards = offerString?.split(',').map(item => item.trim()) || [];
             for (let i = 0; i < offeredCards.length; i++) {
                 const cardName = offeredCards[i];
-                const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
-                const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
+                const normalizedCardName = normalizeCardName(cardName);
+                const villager = villagers.find(v => normalizeCardName(v.name) === normalizedCardName || normalizeCardName(v.name_sort) === normalizedCardName);
                 if (!villager) return await interaction.reply(`Could not find a card named **${cardName}**. Please try again. (Use **/help** for information about trading syntax.)`);
                 offeredCards[i] = villager.name;
             }
@@ -65,8 +65,8 @@ module.exports = {
             const requestedCards = requestString?.split(',').map(item => item.trim()) || [];
             for (let i = 0; i < requestedCards.length; i++) {
                 const cardName = requestedCards[i];
-                const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
-                const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
+                const normalizedCardName = normalizeCardName(cardName);
+                const villager = villagers.find(v => normalizeCardName(v.name) === normalizedCardName || normalizeCardName(v.name_sort) === normalizedCardName);
                 if (!villager) return await interaction.reply(`Could not find a card named **${cardName}**. Please try again. (Use **/help** for information about trading syntax.)`);
                 requestedCards[i] = villager.name;
             }

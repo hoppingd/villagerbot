@@ -1,6 +1,6 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
 const villagers = require('../../villagerdata/data.json');
-const { getOrCreateProfile } = require('../../util');
+const { getOrCreateProfile, normalizeCardName } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -39,8 +39,8 @@ module.exports = {
             // SET SUBCOMMAND
             else if (subCommand == 'set') {
                 const cardName = interaction.options.getString('card');
-                const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, ""); //TODO simplify
-                const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(".", "") === normalizedCardName);
+                const normalizedCardName = normalizeCardName(cardName);
+                const villager = villagers.find(v => normalizeCardName(v.name) === normalizedCardName || normalizeCardName(v.name_sort) === normalizedCardName);
                 if (villager) {
                     profileData.wish = villager.name;
                     await profileData.save();

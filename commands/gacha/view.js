@@ -3,7 +3,7 @@ const profileModel = require('../../models/profileSchema');
 const charModel = require('../../models/charSchema');
 const villagers = require('../../villagerdata/data.json');
 const constants = require('../../constants');
-const { calculatePoints, getClaimRank, getLevelRank, getLevelRankEmoji, getOrCreateProfile, getOwnershipFooter } = require('../../util');
+const { calculatePoints, getClaimRank, getLevelRank, getLevelRankEmoji, getOrCreateProfile, getOwnershipFooter, normalizeCardName } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -31,8 +31,8 @@ module.exports = {
         try {
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');
-            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "");
-            const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
+            const normalizedCardName = normalizeCardName(cardName);
+            const villager = villagers.find(v => normalizeCardName(v.name) === normalizedCardName || normalizeCardName(v.name_sort) === normalizedCardName);
 
             if (villager) {
                 // get rarity data

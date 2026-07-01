@@ -1,5 +1,5 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile, linkServer } = require('../../util');
+const { getOrCreateProfile, linkServer, normalizeCardName } = require('../../util');
 const constants = require('../../constants');
 
 module.exports = {
@@ -136,9 +136,9 @@ module.exports = {
             // CARD SUBCOMMAND
             else {
                 const cardName = interaction.options.getString('name');
-                const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
-                const cardIdx = profileData.cards.findIndex(card => card.name.toLowerCase() === normalizedCardName);
-                const storageIdx = profileData.storage.findIndex(card => card.name.toLowerCase() === normalizedCardName);
+                const normalizedCardName = normalizeCardName(cardName);
+                const cardIdx = profileData.cards.findIndex(card => normalizeCardName(card.name) === normalizedCardName);
+                const storageIdx = profileData.storage.findIndex(card => normalizeCardName(card.name) === normalizedCardName);
                 let realName = null;
                 let rarity = null;
                 let level = null;

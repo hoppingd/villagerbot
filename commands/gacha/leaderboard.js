@@ -3,7 +3,7 @@ const charModel = require('../../models/charSchema');
 const profileModel = require('../../models/profileSchema');
 const shopModel = require('../../models/shopSchema');
 const serverDataModel = require('../../models/serverDataSchema');
-const { calculatePoints, escapeMarkdown, fetchGuildName, fetchUsername, getLevelRankEmoji, getOrCreateShop } = require('../../util');
+const { calculatePoints, escapeMarkdown, fetchGuildName, fetchUsername, getLevelRankEmoji, getOrCreateShop, normalizeCardName } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -243,8 +243,8 @@ module.exports = {
             // OWNERRANK SUBCOMMAND
             else if (subCommand == "ownerrank") {
                 const character = interaction.options.getString('character');
-                const normalizedCardName = character.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "");
-                const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName);
+                const normalizedCardName = normalizeCardName(character);
+                const villager = villagers.find(v => normalizeCardName(v.name) === normalizedCardName || normalizeCardName(v.name_sort) === normalizedCardName);
 
                 if (!villager) return interaction.reply(`No card named **${character}** found. Check your spelling.`);
 

@@ -1,5 +1,5 @@
 const { InteractionContextType, MessageFlags, SlashCommandBuilder } = require('discord.js');
-const { getOrCreateProfile, linkServer } = require('../../util');
+const { getOrCreateProfile, linkServer, normalizeCardName } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -17,8 +17,8 @@ module.exports = {
             
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');
-            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "")
-            const cardIdx = profileData.cards.findIndex(card => card.name.toLowerCase() === normalizedCardName);
+            const normalizedCardName = normalizeCardName(cardName);
+            const cardIdx = profileData.cards.findIndex(card => normalizeCardName(card.name) === normalizedCardName);
             if (cardIdx === -1) {
                 return await interaction.reply(`No card named **${cardName}** found in your deck. Use **/deck** to view your deck.`);
             }

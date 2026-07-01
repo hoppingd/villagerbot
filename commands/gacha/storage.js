@@ -2,7 +2,7 @@ const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, EmbedBuilde
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile } = require('../../util');
+const { calculatePoints, getOrCreateProfile, normalizeCardName } = require('../../util');
 
 module.exports = {
     data: new SlashCommandBuilder()
@@ -107,8 +107,8 @@ module.exports = {
                     }
                     // check that a valid card was supplied
                     const cardName = interaction.options.getString('card');
-                    const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "");
-                    const cardIdx = profileData.storage.findIndex(card => card.name.toLowerCase() === normalizedCardName);
+                    const normalizedCardName = normalizeCardName(cardName);
+                    const cardIdx = profileData.storage.findIndex(card => normalizeCardName(card.name) === normalizedCardName);
                     // the card exists
                     if (cardIdx != -1) {
                         const realName = profileData.storage[cardIdx].name;

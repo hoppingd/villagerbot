@@ -241,6 +241,14 @@ async function linkServer(profile, serverID) {
     return profile;
 }
 
+function normalizeCardName(name) {
+    return name
+        .toLowerCase()
+        .normalize("NFKD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[.']/g, "");
+}
+
 module.exports = {
     calculatePoints,
     escapeMarkdown,
@@ -256,5 +264,6 @@ module.exports = {
     getOwnershipFooter,
     getRechargeDate,
     getTimeString,
-    linkServer
+    linkServer,
+    normalizeCardName
 };

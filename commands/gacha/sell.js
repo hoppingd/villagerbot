@@ -1,6 +1,6 @@
 const { ActionRowBuilder, ButtonBuilder, ButtonStyle, ComponentType, InteractionContextType, SlashCommandBuilder } = require('discord.js');
 const charModel = require('../../models/charSchema');
-const { calculatePoints, getOrCreateProfile, linkServer } = require('../../util');
+const { calculatePoints, getOrCreateProfile, linkServer, normalizeCardName } = require('../../util');
 const constants = require('../../constants');
 const villagers = require('../../villagerdata/data.json');
 
@@ -20,8 +20,8 @@ module.exports = {
 
             // check that a valid card was supplied
             const cardName = interaction.options.getString('card');
-            const normalizedCardName = cardName.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "");
-            const villager = villagers.find(v => v.name.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[.']/g, "") === normalizedCardName || v.name_sort.toLowerCase().normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(".", "") === normalizedCardName);
+            const normalizedCardName = normalizeCardName(cardName);
+            const villager = villagers.find(v => normalizeCardName(v.name) === normalizedCardName || normalizeCardName(v.name_sort) === normalizedCardName);
             if (!villager) return await interaction.reply(`No card named **${cardName}** found in your deck or storage. Use **/deck** to view your deck, and **/storage view** to view your storage.`);
             const cardIdx = profileData.cards.findIndex(card => card.name == villager.name);
             const storageIdx = profileData.storage.findIndex(card => card.name == villager.name);
